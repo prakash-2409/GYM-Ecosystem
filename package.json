@@ -6,16 +6,17 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "lint": "turbo lint",
-    "db:generate": "turbo db:generate",
-    "db:push": "turbo db:push",
-    "db:seed": "turbo db:seed",
-    "api:dev": "turbo dev --filter=api",
-    "web:dev": "turbo dev --filter=web"
+    "dev": "dotenv -- turbo dev",
+    "build": "dotenv -- turbo build",
+    "lint": "dotenv -- turbo lint",
+    "db:generate": "dotenv -- turbo db:generate",
+    "db:push": "dotenv -- turbo db:push",
+    "db:seed": "dotenv -- turbo db:seed",
+    "api:dev": "dotenv -- turbo dev --filter=api",
+    "web:dev": "dotenv -- turbo dev --filter=web"
   },
   "devDependencies": {
+    "dotenv-cli": "^7.4.2",
     "turbo": "^2.3.0"
   },
   "engines": {
