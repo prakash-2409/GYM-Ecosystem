@@ -1,0 +1,54 @@
+name: gymstack_mobile
+description: GymStack member app – check-in, progress tracking, notifications.
+
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Networking
+  dio: ^5.4.0
+
+  # Secure storage
+  flutter_secure_storage: ^9.0.0
+
+  # Navigation
+  go_router: ^13.0.0
+
+  # QR scanning
+  mobile_scanner: ^4.0.0
+
+  # Push notifications
+  firebase_core: ^2.27.0
+  firebase_messaging: ^14.7.9
+
+  # Fonts
+  google_fonts: ^6.1.0
+
+  # Charts
+  fl_chart: ^0.65.0
+
+  # UI utilities
+  cupertino_icons: ^1.0.6
+  shimmer: ^3.0.0
+  qr_flutter: ^4.1.0
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  riverpod_generator: ^2.4.0
+  build_runner: ^2.4.7
+
+flutter:
+  uses-material-design: true

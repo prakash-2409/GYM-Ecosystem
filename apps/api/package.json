@@ -24,7 +24,8 @@
     "zod": "^3.23.0",
     "express-rate-limit": "^7.4.0",
     "@aws-sdk/client-s3": "^3.650.0",
-    "@aws-sdk/s3-request-presigner": "^3.650.0"
+    "@aws-sdk/s3-request-presigner": "^3.650.0",
+    "google-auth-library": "^9.14.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
