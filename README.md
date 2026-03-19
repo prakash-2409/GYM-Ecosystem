@@ -93,7 +93,11 @@ flutter run
 ```
 
 ## Next Steps for New Chats / Further Development
-When continuing the chat, provide this `README.md` or the `walkthrough.md` in `.gemini/antigravity/brain/` so the assistant understands the context.
+When continuing the chat or using an AI coding assistant (like GitHub Copilot or Cursor), please provide or point the assistant to the following files to ensure complete alignment with project requirements:
+
+1. **`DESIGN_SYSTEM.md`** - STRICT UI/UX rules, typography, spacing, and component definitions. **Must read before generating UI code.**
+2. **`task.md`** - A comprehensive task tracker showing completed backend/frontend work and pending features.
+3. **`README.md`** - General platform architecture.
 
 **Potential next features to develop:**
 - Razorpay online payment integration for members to pay via the app instead of manually at the front desk.
