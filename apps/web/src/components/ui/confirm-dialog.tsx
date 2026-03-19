@@ -1,50 +1,115 @@
 'use client';
 
+import { type ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
-  message: string;
+  /** Primary description text — use either `message` or `description` */
+  message?: string;
+  description?: string;
   confirmLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
+  /** @deprecated use `variant="danger"` */
   destructive?: boolean;
+  variant?: 'danger' | 'warning' | 'default';
+  loading?: boolean;
+  /** Optional slot for extra content (inputs, etc.) between description and buttons */
+  children?: ReactNode;
 }
 
-export function ConfirmDialog({ open, title, message, confirmLabel = 'Confirm', onConfirm, onCancel, destructive }: ConfirmDialogProps) {
+export function ConfirmDialog({
+  open,
+  title,
+  message,
+  description,
+  confirmLabel = 'Confirm',
+  onConfirm,
+  onCancel,
+  destructive = false,
+  variant,
+  loading = false,
+  children,
+}: ConfirmDialogProps) {
   if (!open) return null;
 
+  // Normalise: `variant` takes priority, fall back to `destructive` boolean
+  const resolvedVariant = variant ?? (destructive ? 'danger' : 'default');
+  const isDanger = resolvedVariant === 'danger';
+  const isWarning = resolvedVariant === 'warning';
+
+  // Support both `message` and `description` props
+  const bodyText = description || message;
+
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/30" onClick={onCancel} />
-      <div className="relative bg-surface rounded-card border border-border shadow-xl p-6 max-w-sm w-full mx-4">
-        <div className="flex items-start gap-4">
-          <div className={`shrink-0 h-10 w-10 rounded-full flex items-center justify-center ${destructive ? 'bg-red-100' : 'bg-yellow-100'}`}>
-            <AlertTriangle size={20} className={destructive ? 'text-red-600' : 'text-yellow-600'} />
+    <div className="fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label={title}>
+      {/* Overlay — rgba(0,0,0,0.4), blur 4px, 180ms fade */}
+      <div
+        className="fixed inset-0 z-[70]"
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          backdropFilter: 'blur(4px)',
+        }}
+        onClick={onCancel}
+        aria-hidden="true"
+      />
+
+      {/* Panel — max 400px, 16px radius, 24px padding, scale+fade 180ms */}
+      <div className="fixed inset-0 z-[71] flex items-center justify-center p-4">
+        <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-start gap-4">
+            {/* Icon */}
+            <div
+              className={cn(
+                'shrink-0 h-10 w-10 rounded-full flex items-center justify-center',
+                isDanger ? 'bg-danger-bg' : isWarning ? 'bg-warning-bg' : 'bg-primary/10'
+              )}
+            >
+              <AlertTriangle
+                size={20}
+                strokeWidth={1.5}
+                className={isDanger ? 'text-danger' : isWarning ? 'text-warning' : 'text-primary'}
+              />
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-card-heading text-text-primary">{title}</h3>
+              {bodyText && <p className="text-body text-text-secondary mt-1">{bodyText}</p>}
+            </div>
           </div>
-          <div>
-            <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-            <p className="text-sm text-gray-500 mt-1">{message}</p>
+
+          {/* Optional children slot (e.g. input fields) */}
+          {children && <div className="mt-4">{children}</div>}
+
+          {/* Actions — right-aligned */}
+          <div className="flex justify-end gap-3 mt-6">
+            <button
+              onClick={onCancel}
+              disabled={loading}
+              className="btn btn-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={loading}
+              className={cn(
+                'btn',
+                isDanger
+                  ? 'btn-danger'
+                  : 'btn-primary'
+              )}
+            >
+              {loading && (
+                <span className="btn-spinner" />
+              )}
+              {confirmLabel}
+            </button>
           </div>
-        </div>
-        <div className="flex justify-end gap-3 mt-6">
-          <button
-            onClick={onCancel}
-            className="h-9 px-4 text-sm font-medium rounded-btn border border-border text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors duration-150"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className={`h-9 px-4 text-sm font-medium rounded-btn text-white transition-colors duration-150 ${
-              destructive
-                ? 'bg-red-600 hover:bg-red-700 active:bg-red-800'
-                : 'bg-primary hover:opacity-90 active:opacity-80'
-            }`}
-          >
-            {confirmLabel}
-          </button>
         </div>
       </div>
     </div>

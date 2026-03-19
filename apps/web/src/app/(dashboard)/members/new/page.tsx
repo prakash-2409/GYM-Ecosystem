@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/api-client';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function AddMemberPage() {
   const router = useRouter();
@@ -50,35 +52,36 @@ export default function AddMemberPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">Add Member</h1>
+      <Link
+        href="/members"
+        className="inline-flex items-center gap-2 text-caption text-text-secondary hover:text-text-primary mb-4 transition-colors duration-normal stagger-1"
+      >
+        <ArrowLeft size={16} strokeWidth={1.5} /> Back to Members
+      </Link>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <h1 className="text-page-title text-text-primary mb-8 stagger-2">Add Member</h1>
+
+      <form onSubmit={handleSubmit} className="card space-y-6 stagger-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-            <input name="name" value={form.name} onChange={handleChange} required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" />
+            <label htmlFor="member-name" className="input-label">Name <span className="text-danger">*</span></label>
+            <input id="member-name" name="name" value={form.name} onChange={handleChange} required className="input" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
-            <input name="phone" value={form.phone} onChange={handleChange} required maxLength={10}
-              placeholder="10-digit number"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" />
+            <label htmlFor="member-phone" className="input-label">Phone <span className="text-danger">*</span></label>
+            <input id="member-phone" name="phone" value={form.phone} onChange={handleChange} required maxLength={10} placeholder="10-digit number" className="input font-mono" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input name="email" type="email" value={form.email} onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" />
+            <label htmlFor="member-email" className="input-label">Email</label>
+            <input id="member-email" name="email" type="email" value={form.email} onChange={handleChange} className="input" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-            <input name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" />
+            <label htmlFor="member-dob" className="input-label">Date of Birth</label>
+            <input id="member-dob" name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={handleChange} className="input font-mono" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-            <select name="gender" value={form.gender} onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none">
+            <label htmlFor="member-gender" className="input-label">Gender</label>
+            <select id="member-gender" name="gender" value={form.gender} onChange={handleChange} className="input">
               <option value="">Select</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
@@ -86,33 +89,29 @@ export default function AddMemberPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Blood Group</label>
-            <input name="bloodGroup" value={form.bloodGroup} onChange={handleChange} maxLength={5}
-              placeholder="e.g. O+"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" />
+            <label htmlFor="member-blood" className="input-label">Blood Group</label>
+            <input id="member-blood" name="bloodGroup" value={form.bloodGroup} onChange={handleChange} maxLength={5} placeholder="e.g. O+" className="input" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Emergency Phone</label>
-            <input name="emergencyPhone" value={form.emergencyPhone} onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" />
+            <label htmlFor="member-emergency" className="input-label">Emergency Phone</label>
+            <input id="member-emergency" name="emergencyPhone" value={form.emergencyPhone} onChange={handleChange} className="input font-mono" />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-          <textarea name="notes" value={form.notes} onChange={handleChange} rows={3}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none resize-none" />
+          <label htmlFor="member-notes" className="input-label">Notes</label>
+          <textarea id="member-notes" name="notes" value={form.notes} onChange={handleChange} rows={3} className="input h-auto py-3 resize-none" />
         </div>
 
-        {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg">{error}</div>}
+        {error && (
+          <div className="bg-danger-bg text-danger text-body px-4 py-3 rounded-btn border border-danger-border">{error}</div>
+        )}
 
-        <div className="flex gap-3">
-          <button type="submit" disabled={loading}
-            className="bg-primary text-white px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition disabled:opacity-50">
-            {loading ? 'Adding...' : 'Add Member'}
+        <div className="flex gap-3 pt-4 border-t border-divider">
+          <button type="submit" disabled={loading} className="btn btn-primary">
+            {loading ? <><Loader2 size={16} className="animate-spin" strokeWidth={1.5} /> Adding...</> : 'Add Member'}
           </button>
-          <button type="button" onClick={() => router.back()}
-            className="px-6 py-2.5 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition">
+          <button type="button" onClick={() => router.back()} className="btn btn-secondary">
             Cancel
           </button>
         </div>

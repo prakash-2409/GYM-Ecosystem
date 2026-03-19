@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
-import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
+import { Check, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -10,6 +10,7 @@ interface Toast {
   id: string;
   type: ToastType;
   message: string;
+  dismissing?: boolean;
 }
 
 interface ToastContextType {
@@ -30,20 +31,34 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const toast = useCallback((type: ToastType, message: string) => {
     const id = crypto.randomUUID();
     setToasts((prev) => [...prev, { id, type, message }]);
+
+    // Auto-dismiss after 3000ms with slide-out animation
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
+      setToasts((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, dismissing: true } : t))
+      );
+      // Remove from DOM after slide-out animation (300ms)
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 300);
     }, 3000);
   }, []);
 
   const dismiss = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    setToasts((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, dismissing: true } : t))
+    );
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 300);
   }, []);
 
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      {/* Toast container — bottom-right */}
-      <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
+
+      {/* Toast container — bottom-right, 340px, z-100 */}
+      <div className="toast-container">
         {toasts.map((t) => (
           <ToastItem key={t.id} toast={t} onDismiss={dismiss} />
         ))}
@@ -52,45 +67,53 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Standalone Toaster for use in layout (wraps ToastProvider)
+// Re-export for layout mounting convenience
 export function Toaster() {
-  return null; // ToastProvider is the actual provider, Toaster is just a mount point
+  return null;
 }
 
-const iconMap = {
-  success: CheckCircle,
+const iconMap: Record<ToastType, typeof Check> = {
+  success: Check,
   error: XCircle,
   warning: AlertTriangle,
   info: Info,
 };
 
-const colorMap = {
-  success: 'bg-green-50 border-green-200 text-green-800',
-  error: 'bg-red-50 border-red-200 text-red-800',
-  warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-  info: 'bg-blue-50 border-blue-200 text-blue-800',
+const toastTypeClass: Record<ToastType, string> = {
+  success: 'toast-success',
+  error: 'toast-error',
+  warning: 'toast-warning',
+  info: 'toast-info',
 };
 
-const iconColorMap = {
-  success: 'text-green-500',
-  error: 'text-red-500',
-  warning: 'text-yellow-500',
-  info: 'text-blue-500',
+const iconColorMap: Record<ToastType, string> = {
+  success: 'text-success',
+  error: 'text-danger',
+  warning: 'text-warning',
+  info: 'text-info',
 };
 
 function ToastItem({ toast: t, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
   const Icon = iconMap[t.type];
+
   return (
     <div
       className={cn(
-        'toast-enter pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-card border shadow-lg min-w-[300px] max-w-[420px]',
-        colorMap[t.type]
+        'toast',
+        toastTypeClass[t.type],
+        t.dismissing && 'toast-dismiss'
       )}
+      role="alert"
+      aria-live="polite"
     >
-      <Icon size={16} className={iconColorMap[t.type]} />
-      <p className="text-sm font-medium flex-1">{t.message}</p>
-      <button onClick={() => onDismiss(t.id)} className="opacity-60 hover:opacity-100 transition-opacity duration-150">
-        <X size={14} />
+      <Icon size={16} strokeWidth={1.5} className={iconColorMap[t.type]} />
+      <p className="text-body text-text-primary font-medium flex-1">{t.message}</p>
+      <button
+        onClick={() => onDismiss(t.id)}
+        className="text-text-muted hover:text-text-primary transition-colors duration-fast flex-shrink-0"
+        aria-label="Dismiss notification"
+      >
+        <X size={14} strokeWidth={1.5} />
       </button>
     </div>
   );

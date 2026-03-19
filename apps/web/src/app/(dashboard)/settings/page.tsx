@@ -5,8 +5,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/api-client';
 import {
   Building2, Users, Bell, QrCode, Save, RefreshCw,
-  PlusIcon, X, Trash2, Palette, Copy, Check,
+  PlusIcon, Trash2, Palette, Copy, Check, Loader2,
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Drawer } from '@/components/ui/drawer';
+import { EmptyState } from '@/components/ui/empty-state';
 
 type SettingsTab = 'gym' | 'staff' | 'notifications' | 'qr';
 
@@ -33,7 +36,6 @@ export default function SettingsPage() {
   const [staffForm, setStaffForm] = useState({ name: '', phone: '', role: 'receptionist' });
   const queryClient = useQueryClient();
 
-  // Gym data
   const { data: gymData } = useQuery({
     queryKey: ['gym-settings'],
     queryFn: () => apiClient.get('/gym').then((r) => r.data),
@@ -59,21 +61,18 @@ export default function SettingsPage() {
     }
   }, [gymData]);
 
-  // Staff
   const { data: staffData } = useQuery({
     queryKey: ['staff-list'],
     queryFn: () => apiClient.get('/staff').then((r) => r.data),
     enabled: activeTab === 'staff',
   });
 
-  // QR
   const { data: qrData, refetch: refetchQr } = useQuery({
     queryKey: ['gym-qr'],
     queryFn: () => apiClient.get('/gym/qr').then((r) => r.data),
     enabled: activeTab === 'qr',
   });
 
-  // Mutations
   const updateGymMutation = useMutation({
     mutationFn: (data: typeof gymForm) => apiClient.put('/gym', data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['gym-settings'] }),
@@ -93,7 +92,6 @@ export default function SettingsPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['staff-list'] }),
   });
 
-  // Automation config (local state, saved via API)
   const [automations, setAutomations] = useState<AutomationConfig>({
     feeReminder: true, feeOverdue: true, planExpiry: true,
     inactivity: true, birthday: true, weeklySummary: true,
@@ -102,92 +100,115 @@ export default function SettingsPage() {
   const staff: StaffMember[] = staffData?.staff || [];
   const gym = gymData?.gym;
 
-  const tabs: { key: SettingsTab; label: string; icon: React.ReactNode }[] = [
-    { key: 'gym', label: 'Gym Profile', icon: <Building2 size={16} /> },
-    { key: 'staff', label: 'Staff', icon: <Users size={16} /> },
-    { key: 'notifications', label: 'Automations', icon: <Bell size={16} /> },
-    { key: 'qr', label: 'QR Code', icon: <QrCode size={16} /> },
+  const tabs: { key: SettingsTab; label: string; icon: React.ComponentType<{ size?: number; strokeWidth?: number }> }[] = [
+    { key: 'gym', label: 'Gym Profile', icon: Building2 },
+    { key: 'staff', label: 'Staff', icon: Users },
+    { key: 'notifications', label: 'Automations', icon: Bell },
+    { key: 'qr', label: 'QR Code', icon: QrCode },
   ];
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+      <h1 className="text-page-title text-text-primary mb-8 stagger-1">Settings</h1>
 
-      <div className="flex gap-6">
-        {/* Sidebar */}
-        <div className="w-56 flex-shrink-0">
+      <div className="flex gap-between-sections stagger-2">
+        {/* Settings sidebar nav */}
+        <div className="w-56 flex-shrink-0 hidden lg:block">
           <nav className="space-y-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === tab.key ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-btn text-body font-medium transition-all duration-normal ${
+                    activeTab === tab.key
+                      ? 'bg-primary/5 text-primary'
+                      : 'text-text-secondary hover:bg-divider hover:text-text-primary'
                   }`}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
+                >
+                  <Icon size={18} strokeWidth={1.5} />
+                  {tab.label}
+                </button>
+              );
+            })}
           </nav>
         </div>
 
+        {/* Mobile tabs */}
+        <div className="lg:hidden flex gap-2 mb-6 overflow-x-auto">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`filter-chip ${activeTab === tab.key ? 'active' : ''}`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         {/* Content */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
+          {/* ── Gym Profile ────────────────────────────── */}
           {activeTab === 'gym' && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold mb-6">Gym Profile</h2>
+            <div className="card">
+              <h2 className="text-section-heading text-text-primary mb-6">Gym Profile</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Gym Name</label>
-                  <input type="text" value={gymForm.name} onChange={(e) => setGymForm({ ...gymForm, name: e.target.value })} className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" />
+                  <label htmlFor="gym-name" className="input-label">Gym Name</label>
+                  <input id="gym-name" type="text" value={gymForm.name} onChange={(e) => setGymForm({ ...gymForm, name: e.target.value })} className="input" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                    <input type="text" value={gymForm.city} onChange={(e) => setGymForm({ ...gymForm, city: e.target.value })} className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" />
+                    <label htmlFor="gym-city" className="input-label">City</label>
+                    <input id="gym-city" type="text" value={gymForm.city} onChange={(e) => setGymForm({ ...gymForm, city: e.target.value })} className="input" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-                    <input type="text" value={gymForm.state} onChange={(e) => setGymForm({ ...gymForm, state: e.target.value })} className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" />
+                    <label htmlFor="gym-state" className="input-label">State</label>
+                    <input id="gym-state" type="text" value={gymForm.state} onChange={(e) => setGymForm({ ...gymForm, state: e.target.value })} className="input" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Pincode</label>
-                    <input type="text" value={gymForm.pincode} onChange={(e) => setGymForm({ ...gymForm, pincode: e.target.value })} className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" />
+                    <label htmlFor="gym-pincode" className="input-label">Pincode</label>
+                    <input id="gym-pincode" type="text" value={gymForm.pincode} onChange={(e) => setGymForm({ ...gymForm, pincode: e.target.value })} className="input" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">GSTIN</label>
-                    <input type="text" value={gymForm.gstin} onChange={(e) => setGymForm({ ...gymForm, gstin: e.target.value })} className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" />
+                    <label htmlFor="gym-gstin" className="input-label">GSTIN</label>
+                    <input id="gym-gstin" type="text" value={gymForm.gstin} onChange={(e) => setGymForm({ ...gymForm, gstin: e.target.value })} className="input" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                  <textarea value={gymForm.address} onChange={(e) => setGymForm({ ...gymForm, address: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none" />
+                  <label htmlFor="gym-address" className="input-label">Address</label>
+                  <textarea id="gym-address" value={gymForm.address} onChange={(e) => setGymForm({ ...gymForm, address: e.target.value })} rows={2} className="input h-auto py-3 resize-none" />
                 </div>
 
                 {/* Branding Colors */}
-                <div className="pt-4 border-t">
-                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><Palette size={16} /> Branding</h3>
+                <div className="pt-6 border-t border-divider">
+                  <h3 className="text-card-heading text-text-primary mb-4 flex items-center gap-2">
+                    <Palette size={18} strokeWidth={1.5} /> Branding
+                  </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Primary Color</label>
+                      <label htmlFor="gym-primary-color" className="input-label">Primary Color</label>
                       <div className="flex items-center gap-3">
-                        <input type="color" value={gymForm.primaryColor} onChange={(e) => setGymForm({ ...gymForm, primaryColor: e.target.value })} className="w-10 h-10 rounded-lg border border-gray-300 cursor-pointer" />
-                        <input type="text" value={gymForm.primaryColor} onChange={(e) => setGymForm({ ...gymForm, primaryColor: e.target.value })} className="flex-1 h-10 px-3 border border-gray-300 rounded-lg font-mono text-sm" />
+                        <input id="gym-primary-color" type="color" value={gymForm.primaryColor} onChange={(e) => setGymForm({ ...gymForm, primaryColor: e.target.value })} className="w-10 h-input rounded-btn border border-border-default cursor-pointer" />
+                        <input type="text" value={gymForm.primaryColor} onChange={(e) => setGymForm({ ...gymForm, primaryColor: e.target.value })} className="input flex-1 font-mono" />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Secondary Color</label>
+                      <label htmlFor="gym-secondary-color" className="input-label">Secondary Color</label>
                       <div className="flex items-center gap-3">
-                        <input type="color" value={gymForm.secondaryColor} onChange={(e) => setGymForm({ ...gymForm, secondaryColor: e.target.value })} className="w-10 h-10 rounded-lg border border-gray-300 cursor-pointer" />
-                        <input type="text" value={gymForm.secondaryColor} onChange={(e) => setGymForm({ ...gymForm, secondaryColor: e.target.value })} className="flex-1 h-10 px-3 border border-gray-300 rounded-lg font-mono text-sm" />
+                        <input id="gym-secondary-color" type="color" value={gymForm.secondaryColor} onChange={(e) => setGymForm({ ...gymForm, secondaryColor: e.target.value })} className="w-10 h-input rounded-btn border border-border-default cursor-pointer" />
+                        <input type="text" value={gymForm.secondaryColor} onChange={(e) => setGymForm({ ...gymForm, secondaryColor: e.target.value })} className="input flex-1 font-mono" />
                       </div>
                     </div>
                   </div>
-                  <div className="mt-3 p-4 rounded-lg flex items-center gap-3" style={{ background: gymForm.primaryColor }}>
-                    <span className="text-white font-medium text-sm">Preview: {gymForm.name || 'Your Gym'}</span>
-                    <span className="px-2 py-0.5 rounded text-xs font-medium" style={{ background: gymForm.secondaryColor, color: '#fff' }}>
+                  {/* Brand preview */}
+                  <div className="mt-4 p-4 rounded-card flex items-center gap-3" style={{ background: gymForm.primaryColor }}>
+                    <span className="text-white font-medium text-body">{gymForm.name || 'Your Gym'}</span>
+                    <span className="px-2 py-0.5 rounded-badge text-badge font-medium" style={{ background: gymForm.secondaryColor, color: '#fff' }}>
                       Premium
                     </span>
                   </div>
@@ -196,100 +217,139 @@ export default function SettingsPage() {
                 <button
                   onClick={() => updateGymMutation.mutate(gymForm)}
                   disabled={updateGymMutation.isPending}
-                  className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="btn btn-primary mt-4"
                 >
-                  <Save size={16} /> {updateGymMutation.isPending ? 'Saving...' : 'Save Changes'}
+                  {updateGymMutation.isPending ? (
+                    <><Loader2 size={16} className="animate-spin" strokeWidth={1.5} /> Saving...</>
+                  ) : (
+                    <><Save size={16} strokeWidth={1.5} /> Save Changes</>
+                  )}
                 </button>
-                {updateGymMutation.isSuccess && <p className="text-sm text-green-600 flex items-center gap-1"><Check size={14} /> Saved successfully</p>}
+                {updateGymMutation.isSuccess && (
+                  <p className="text-caption text-success flex items-center gap-1 mt-2">
+                    <Check size={14} strokeWidth={1.5} /> Saved successfully
+                  </p>
+                )}
               </div>
             </div>
           )}
 
+          {/* ── Staff ──────────────────────────────────── */}
           {activeTab === 'staff' && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">Staff Management</h2>
-                <button onClick={() => setShowAddStaff(true)} className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
-                  <PlusIcon size={16} /> Add Staff
+            <div className="card">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-section-heading text-text-primary">Staff Management</h2>
+                <button onClick={() => setShowAddStaff(true)} className="btn btn-primary">
+                  <PlusIcon size={16} strokeWidth={1.5} /> Add Staff
                 </button>
               </div>
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th className="table-header text-left">Name</th>
+                    <th className="table-header text-left">Phone</th>
+                    <th className="table-header text-left">Role</th>
+                    <th className="table-header text-left">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {staff.map((s) => (
-                    <tr key={s.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium">{s.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600 font-mono">{s.phone}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.role === 'gym_owner' ? 'bg-purple-100 text-purple-700'
-                            : s.role === 'coach' ? 'bg-blue-100 text-blue-700'
-                              : 'bg-gray-100 text-gray-700'
-                          }`}>
-                          {s.role === 'gym_owner' ? 'Owner' : s.role === 'coach' ? 'Coach' : 'Receptionist'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        {s.role !== 'gym_owner' && (
-                          <button onClick={() => deleteStaffMutation.mutate(s.id)} className="text-red-500 hover:text-red-600 transition-colors p-1">
-                            <Trash2 size={14} />
-                          </button>
-                        )}
+                <tbody>
+                  {staff.length > 0 ? (
+                    staff.map((s) => (
+                      <tr key={s.id} className="table-row group">
+                        <td className="px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="avatar text-badge">{s.name[0]?.toUpperCase()}</div>
+                            <span className="text-table-row font-medium text-text-primary">{s.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 text-table-row font-mono text-text-secondary">{s.phone}</td>
+                        <td className="px-4">
+                          <Badge variant={
+                            s.role === 'gym_owner' ? 'receptionist' : s.role === 'coach' ? 'coach' : 'default'
+                          }>
+                            {s.role === 'gym_owner' ? 'Owner' : s.role === 'coach' ? 'Coach' : 'Receptionist'}
+                          </Badge>
+                        </td>
+                        <td className="px-4">
+                          <div className="row-actions">
+                            {s.role !== 'gym_owner' && (
+                              <button
+                                onClick={() => deleteStaffMutation.mutate(s.id)}
+                                className="btn btn-danger h-8 px-3 text-badge"
+                              >
+                                <Trash2 size={14} strokeWidth={1.5} /> Remove
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="p-0">
+                        <EmptyState
+                          icon={Users}
+                          title="No staff members yet"
+                          description="Add receptionists and coaches to help manage your gym"
+                          action={
+                            <button onClick={() => setShowAddStaff(true)} className="btn btn-primary">
+                              <PlusIcon size={16} strokeWidth={1.5} /> Add Staff
+                            </button>
+                          }
+                        />
                       </td>
                     </tr>
-                  ))}
-                  {staff.length === 0 && (
-                    <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-400">No staff members yet</td></tr>
                   )}
                 </tbody>
               </table>
 
               {/* Add Staff Drawer */}
-              {showAddStaff && (
-                <>
-                  <div className="fixed inset-0 bg-black/30 z-40" onClick={() => setShowAddStaff(false)} />
-                  <div className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white z-50 shadow-2xl p-6 overflow-y-auto">
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-lg font-bold">Add Staff Member</h2>
-                      <button onClick={() => setShowAddStaff(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                        <input type="text" value={staffForm.name} onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })} className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                        <input type="tel" value={staffForm.phone} onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })} className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="9876543210" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                        <select value={staffForm.role} onChange={(e) => setStaffForm({ ...staffForm, role: e.target.value })} className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none">
-                          <option value="receptionist">Receptionist</option>
-                          <option value="coach">Coach</option>
-                        </select>
-                      </div>
-                      <button onClick={() => addStaffMutation.mutate(staffForm)} disabled={addStaffMutation.isPending || !staffForm.name || !staffForm.phone} className="w-full h-10 bg-primary text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
-                        {addStaffMutation.isPending ? 'Adding...' : 'Add Staff'}
-                      </button>
-                    </div>
+              <Drawer
+                open={showAddStaff}
+                onClose={() => setShowAddStaff(false)}
+                title="Add Staff Member"
+                footer={
+                  <>
+                    <button onClick={() => setShowAddStaff(false)} className="btn btn-secondary">Cancel</button>
+                    <button
+                      onClick={() => addStaffMutation.mutate(staffForm)}
+                      disabled={addStaffMutation.isPending || !staffForm.name || !staffForm.phone}
+                      className="btn btn-primary"
+                    >
+                      {addStaffMutation.isPending ? (
+                        <><Loader2 size={16} className="animate-spin" strokeWidth={1.5} /> Adding...</>
+                      ) : 'Add Staff'}
+                    </button>
+                  </>
+                }
+              >
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="staff-name" className="input-label">Name</label>
+                    <input id="staff-name" type="text" value={staffForm.name} onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })} className="input" />
                   </div>
-                </>
-              )}
+                  <div>
+                    <label htmlFor="staff-phone" className="input-label">Phone</label>
+                    <input id="staff-phone" type="tel" value={staffForm.phone} onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })} className="input" placeholder="9876543210" />
+                  </div>
+                  <div>
+                    <label htmlFor="staff-role" className="input-label">Role</label>
+                    <select id="staff-role" value={staffForm.role} onChange={(e) => setStaffForm({ ...staffForm, role: e.target.value })} className="input">
+                      <option value="receptionist">Receptionist</option>
+                      <option value="coach">Coach</option>
+                    </select>
+                  </div>
+                </div>
+              </Drawer>
             </div>
           )}
 
+          {/* ── Automations ────────────────────────────── */}
           {activeTab === 'notifications' && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold mb-2">Automation Settings</h2>
-              <p className="text-sm text-gray-500 mb-6">Control which automated messages are sent to your members.</p>
-              <div className="space-y-4">
+            <div className="card">
+              <h2 className="text-section-heading text-text-primary mb-2">Automation Settings</h2>
+              <p className="text-body text-text-secondary mb-6">Control which automated messages are sent to your members.</p>
+              <div className="space-y-3">
                 {[
                   { key: 'feeReminder' as keyof AutomationConfig, label: 'Fee Reminders', desc: '3 days before due date via WhatsApp' },
                   { key: 'feeOverdue' as keyof AutomationConfig, label: 'Fee Overdue Alerts', desc: 'On due date via WhatsApp + SMS' },
@@ -298,16 +358,23 @@ export default function SettingsPage() {
                   { key: 'birthday' as keyof AutomationConfig, label: 'Birthday Wishes', desc: 'Auto birthday greeting on their day' },
                   { key: 'weeklySummary' as keyof AutomationConfig, label: 'Weekly Summary', desc: 'Monday morning stats to gym owner' },
                 ].map((item) => (
-                  <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div key={item.key} className="flex items-center justify-between p-4 stat-card">
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{item.label}</p>
-                      <p className="text-xs text-gray-500">{item.desc}</p>
+                      <p className="text-body font-medium text-text-primary">{item.label}</p>
+                      <p className="text-caption text-text-secondary">{item.desc}</p>
                     </div>
                     <button
                       onClick={() => setAutomations({ ...automations, [item.key]: !automations[item.key] })}
-                      className={`w-11 h-6 rounded-full relative transition-colors ${automations[item.key] ? 'bg-primary' : 'bg-gray-300'}`}
+                      className={`w-11 h-6 rounded-full relative transition-colors duration-normal ${
+                        automations[item.key] ? 'bg-primary' : 'bg-border-strong'
+                      }`}
+                      role="switch"
+                      aria-checked={automations[item.key]}
+                      aria-label={item.label}
                     >
-                      <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${automations[item.key] ? 'left-[22px]' : 'left-0.5'}`} />
+                      <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-normal ${
+                        automations[item.key] ? 'translate-x-[22px]' : 'translate-x-0.5'
+                      }`} />
                     </button>
                   </div>
                 ))}
@@ -315,42 +382,40 @@ export default function SettingsPage() {
             </div>
           )}
 
+          {/* ── QR Code ────────────────────────────────── */}
           {activeTab === 'qr' && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold mb-2">Gym QR Code</h2>
-              <p className="text-sm text-gray-500 mb-6">Members scan this QR code with the app to check in. Print and display at your gym entrance.</p>
+            <div className="card">
+              <h2 className="text-section-heading text-text-primary mb-2">Gym QR Code</h2>
+              <p className="text-body text-text-secondary mb-6">Members scan this QR code with the app to check in. Print and display at your gym entrance.</p>
 
               <div className="text-center">
-                <div className="inline-block p-6 bg-white border-2 border-gray-200 rounded-2xl mt-2 mb-6">
-                  {/* QR Code placeholder — use a QR lib on frontend or generate server-side */}
-                  <div className="w-48 h-48 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-                    <QrCode size={80} className="text-gray-400" />
+                <div className="inline-block p-6 card mt-2 mb-6">
+                  <div className="w-48 h-48 bg-divider rounded-card flex items-center justify-center">
+                    <QrCode size={80} strokeWidth={1.5} className="text-text-muted" />
                   </div>
-                  <p className="mt-3 text-sm font-medium text-gray-700">{gym?.name || 'Your Gym'}</p>
-                  <p className="text-xs text-gray-400">Scan to check in</p>
+                  <p className="mt-3 text-body font-medium text-text-primary">{gym?.name || 'Your Gym'}</p>
+                  <p className="text-caption text-text-muted">Scan to check in</p>
                 </div>
 
                 {qrData && (
-                  <div className="bg-gray-50 rounded-lg p-4 text-left mb-6">
-                    <label className="block text-xs font-medium text-gray-500 uppercase mb-2">QR Data (use this in a QR generator)</label>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 text-xs bg-gray-100 p-2 rounded font-mono break-all">{qrData.qrData}</code>
+                  <div className="stat-card text-left mb-6 mx-auto max-w-md">
+                    <label className="input-label uppercase">QR Data</label>
+                    <div className="flex items-center gap-2 mt-2">
+                      <code className="flex-1 text-caption bg-divider p-2 rounded-btn font-mono break-all">{qrData.qrData}</code>
                       <button
                         onClick={() => { navigator.clipboard.writeText(qrData.qrData); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                        className="flex-shrink-0 p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                        className="btn btn-ghost h-8 w-8 p-0 flex-shrink-0"
+                        aria-label="Copy QR data"
                       >
-                        {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                        {copied ? <Check size={16} strokeWidth={1.5} className="text-success" /> : <Copy size={16} strokeWidth={1.5} />}
                       </button>
                     </div>
                   </div>
                 )}
 
                 <div className="flex justify-center gap-3">
-                  <button
-                    onClick={() => refetchQr()}
-                    className="flex items-center gap-2 text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-                  >
-                    <RefreshCw size={14} /> Refresh
+                  <button onClick={() => refetchQr()} className="btn btn-secondary">
+                    <RefreshCw size={16} strokeWidth={1.5} /> Refresh
                   </button>
                 </div>
               </div>

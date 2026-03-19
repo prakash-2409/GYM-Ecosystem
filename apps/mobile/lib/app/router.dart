@@ -7,6 +7,7 @@ import '../screens/home_screen.dart';
 import '../screens/notifications_screen.dart';
 import '../screens/progress_screen.dart';
 import '../screens/profile_screen.dart';
+import 'theme.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -49,21 +50,51 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       body: widget.child,
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Color(0xFF333333), width: 0.5)),
+        decoration: BoxDecoration(
+          color: AppColors.navBackground,
+          // Border: 1px solid rgba(255,255,255,0.07)
+          border: Border(
+            top: BorderSide(
+              color: Colors.white.withOpacity(0.07),
+              width: 1,
+            ),
+          ),
         ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() => _currentIndex = index);
-            context.go(_paths[index]);
-          },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.notifications_rounded), label: 'Alerts'),
-            BottomNavigationBarItem(icon: Icon(Icons.trending_up_rounded), label: 'Progress'),
-            BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
-          ],
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: AppSpacing.bottomNavHeight,
+            child: BottomNavigationBar(
+              currentIndex: _currentIndex,
+              onTap: (index) {
+                setState(() => _currentIndex = index);
+                context.go(_paths[index]);
+              },
+              // Tabs: Home, Notifications, Progress, Profile — per spec
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home_outlined),
+                  activeIcon: Icon(Icons.home_rounded),
+                  label: 'Home',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.notifications_outlined),
+                  activeIcon: Icon(Icons.notifications_rounded),
+                  label: 'Notifications',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.trending_up_rounded),
+                  activeIcon: Icon(Icons.trending_up_rounded),
+                  label: 'Progress',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_outlined),
+                  activeIcon: Icon(Icons.person_rounded),
+                  label: 'Profile',
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

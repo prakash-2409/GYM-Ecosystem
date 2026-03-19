@@ -2,12 +2,17 @@
 
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/lib/api-client';
+import { Badge } from '@/components/ui/badge';
+import { StatCardSkeleton, TableSkeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
 
-const COLORS = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+// Design system–aligned chart palette
+const CHART_COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
 export default function AnalyticsPage() {
-  const { data: revenue } = useQuery({
+  const { data: revenue, isLoading: revLoading } = useQuery({
     queryKey: ['analytics-revenue'],
     queryFn: () => apiClient.get('/analytics/revenue').then((r) => r.data),
   });
@@ -34,64 +39,81 @@ export default function AnalyticsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Analytics</h1>
+      <h1 className="text-page-title text-text-primary mb-8 stagger-1">Analytics</h1>
 
-      {/* Revenue cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white rounded-xl border p-5">
-          <p className="text-sm text-gray-500">This Month</p>
-          <p className="text-3xl font-bold mt-1">
-            {revenue ? `₹${revenue.currentMonth.toLocaleString('en-IN')}` : '—'}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl border p-5">
-          <p className="text-sm text-gray-500">Last Month</p>
-          <p className="text-3xl font-bold mt-1">
-            {revenue ? `₹${revenue.lastMonth.toLocaleString('en-IN')}` : '—'}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl border p-5">
-          <p className="text-sm text-gray-500">Change</p>
-          <p className={`text-3xl font-bold mt-1 ${
-            revenue?.changePercent >= 0 ? 'text-green-600' : 'text-red-600'
-          }`}>
-            {revenue ? `${revenue.changePercent >= 0 ? '+' : ''}${revenue.changePercent}%` : '—'}
-          </p>
-        </div>
+      {/* Revenue stat cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-between-cards mb-between-sections stagger-2">
+        {revLoading ? (
+          <>
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </>
+        ) : (
+          <>
+            <div className="stat-card">
+              <span className="stat-card-label">This Month</span>
+              <p className="stat-card-value mt-2">
+                {revenue ? `₹${revenue.currentMonth.toLocaleString('en-IN')}` : '—'}
+              </p>
+            </div>
+            <div className="stat-card">
+              <span className="stat-card-label">Last Month</span>
+              <p className="stat-card-value mt-2">
+                {revenue ? `₹${revenue.lastMonth.toLocaleString('en-IN')}` : '—'}
+              </p>
+            </div>
+            <div className="stat-card">
+              <span className="stat-card-label">Change</span>
+              <p className="stat-card-value mt-2">
+                {revenue ? `${revenue.changePercent >= 0 ? '+' : ''}${revenue.changePercent}%` : '—'}
+              </p>
+              {revenue && (
+                <span className={`stat-card-trend ${revenue.changePercent >= 0 ? 'up' : 'down'} mt-1`}>
+                  {revenue.changePercent >= 0 ? <TrendingUp size={13} strokeWidth={1.5} /> : <TrendingDown size={13} strokeWidth={1.5} />}
+                  {revenue.changePercent >= 0 ? 'growth' : 'decline'}
+                </span>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Peak hours */}
-        <div className="bg-white rounded-xl border p-6">
-          <h3 className="text-lg font-semibold mb-4">Peak Hours (Last 30 Days)</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-between-sections mb-between-sections stagger-3">
+        {/* Peak hours chart */}
+        <div className="card">
+          <h3 className="text-section-heading text-text-primary mb-6">Peak Hours (Last 30 Days)</h3>
           <div className="h-64">
             {peakHours?.hours && (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={peakHours.hours.filter((h: { hour: number }) => h.hour >= 5 && h.hour <= 23)}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" tickFormatter={(h: number) => `${h}:00`} />
-                  <YAxis />
-                  <Tooltip labelFormatter={(h: number) => `${h}:00 - ${h + 1}:00`} />
-                  <Bar dataKey="count" fill="#2563EB" radius={[4, 4, 0, 0]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-divider)" />
+                  <XAxis dataKey="hour" tickFormatter={(h: number) => `${h}:00`} tick={{ fill: 'var(--color-text-secondary)', fontSize: 12 }} />
+                  <YAxis tick={{ fill: 'var(--color-text-secondary)', fontSize: 12 }} />
+                  <Tooltip
+                    labelFormatter={(h: number) => `${h}:00 - ${h + 1}:00`}
+                    contentStyle={{ borderRadius: 8, border: '1px solid var(--color-divider)', fontSize: 13 }}
+                  />
+                  <Bar dataKey="count" fill="#4F46E5" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
           </div>
         </div>
 
-        {/* Plan popularity */}
-        <div className="bg-white rounded-xl border p-6">
-          <h3 className="text-lg font-semibold mb-4">Plan Popularity</h3>
+        {/* Plan popularity chart */}
+        <div className="card">
+          <h3 className="text-section-heading text-text-primary mb-6">Plan Popularity</h3>
           <div className="h-64">
             {planPop?.plans && (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={planPop.plans} dataKey="count" nameKey="planName" cx="50%" cy="50%" outerRadius={80} label>
                     {planPop.plans.map((_: unknown, i: number) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid var(--color-divider)', fontSize: 13 }} />
                 </PieChart>
               </ResponsiveContainer>
             )}
@@ -99,57 +121,74 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Member growth */}
-      <div className="bg-white rounded-xl border p-6 mb-8">
-        <h3 className="text-lg font-semibold mb-4">Member Growth (12 Months)</h3>
+      {/* Member growth chart */}
+      <div className="card mb-between-sections stagger-4">
+        <h3 className="text-section-heading text-text-primary mb-6">Member Growth (12 Months)</h3>
         <div className="h-64">
           {growth?.monthly && (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={growth.monthly}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="totalMembers" stroke="#2563EB" strokeWidth={2} />
-                <Line type="monotone" dataKey="newMembers" stroke="#10B981" strokeWidth={2} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-divider)" />
+                <XAxis dataKey="month" tick={{ fill: 'var(--color-text-secondary)', fontSize: 12 }} />
+                <YAxis tick={{ fill: 'var(--color-text-secondary)', fontSize: 12 }} />
+                <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid var(--color-divider)', fontSize: 13 }} />
+                <Line type="monotone" dataKey="totalMembers" stroke="#4F46E5" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="newMembers" stroke="#10B981" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           )}
         </div>
       </div>
 
-      {/* Churn risk */}
-      <div className="bg-white rounded-xl border overflow-hidden">
-        <div className="px-6 py-4 border-b">
-          <h3 className="text-lg font-semibold">Churn Risk (7+ days inactive)</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plan</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Days Absent</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {churn?.members?.map((m: Record<string, unknown>) => (
-                <tr key={m.memberId as string} className="hover:bg-gray-50">
-                  <td className="px-6 py-3 text-sm font-medium">{m.name as string}</td>
-                  <td className="px-6 py-3 text-sm text-gray-600">{m.phone as string}</td>
-                  <td className="px-6 py-3 text-sm text-gray-600">{m.planName as string}</td>
-                  <td className="px-6 py-3">
-                    <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                      {m.daysSinceLastVisit ? `${m.daysSinceLastVisit} days` : 'Never visited'}
-                    </span>
-                  </td>
+      {/* Churn risk table */}
+      <div className="stagger-5">
+        <div className="card p-0 overflow-hidden">
+          <div className="px-card-pad py-4 border-b border-divider">
+            <h3 className="text-section-heading text-text-primary">Churn Risk (7+ days inactive)</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="sticky top-0 z-10 bg-surface">
+                <tr>
+                  <th className="table-header text-left">Name</th>
+                  <th className="table-header text-left">Phone</th>
+                  <th className="table-header text-left">Plan</th>
+                  <th className="table-header text-left">Days Absent</th>
                 </tr>
-              )) || (
-                <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-400">No at-risk members</td></tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {churn?.members?.length > 0 ? (
+                  churn.members.map((m: Record<string, unknown>) => (
+                    <tr key={m.memberId as string} className="table-row">
+                      <td className="px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="avatar text-badge">{(m.name as string)?.[0]?.toUpperCase()}</div>
+                          <span className="text-table-row font-medium text-text-primary">{m.name as string}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 text-table-row font-mono text-text-secondary">{m.phone as string}</td>
+                      <td className="px-4 text-table-row text-text-secondary">{m.planName as string}</td>
+                      <td className="px-4">
+                        <Badge variant="overdue">
+                          {m.daysSinceLastVisit ? `${m.daysSinceLastVisit} days` : 'Never visited'}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="p-0">
+                      <EmptyState
+                        icon={AlertTriangle}
+                        title="No at-risk members"
+                        description="All members have been active recently"
+                      />
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

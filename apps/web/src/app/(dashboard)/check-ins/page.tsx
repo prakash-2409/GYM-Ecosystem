@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/lib/api-client';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
-import { TableSkeleton } from '@/components/ui/skeleton';
+import { TableSkeleton, StatCardSkeleton } from '@/components/ui/skeleton';
 import { CalendarCheck, Download, Calendar } from 'lucide-react';
 
 interface CheckInRow {
@@ -37,7 +37,6 @@ export default function CheckInsPage() {
 
   const checkIns: CheckInRow[] = data?.checkIns || [];
 
-  // Pair check-ins by member for the same day to compute duration
   const enriched = useMemo(() => {
     const grouped = new Map<string, CheckInRow[]>();
     checkIns.forEach((ci) => {
@@ -58,7 +57,7 @@ export default function CheckInsPage() {
         sorted.length > 1 ? new Date(lastIn.checkedInAt).getTime() - timeIn.getTime() : null;
 
       return { ...ci, timeIn, durationMs, isFirst: ci.id === firstIn.id };
-    }).filter((ci) => ci.isFirst); // Show one row per member
+    }).filter((ci) => ci.isFirst);
   }, [checkIns]);
 
   const formatTime = (d: Date) =>
@@ -94,104 +93,124 @@ export default function CheckInsPage() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 stagger-1">
         <div>
-          <h1 className="text-2xl font-bold">Check-ins</h1>
+          <h1 className="text-page-title text-text-primary">Check-ins</h1>
           {isToday && (
-            <p className="text-sm text-gray-500 mt-1">Auto-refreshes every 30 seconds</p>
+            <p className="text-caption text-text-secondary mt-1">Auto-refreshes every 30 seconds</p>
           )}
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <Calendar size={16} strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
             <input
+              id="checkins-date"
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="h-9 pl-9 pr-3 border border-border rounded-btn text-sm font-mono focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-150"
+              className="input pl-9 w-48 font-mono"
             />
           </div>
           <button
             onClick={exportCSV}
             disabled={!enriched.length}
-            className="flex items-center gap-2 h-9 px-4 text-sm font-medium rounded-btn border border-border text-gray-700 hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50 transition-colors duration-150"
+            className="btn btn-secondary"
           >
-            <Download size={16} />
+            <Download size={16} strokeWidth={1.5} />
             Export CSV
           </button>
         </div>
       </div>
 
-      {isLoading ? (
-        <TableSkeleton rows={6} cols={5} />
-      ) : !enriched.length ? (
-        <div className="bg-surface rounded-card border border-border">
-          <EmptyState
-            icon={<CalendarCheck size={28} />}
-            title="No check-ins"
-            description={isToday ? 'No members have checked in yet today.' : `No check-ins found for ${selectedDate}.`}
-          />
-        </div>
-      ) : (
-        <div className="bg-surface rounded-card border border-border overflow-hidden">
-          <div className="px-6 py-3 border-b border-border flex items-center justify-between">
-            <p className="text-sm text-gray-500">
-              <span className="font-semibold text-gray-900 font-mono">{enriched.length}</span> check-ins
-            </p>
-            {isToday && (
-              <Badge variant="info">Live</Badge>
-            )}
+      {/* Summary stat */}
+      {!isLoading && enriched.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-between-cards mb-between-sections stagger-2">
+          <div className="stat-card">
+            <span className="stat-card-label">Total Check-ins</span>
+            <p className="stat-card-value mt-2">{enriched.length}</p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time In</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {enriched.map((ci) => (
-                  <tr key={ci.id} className="hover:bg-[#F5F5F5] transition-colors duration-150">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        {ci.member.user.avatarUrl ? (
-                          <img src={ci.member.user.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
-                        ) : (
-                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold">
-                            {ci.member.user.name?.[0]?.toUpperCase() || '?'}
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{ci.member.user.name}</p>
-                          <p className="text-xs text-gray-500 font-mono">{ci.member.memberCode}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-mono text-gray-600">
-                      {formatTime(ci.timeIn)}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-mono text-gray-600">
-                      {formatDuration(ci.durationMs)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge variant={ci.source === 'kiosk' ? 'info' : 'default'}>
-                        {ci.source}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {ci.member.subscriptions?.[0]?.plan?.name || '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="stat-card">
+            <span className="stat-card-label">Avg. Duration</span>
+            <p className="stat-card-value mt-2">
+              {formatDuration(
+                enriched.reduce((sum, ci) => sum + (ci.durationMs || 0), 0) / enriched.filter(ci => ci.durationMs).length || null
+              )}
+            </p>
+          </div>
+          <div className="stat-card flex items-center justify-between">
+            <div>
+              <span className="stat-card-label">Status</span>
+              <p className="stat-card-value mt-2">{isToday ? 'Live' : 'Historic'}</p>
+            </div>
+            {isToday && <Badge variant="active">Live</Badge>}
           </div>
         </div>
       )}
+
+      <div className="stagger-3">
+        {isLoading ? (
+          <TableSkeleton rows={6} cols={5} />
+        ) : !enriched.length ? (
+          <div className="card">
+            <EmptyState
+              icon={CalendarCheck}
+              title="No check-ins"
+              description={isToday ? 'No members have checked in yet today.' : `No check-ins found for ${selectedDate}.`}
+            />
+          </div>
+        ) : (
+          <div className="card p-0 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="sticky top-0 z-10 bg-surface">
+                  <tr>
+                    <th className="table-header text-left">Member</th>
+                    <th className="table-header text-left">Time In</th>
+                    <th className="table-header text-left">Duration</th>
+                    <th className="table-header text-left">Source</th>
+                    <th className="table-header text-left">Plan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {enriched.map((ci) => (
+                    <tr key={ci.id} className="table-row">
+                      <td className="px-4">
+                        <div className="flex items-center gap-3">
+                          {ci.member.user.avatarUrl ? (
+                            <img src={ci.member.user.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
+                          ) : (
+                            <div className="avatar text-badge">
+                              {ci.member.user.name?.[0]?.toUpperCase() || '?'}
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-table-row font-medium text-text-primary">{ci.member.user.name}</p>
+                            <p className="text-caption text-text-muted font-mono">{ci.member.memberCode}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 text-table-row font-mono text-text-secondary">
+                        {formatTime(ci.timeIn)}
+                      </td>
+                      <td className="px-4 text-table-row font-mono text-text-secondary">
+                        {formatDuration(ci.durationMs)}
+                      </td>
+                      <td className="px-4">
+                        <Badge variant={ci.source === 'kiosk' ? 'info' : 'default'}>
+                          {ci.source}
+                        </Badge>
+                      </td>
+                      <td className="px-4 text-table-row text-text-secondary">
+                        {ci.member.subscriptions?.[0]?.plan?.name || '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

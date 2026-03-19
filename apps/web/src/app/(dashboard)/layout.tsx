@@ -36,28 +36,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen bg-page">
-      {/* Sidebar — dark #111111 */}
+      {/* ─── Sidebar — 240px, #111111 bg ─────────────────── */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 bg-[#111111] transform transition-transform duration-200 lg:relative lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 w-sidebar bg-sidebar',
+          'transform transition-transform duration-normal lg:relative lg:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="flex items-center gap-3 h-16 px-6 border-b border-white/10">
+        {/* Logo area — 56px height */}
+        <div className="flex items-center gap-3 h-sidebar-logo px-4 border-b border-sidebar-border-bottom">
           {branding?.logoUrl ? (
             <img src={branding.logoUrl} alt={branding.name} className="h-8 w-8 rounded" />
           ) : (
-            <div className="h-8 w-8 rounded bg-primary flex items-center justify-center text-white font-bold text-sm">
+            <div className="h-8 w-8 rounded-btn bg-primary flex items-center justify-center text-white font-medium text-caption">
               {branding?.name?.[0] || 'G'}
             </div>
           )}
-          <span className="font-bold text-lg truncate text-white">{branding?.name || 'GymStack'}</span>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden ml-auto text-gray-400 hover:text-white transition-colors duration-150">
-            <X size={20} />
+          <span className="font-medium text-body truncate text-sidebar-text">{branding?.name || 'GymOS'}</span>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden ml-auto text-sidebar-muted hover:text-sidebar-text transition-colors duration-normal"
+            aria-label="Close sidebar"
+          >
+            <X size={20} strokeWidth={1.5} />
           </button>
         </div>
 
-        <nav className="p-4 space-y-1">
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto sidebar-scroll py-2">
           {filteredNav.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -67,13 +74,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150',
-                  isActive
-                    ? 'bg-white/10 text-white'
-                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                  'sidebar-nav-item',
+                  isActive && 'active'
                 )}
               >
-                <Icon size={18} />
+                <Icon size={18} strokeWidth={1.5} />
                 {item.label}
               </Link>
             );
@@ -82,24 +87,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Link
             href="/kiosk"
             target="_blank"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-colors duration-150"
+            className="sidebar-nav-item"
           >
-            <Monitor size={18} />
+            <Monitor size={18} strokeWidth={1.5} />
             Open Kiosk
           </Link>
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10">
+        {/* Bottom section — avatar + name + logout */}
+        <div className="p-3 border-t border-sidebar-border-bottom">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-full bg-white/10 flex items-center justify-center text-white font-semibold text-sm">
+            <div className="avatar bg-sidebar-active-bg text-sidebar-text">
               {user?.name?.[0]?.toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate text-white">{user?.name}</p>
-              <p className="text-xs text-gray-500 capitalize">{user?.role?.replace('_', ' ')}</p>
+              <p className="text-body font-medium truncate text-sidebar-text">{user?.name}</p>
+              <p className="text-caption text-sidebar-muted capitalize">{user?.role?.replace('_', ' ')}</p>
             </div>
-            <button onClick={logout} className="text-gray-500 hover:text-red-400 transition-colors duration-150" title="Logout">
-              <LogOut size={18} />
+            <button
+              onClick={logout}
+              className="text-sidebar-muted hover:text-danger transition-colors duration-normal p-1"
+              title="Logout"
+              aria-label="Logout"
+            >
+              <LogOut size={18} strokeWidth={1.5} />
             </button>
           </div>
         </div>
@@ -107,24 +118,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Sidebar overlay on mobile */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 bg-overlay z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
       )}
 
-      {/* Main content */}
+      {/* ─── Main content area ───────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Topbar */}
-        <header className="h-16 bg-surface border-b border-border flex items-center px-4 lg:px-8 gap-4">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-600 hover:text-gray-900 transition-colors duration-150">
-            <Menu size={24} />
+        {/* Topbar — 56px, sticky, white bg, border-bottom */}
+        <header className="topbar">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden text-text-secondary hover:text-text-primary transition-colors duration-normal"
+            aria-label="Open sidebar"
+          >
+            <Menu size={24} strokeWidth={1.5} />
           </button>
           <div className="flex-1" />
-          <span className="text-sm text-gray-500 font-mono">
+          <span className="text-caption text-text-secondary font-mono">
             {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </span>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8">{children}</main>
+        {/* Page content — 32px horizontal, 48px top padding */}
+        <main className="flex-1 overflow-y-auto px-4 lg:px-page-h pt-page-top pb-8">{children}</main>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/providers/auth-provider';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -29,60 +30,81 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+    <div className="min-h-screen flex items-center justify-center bg-page px-4">
+      <div className="w-full max-w-[400px] card stagger-1">
+        {/* Logo & Title */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary">GymStack</h1>
-          <p className="text-gray-500 mt-2">Sign in to your gym dashboard</p>
+          <div className="inline-flex items-center justify-center h-12 w-12 rounded-card bg-primary text-white font-medium text-section-heading mb-4">
+            G
+          </div>
+          <h1 className="text-page-title text-text-primary">GymOS</h1>
+          <p className="text-body text-text-secondary mt-2">Sign in to your gym dashboard</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Gym Code */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Gym Code</label>
+            <label htmlFor="login-gym-code" className="input-label">Gym Code</label>
             <input
+              id="login-gym-code"
               type="text"
               value={gymSlug}
               onChange={(e) => setGymSlug(e.target.value)}
               placeholder="e.g. goldensgym"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+              className="input"
             />
           </div>
 
+          {/* Phone */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+            <label htmlFor="login-phone" className="input-label">Phone Number</label>
             <input
+              id="login-phone"
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="10-digit phone number"
               maxLength={10}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+              className="input"
             />
           </div>
 
+          {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label htmlFor="login-password" className="input-label">Password</label>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+              className="input"
             />
           </div>
 
+          {/* Error message */}
           {error && (
-            <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg">{error}</div>
+            <div className="bg-danger-bg text-danger text-caption px-4 py-3 rounded-btn border border-danger-border">
+              {error}
+            </div>
           )}
 
+          {/* Submit button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-white font-semibold py-3 rounded-lg hover:opacity-90 transition disabled:opacity-50"
+            className="btn btn-primary w-full h-input"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" strokeWidth={1.5} />
+                Signing in...
+              </>
+            ) : (
+              'Sign In'
+            )}
           </button>
         </form>
       </div>

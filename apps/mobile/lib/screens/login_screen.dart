@@ -122,13 +122,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     hintText: '9876543210',
                     prefixIcon: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('🇮🇳', style: TextStyle(fontSize: 20)),
-                          SizedBox(width: 8),
-                          Text('+91', style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
-                          SizedBox(width: 8),
+                          const Text('🇮🇳', style: TextStyle(fontSize: 20)),
+                          const SizedBox(width: 8),
+                          const Text('+91', style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
+                          const SizedBox(width: 8),
                           SizedBox(height: 24, child: VerticalDivider(color: AppColors.border)),
                         ],
                       ),
