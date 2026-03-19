@@ -36,6 +36,11 @@ class AppColors {
 
   // Brand — overridden per gym from API
   static const brand = Color(0xFF6366F1);
+
+  // Aliases used by screens
+  static const danger = error;
+  static final dangerBg = errorBg;
+  static const cardDark = surfaceElevated;
 }
 
 // ─── Typography Scale ──────────────────────────────────────
@@ -255,7 +260,7 @@ final gymTheme = ThemeData(
   ),
 
   // Dialog — avoid using, prefer bottom sheets on mobile
-  dialogTheme: DialogTheme(
+  dialogTheme: DialogThemeData(
     backgroundColor: AppColors.surface,
     elevation: 0,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

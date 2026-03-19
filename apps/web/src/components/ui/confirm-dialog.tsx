@@ -1,42 +1,57 @@
 'use client';
 
+import { type ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
-  message: string;
+  /** Primary description text — use either `message` or `description` */
+  message?: string;
+  description?: string;
   confirmLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
+  /** @deprecated use `variant="danger"` */
   destructive?: boolean;
+  variant?: 'danger' | 'warning' | 'default';
   loading?: boolean;
+  /** Optional slot for extra content (inputs, etc.) between description and buttons */
+  children?: ReactNode;
 }
 
 export function ConfirmDialog({
   open,
   title,
   message,
+  description,
   confirmLabel = 'Confirm',
   onConfirm,
   onCancel,
   destructive = false,
+  variant,
   loading = false,
+  children,
 }: ConfirmDialogProps) {
   if (!open) return null;
+
+  // Normalise: `variant` takes priority, fall back to `destructive` boolean
+  const resolvedVariant = variant ?? (destructive ? 'danger' : 'default');
+  const isDanger = resolvedVariant === 'danger';
+  const isWarning = resolvedVariant === 'warning';
+
+  // Support both `message` and `description` props
+  const bodyText = description || message;
 
   return (
     <div className="fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label={title}>
       {/* Overlay — rgba(0,0,0,0.4), blur 4px, 180ms fade */}
       <div
-        className="modal-overlay !z-auto !relative !fixed !inset-0"
+        className="fixed inset-0 z-[70]"
         style={{
-          position: 'fixed',
-          inset: 0,
           backgroundColor: 'rgba(0, 0, 0, 0.4)',
           backdropFilter: 'blur(4px)',
-          zIndex: 70,
         }}
         onClick={onCancel}
         aria-hidden="true"
@@ -50,22 +65,25 @@ export function ConfirmDialog({
             <div
               className={cn(
                 'shrink-0 h-10 w-10 rounded-full flex items-center justify-center',
-                destructive ? 'bg-danger-bg' : 'bg-warning-bg'
+                isDanger ? 'bg-danger-bg' : isWarning ? 'bg-warning-bg' : 'bg-primary/10'
               )}
             >
               <AlertTriangle
                 size={20}
                 strokeWidth={1.5}
-                className={destructive ? 'text-danger' : 'text-warning'}
+                className={isDanger ? 'text-danger' : isWarning ? 'text-warning' : 'text-primary'}
               />
             </div>
 
             {/* Content */}
             <div className="flex-1 min-w-0">
               <h3 className="text-card-heading text-text-primary">{title}</h3>
-              <p className="text-body text-text-secondary mt-1">{message}</p>
+              {bodyText && <p className="text-body text-text-secondary mt-1">{bodyText}</p>}
             </div>
           </div>
+
+          {/* Optional children slot (e.g. input fields) */}
+          {children && <div className="mt-4">{children}</div>}
 
           {/* Actions — right-aligned */}
           <div className="flex justify-end gap-3 mt-6">
@@ -81,7 +99,7 @@ export function ConfirmDialog({
               disabled={loading}
               className={cn(
                 'btn',
-                destructive
+                isDanger
                   ? 'btn-danger'
                   : 'btn-primary'
               )}

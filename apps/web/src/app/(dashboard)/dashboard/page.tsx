@@ -3,15 +3,17 @@
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/lib/api-client';
 import { Users, CalendarCheck, CreditCard, AlertTriangle } from 'lucide-react';
+import { StatCardSkeleton, TableSkeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export default function DashboardPage() {
-  const { data: checkIns } = useQuery({
+  const { data: checkIns, isLoading: checkInsLoading } = useQuery({
     queryKey: ['checkins-today'],
     queryFn: () => apiClient.get('/checkins/today').then((r) => r.data),
     refetchInterval: 10000,
   });
 
-  const { data: dueMembers } = useQuery({
+  const { data: dueMembers, isLoading: dueLoading } = useQuery({
     queryKey: ['payments-due'],
     queryFn: () => apiClient.get('/payments/due').then((r) => r.data),
   });
@@ -21,73 +23,112 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+      <h1 className="text-page-title text-text-primary mb-8 stagger-1">Dashboard</h1>
 
-      {/* Stats cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard icon={CalendarCheck} label="Check-ins Today" value={todayCount} color="bg-blue-500" />
-        <StatCard icon={AlertTriangle} label="Fees Due" value={dueCount} color="bg-red-500" />
-        <StatCard icon={Users} label="Total Members" value="—" color="bg-green-500" />
-        <StatCard icon={CreditCard} label="Revenue (Month)" value="—" color="bg-purple-500" />
+      {/* Stat cards — design system spec: #F5F5F4 bg, no border, 12px radius */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-between-cards mb-between-sections stagger-2">
+        {checkInsLoading || dueLoading ? (
+          <>
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </>
+        ) : (
+          <>
+            <StatCard
+              icon={CalendarCheck}
+              label="Check-ins Today"
+              value={todayCount}
+              trend={todayCount > 0 ? { direction: 'up', label: 'active' } : undefined}
+            />
+            <StatCard
+              icon={AlertTriangle}
+              label="Fees Due"
+              value={dueCount}
+              trend={dueCount > 0 ? { direction: 'down', label: 'pending' } : undefined}
+            />
+            <StatCard icon={Users} label="Total Members" value="—" />
+            <StatCard icon={CreditCard} label="Revenue (Month)" value="—" />
+          </>
+        )}
       </div>
 
       {/* Today's check-ins table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold">Today&apos;s Check-ins</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Member</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plan</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {checkIns?.checkIns?.map((ci: Record<string, unknown>) => (
-                <tr key={ci.id as string} className="hover:bg-gray-50">
-                  <td className="px-6 py-3 text-sm text-gray-600">
-                    {new Date(ci.checkedInAt as string).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-                  </td>
-                  <td className="px-6 py-3 text-sm font-medium">
-                    {(ci.member as Record<string, Record<string, string>>)?.user?.name || '—'}
-                  </td>
-                  <td className="px-6 py-3 text-sm text-gray-600">
-                    {((ci.member as Record<string, Array<Record<string, Record<string, string>>>>)?.subscriptions?.[0]?.plan?.name) || 'No plan'}
-                  </td>
-                </tr>
-              )) || (
-                <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-gray-400">No check-ins yet today</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div className="stagger-3">
+        {checkInsLoading ? (
+          <TableSkeleton rows={5} cols={3} />
+        ) : (
+          <div className="card p-0 overflow-hidden">
+            {/* Section heading */}
+            <div className="px-card-pad py-4 border-b border-divider">
+              <h2 className="text-section-heading text-text-primary">Today&apos;s Check-ins</h2>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className="table-header text-left">Time</th>
+                    <th className="table-header text-left">Member</th>
+                    <th className="table-header text-left">Plan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {checkIns?.checkIns?.length > 0 ? (
+                    checkIns.checkIns.map((ci: Record<string, unknown>) => (
+                      <tr key={ci.id as string} className="table-row">
+                        <td className="px-4 text-table-row text-text-secondary">
+                          {new Date(ci.checkedInAt as string).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className="px-4 text-table-row text-text-primary font-medium">
+                          {(ci.member as Record<string, Record<string, string>>)?.user?.name || '—'}
+                        </td>
+                        <td className="px-4 text-table-row text-text-secondary">
+                          {((ci.member as Record<string, Array<Record<string, Record<string, string>>>>)?.subscriptions?.[0]?.plan?.name) || 'No plan'}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={3} className="p-0">
+                        <EmptyState
+                          icon={CalendarCheck}
+                          title="No check-ins yet today"
+                          description="Members will appear here as they check in"
+                        />
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function StatCard({ icon: Icon, label, value, color }: {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+// ─── Stat Card — matches design system exactly ──────────────
+function StatCard({ icon: Icon, label, value, trend }: {
+  icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
   label: string;
   value: string | number;
-  color: string;
+  trend?: { direction: 'up' | 'down'; label: string };
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <div className="flex items-center gap-4">
-        <div className={`${color} text-white p-3 rounded-lg`}>
-          <Icon size={22} />
-        </div>
-        <div>
-          <p className="text-sm text-gray-500">{label}</p>
-          <p className="text-2xl font-bold">{value}</p>
-        </div>
+    <div className="stat-card">
+      <div className="flex items-center justify-between mb-3">
+        <span className="stat-card-label">{label}</span>
+        <Icon size={20} strokeWidth={1.5} className="text-text-muted" />
       </div>
+      <p className="stat-card-value">{value}</p>
+      {trend && (
+        <span className={`stat-card-trend ${trend.direction === 'up' ? 'up' : 'down'} mt-1`}>
+          {trend.direction === 'up' ? '↑' : '↓'} {trend.label}
+        </span>
+      )}
     </div>
   );
 }

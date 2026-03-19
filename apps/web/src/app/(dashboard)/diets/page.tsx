@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { TableSkeleton } from '@/components/ui/skeleton';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { Plus, Trash2, UtensilsCrossed, Copy, Users, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Plus, Trash2, UtensilsCrossed, Copy, Users, ChevronDown, ChevronUp, X, Loader2 } from 'lucide-react';
 
 const MEAL_TYPES = ['breakfast', 'pre-workout', 'lunch', 'post-workout', 'dinner', 'bed-time'] as const;
 
@@ -103,8 +103,8 @@ export default function DietsPage() {
   if (isLoading) {
     return (
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Diet Charts</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-page-title text-text-primary">Diet Charts</h1>
         </div>
         <TableSkeleton rows={4} cols={4} />
       </div>
@@ -113,49 +113,49 @@ export default function DietsPage() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold">Diet Charts</h1>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 stagger-1">
+        <h1 className="text-page-title text-text-primary">Diet Charts</h1>
         <button
           onClick={() => setDrawerOpen(true)}
-          className="flex items-center gap-2 bg-primary text-white px-4 h-9 rounded-btn text-sm font-medium hover:opacity-90 active:opacity-80 transition-all duration-150"
+          className="btn btn-primary"
         >
-          <Plus size={16} />
+          <Plus size={16} strokeWidth={1.5} />
           Create Chart
         </button>
       </div>
 
       {!charts?.length ? (
-        <div className="bg-surface rounded-card border border-border">
+        <div className="card stagger-2">
           <EmptyState
-            icon={<UtensilsCrossed size={28} />}
+            icon={UtensilsCrossed}
             title="No diet charts"
             description="Create diet plans with meal slots and assign them to your members."
             action={
               <button
                 onClick={() => setDrawerOpen(true)}
-                className="flex items-center gap-2 bg-primary text-white px-4 h-9 rounded-btn text-sm font-medium hover:opacity-90 transition-all duration-150"
+                className="btn btn-primary"
               >
-                <Plus size={16} />
+                <Plus size={16} strokeWidth={1.5} />
                 Create Chart
               </button>
             }
           />
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 stagger-2">
           {(charts as DietChartSummary[]).map((chart) => (
-            <div key={chart.id} className="bg-surface rounded-card border border-border overflow-hidden">
+            <div key={chart.id} className="card p-0 overflow-hidden">
               <div
-                className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-[#F5F5F5] transition-colors duration-150"
+                className="flex items-center justify-between px-card-pad py-4 cursor-pointer hover:bg-page transition-colors duration-normal"
                 onClick={() => setExpandedChart(expandedChart === chart.id ? null : chart.id)}
               >
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center text-green-600">
-                    <UtensilsCrossed size={20} />
+                  <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center text-success">
+                    <UtensilsCrossed size={20} strokeWidth={1.5} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-900">{chart.name}</h3>
-                    <p className="text-xs text-gray-500">
+                    <h3 className="text-body font-medium text-text-primary">{chart.name}</h3>
+                    <p className="text-caption text-text-secondary">
                       {chart.meals.length} meals
                       {chart.totalCalories && <> &middot; <span className="font-mono">{chart.totalCalories}</span> cal</>}
                       {' '}&middot; {chart._count.assignments} members
@@ -166,50 +166,50 @@ export default function DietsPage() {
                   {chart.isTemplate && <Badge variant="info">Template</Badge>}
                   <button
                     onClick={(e) => { e.stopPropagation(); setDuplicateTarget(chart); setDuplicateName(`${chart.name} (Copy)`); }}
-                    className="h-8 w-8 flex items-center justify-center rounded-btn text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-150"
+                    className="btn btn-ghost h-8 w-8 p-0 hover:!text-info hover:!bg-info-bg"
                     title="Duplicate"
                   >
-                    <Copy size={16} />
+                    <Copy size={16} strokeWidth={1.5} />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setAssignChartId(chart.id); setAssignDrawerOpen(true); }}
-                    className="h-8 px-3 flex items-center gap-1.5 text-xs font-medium rounded-btn border border-border text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                    className="btn btn-secondary h-8 px-3 text-badge"
                   >
-                    <Users size={14} />
+                    <Users size={14} strokeWidth={1.5} />
                     Assign
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setDeleteTarget(chart); }}
-                    className="h-8 w-8 flex items-center justify-center rounded-btn text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors duration-150"
+                    className="btn btn-ghost h-8 w-8 p-0 hover:!text-danger hover:!bg-danger-bg"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={16} strokeWidth={1.5} />
                   </button>
-                  {expandedChart === chart.id ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                  {expandedChart === chart.id ? <ChevronUp size={16} strokeWidth={1.5} className="text-text-muted" /> : <ChevronDown size={16} strokeWidth={1.5} className="text-text-muted" />}
                 </div>
               </div>
 
               {expandedChart === chart.id && (
-                <div className="border-t border-border px-6 py-4">
+                <div className="border-t border-divider px-card-pad py-4">
                   {chart.description && (
-                    <p className="text-sm text-gray-500 mb-4">{chart.description}</p>
+                    <p className="text-body text-text-secondary mb-4">{chart.description}</p>
                   )}
                   <div className="grid gap-3">
                     {MEAL_TYPES.map((type) => {
                       const meals = chart.meals.filter((m) => m.mealType === type).sort((a, b) => a.sortOrder - b.sortOrder);
                       if (!meals.length) return null;
                       return (
-                        <div key={type} className="bg-gray-50 rounded-btn p-4">
-                          <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">
+                        <div key={type} className="stat-card p-4">
+                          <h4 className="text-label font-medium text-text-secondary uppercase mb-2">
                             {MEAL_TYPE_LABELS[type] || type}
-                            {meals[0].timeSuggestion && <span className="font-mono ml-2 text-gray-400">{meals[0].timeSuggestion}</span>}
+                            {meals[0].timeSuggestion && <span className="font-mono ml-2 text-text-muted">{meals[0].timeSuggestion}</span>}
                           </h4>
                           {meals.map((meal) => (
                             <div key={meal.id} className="flex items-center justify-between py-1">
                               <div>
-                                <span className="text-sm text-gray-900">{meal.mealName}</span>
-                                {meal.description && <span className="text-xs text-gray-500 ml-2">— {meal.description}</span>}
+                                <span className="text-body text-text-primary">{meal.mealName}</span>
+                                {meal.description && <span className="text-caption text-text-secondary ml-2">— {meal.description}</span>}
                               </div>
-                              <div className="flex items-center gap-3 text-xs font-mono text-gray-500">
+                              <div className="flex items-center gap-3 text-caption font-mono text-text-muted">
                                 {meal.calories && <span>{meal.calories} cal</span>}
                                 {meal.proteinG && <span>P:{Number(meal.proteinG)}g</span>}
                                 {meal.carbsG && <span>C:{Number(meal.carbsG)}g</span>}
@@ -251,44 +251,29 @@ export default function DietsPage() {
       <ConfirmDialog
         open={!!deleteTarget}
         title="Delete Diet Chart"
-        message={`Delete "${deleteTarget?.name}"? This cannot be undone.`}
+        description={`Delete "${deleteTarget?.name}"? This cannot be undone.`}
         confirmLabel="Delete"
-        destructive
+        variant="danger"
         onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
         onCancel={() => setDeleteTarget(null)}
+        loading={deleteMutation.isPending}
       />
 
       {/* Duplicate Dialog */}
-      {duplicateTarget && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => { setDuplicateTarget(null); setDuplicateName(''); }} />
-          <div className="relative bg-surface rounded-card border border-border shadow-xl p-6 max-w-sm w-full mx-4">
-            <h3 className="text-base font-semibold mb-3">Duplicate Diet Chart</h3>
-            <input
-              type="text"
-              value={duplicateName}
-              onChange={(e) => setDuplicateName(e.target.value)}
-              placeholder="New chart name"
-              className="w-full h-10 px-3 border border-border rounded-btn text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none mb-4"
-            />
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => { setDuplicateTarget(null); setDuplicateName(''); }}
-                className="h-9 px-4 text-sm font-medium rounded-btn border border-border text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => duplicateName.trim() && duplicateMutation.mutate({ id: duplicateTarget.id, name: duplicateName.trim() })}
-                disabled={!duplicateName.trim() || duplicateMutation.isPending}
-                className="h-9 px-4 text-sm font-medium rounded-btn bg-primary text-white hover:opacity-90 disabled:opacity-50 transition-all duration-150"
-              >
-                {duplicateMutation.isPending ? 'Duplicating...' : 'Duplicate'}
-              </button>
-            </div>
-          </div>
+      <ConfirmDialog
+        open={!!duplicateTarget}
+        title="Duplicate Diet Chart"
+        description="Enter a name for the duplicated chart."
+        confirmLabel={duplicateMutation.isPending ? 'Duplicating...' : 'Duplicate'}
+        onConfirm={() => duplicateName.trim() && duplicateTarget && duplicateMutation.mutate({ id: duplicateTarget.id, name: duplicateName.trim() })}
+        onCancel={() => { setDuplicateTarget(null); setDuplicateName(''); }}
+        loading={duplicateMutation.isPending}
+      >
+        <div className="mb-4">
+          <label htmlFor="dup-chart-name" className="input-label">New Chart Name</label>
+          <input id="dup-chart-name" type="text" value={duplicateName} onChange={(e) => setDuplicateName(e.target.value)} placeholder="New chart name" className="input" />
         </div>
-      )}
+      </ConfirmDialog>
     </div>
   );
 }
@@ -370,23 +355,25 @@ function DietChartForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Chart Name *</label>
+          <label htmlFor="diet-chart-name" className="input-label">Chart Name <span className="text-danger">*</span></label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Bulking Diet — 3000 cal"
-            className="w-full h-10 px-3 border border-border rounded-btn text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-150"
+            id="diet-chart-name"
+            className="input"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <label htmlFor="diet-chart-desc" className="input-label">Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Optional"
             rows={2}
-            className="w-full px-3 py-2 border border-border rounded-btn text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none transition-shadow duration-150"
+            id="diet-chart-desc"
+            className="input h-auto py-3 resize-none"
           />
         </div>
       </div>
@@ -394,7 +381,7 @@ function DietChartForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: (
       {/* Meal slots */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900">Meals</h3>
+          <h3 className="text-body font-medium text-text-primary">Meals</h3>
         </div>
 
         {/* Meal type quick-add buttons */}
@@ -404,7 +391,7 @@ function DietChartForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: (
               key={type}
               type="button"
               onClick={() => addMeal(type)}
-              className="text-xs px-3 py-1.5 rounded-full border border-dashed border-gray-300 text-gray-500 hover:border-primary hover:text-primary transition-colors duration-150"
+              className="text-caption px-3 py-1.5 rounded-full border border-dashed border-border-default text-text-secondary hover:border-primary hover:text-primary transition-colors duration-normal"
             >
               + {MEAL_TYPE_LABELS[type]}
             </button>
@@ -412,7 +399,7 @@ function DietChartForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: (
         </div>
 
         {meals.map((meal, idx) => (
-          <div key={idx} className="border border-border rounded-card p-4 space-y-3">
+          <div key={idx} className="border border-divider rounded-card p-4 space-y-3">
             <div className="flex items-center justify-between">
               <Badge variant="default">{MEAL_TYPE_LABELS[meal.mealType] || meal.mealType}</Badge>
               <div className="flex items-center gap-2">
@@ -424,7 +411,7 @@ function DietChartForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: (
                   className="w-24 h-7 px-2 border border-border rounded text-xs font-mono text-center focus:ring-2 focus:ring-primary outline-none"
                 />
                 {meals.length > 1 && (
-                  <button type="button" onClick={() => removeMeal(idx)} className="text-gray-400 hover:text-red-500 transition-colors duration-150">
+                  <button type="button" onClick={() => removeMeal(idx)} className="text-text-muted hover:text-danger transition-colors duration-normal">
                     <X size={14} />
                   </button>
                 )}
@@ -436,7 +423,8 @@ function DietChartForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: (
               value={meal.mealName}
               onChange={(e) => updateMeal(idx, 'mealName', e.target.value)}
               placeholder="Food items (e.g. 4 Eggs + 2 Toast + Banana)"
-              className="w-full h-9 px-3 border border-border rounded-btn text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-150"
+              id={`meal-name-${idx}`}
+              className="input"
             />
 
             <input
@@ -449,7 +437,7 @@ function DietChartForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: (
 
             <div className="grid grid-cols-4 gap-2">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Calories</label>
+                <label className="block text-label text-text-muted mb-1">Calories</label>
                 <input
                   type="number"
                   value={meal.calories}
@@ -459,7 +447,7 @@ function DietChartForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: (
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Protein (g)</label>
+                <label className="block text-label text-text-muted mb-1">Protein (g)</label>
                 <input
                   type="number"
                   value={meal.proteinG}
@@ -470,7 +458,7 @@ function DietChartForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: (
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Carbs (g)</label>
+                <label className="block text-label text-text-muted mb-1">Carbs (g)</label>
                 <input
                   type="number"
                   value={meal.carbsG}
@@ -481,7 +469,7 @@ function DietChartForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: (
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Fat (g)</label>
+                <label className="block text-label text-text-muted mb-1">Fat (g)</label>
                 <input
                   type="number"
                   value={meal.fatG}
@@ -496,20 +484,10 @@ function DietChartForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: (
         ))}
       </div>
 
-      <div className="flex justify-end gap-3 pt-4 border-t border-border">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="h-9 px-4 text-sm font-medium rounded-btn border border-border text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={saving}
-          className="h-9 px-4 text-sm font-medium rounded-btn bg-primary text-white hover:opacity-90 disabled:opacity-50 transition-all duration-150"
-        >
-          {saving ? 'Creating...' : 'Create Chart'}
+      <div className="flex justify-end gap-3 pt-4 border-t border-divider">
+        <button type="button" onClick={onCancel} className="btn btn-secondary">Cancel</button>
+        <button type="submit" disabled={saving} className="btn btn-primary">
+          {saving ? <><Loader2 size={16} className="animate-spin" strokeWidth={1.5} /> Creating...</> : 'Create Chart'}
         </button>
       </div>
     </form>
@@ -554,7 +532,7 @@ function AssignDietForm({ chartId, onDone }: { chartId: string; onDone: () => vo
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search members..."
-        className="w-full h-10 px-3 border border-border rounded-btn text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-150"
+        className="input"
       />
 
       <div className="border border-border rounded-btn overflow-hidden max-h-80 overflow-y-auto">
@@ -564,7 +542,7 @@ function AssignDietForm({ chartId, onDone }: { chartId: string; onDone: () => vo
           return (
             <label
               key={memberId}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-[#F5F5F5] transition-colors duration-150 cursor-pointer border-b border-border last:border-b-0"
+              className="flex items-center gap-3 px-4 py-3 hover:bg-page transition-colors duration-normal cursor-pointer border-b border-divider last:border-b-0"
             >
               <input
                 type="checkbox"
@@ -573,8 +551,8 @@ function AssignDietForm({ chartId, onDone }: { chartId: string; onDone: () => vo
                 className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
               <div>
-                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                <p className="text-xs text-gray-500">{user?.phone}</p>
+                <p className="text-body font-medium text-text-primary">{user?.name}</p>
+                <p className="text-caption text-text-secondary">{user?.phone}</p>
               </div>
             </label>
           );
@@ -582,13 +560,13 @@ function AssignDietForm({ chartId, onDone }: { chartId: string; onDone: () => vo
       </div>
 
       {selectedIds.length > 0 && (
-        <p className="text-xs text-gray-500">{selectedIds.length} member(s) selected</p>
+        <p className="text-caption text-text-secondary">{selectedIds.length} member(s) selected</p>
       )}
 
       <button
         onClick={handleAssign}
         disabled={saving || !selectedIds.length}
-        className="w-full h-9 text-sm font-medium rounded-btn bg-primary text-white hover:opacity-90 disabled:opacity-50 transition-all duration-150"
+        className="btn btn-primary w-full"
       >
         {saving ? 'Assigning...' : `Assign to ${selectedIds.length} Member(s)`}
       </button>

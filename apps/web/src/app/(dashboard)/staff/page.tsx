@@ -8,7 +8,8 @@ import { Drawer } from '@/components/ui/drawer';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { TableSkeleton } from '@/components/ui/skeleton';
-import { Plus, UserCog, KeyRound } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Plus, UserCog, KeyRound, Loader2 } from 'lucide-react';
 
 interface StaffMember {
   id: string;
@@ -59,7 +60,7 @@ export default function StaffPage() {
   };
 
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
   const formatRelative = (d: string | null) => {
     if (!d) return 'Never';
@@ -75,8 +76,8 @@ export default function StaffPage() {
   if (isLoading) {
     return (
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Staff</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-page-title text-text-primary">Staff</h1>
         </div>
         <TableSkeleton rows={3} cols={6} />
       </div>
@@ -85,90 +86,92 @@ export default function StaffPage() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold">Staff</h1>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 stagger-1">
+        <h1 className="text-page-title text-text-primary">Staff</h1>
         <button
           onClick={() => setDrawerOpen(true)}
-          className="flex items-center gap-2 bg-primary text-white px-4 h-9 rounded-btn text-sm font-medium hover:opacity-90 active:opacity-80 transition-all duration-150"
+          className="btn btn-primary"
         >
-          <Plus size={16} />
+          <Plus size={16} strokeWidth={1.5} />
           Add Staff
         </button>
       </div>
 
       {!staff?.length ? (
-        <div className="bg-surface rounded-card border border-border">
+        <div className="card stagger-2">
           <EmptyState
-            icon={<UserCog size={28} />}
+            icon={UserCog}
             title="No staff yet"
             description="Add receptionists and coaches to help manage your gym."
             action={
               <button
                 onClick={() => setDrawerOpen(true)}
-                className="flex items-center gap-2 bg-primary text-white px-4 h-9 rounded-btn text-sm font-medium hover:opacity-90 transition-all duration-150"
+                className="btn btn-primary"
               >
-                <Plus size={16} />
+                <Plus size={16} strokeWidth={1.5} />
                 Add Staff
               </button>
             }
           />
         </div>
       ) : (
-        <div className="bg-surface rounded-card border border-border overflow-hidden">
+        <div className="card p-0 overflow-hidden stagger-2">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="sticky top-0 z-10 bg-surface">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Active</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="table-header text-left">Name</th>
+                  <th className="table-header text-left">Role</th>
+                  <th className="table-header text-left">Contact</th>
+                  <th className="table-header text-left">Joined</th>
+                  <th className="table-header text-left">Last Active</th>
+                  <th className="table-header text-left">Status</th>
+                  <th className="table-header text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody>
                 {staff.map((s: StaffMember) => (
-                  <tr key={s.id} className="hover:bg-[#F5F5F5] transition-colors duration-150">
-                    <td className="px-6 py-4">
+                  <tr key={s.id} className="table-row group">
+                    <td className="px-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold">
+                        <div className="avatar text-badge">
                           {s.name[0]?.toUpperCase()}
                         </div>
-                        <p className="text-sm font-medium text-gray-900">{s.name}</p>
+                        <span className="text-table-row font-medium text-text-primary">{s.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <Badge variant={s.role === 'coach' ? 'secondary' : 'info'}>
+                    <td className="px-4">
+                      <Badge variant={s.role === 'coach' ? 'coach' : 'receptionist'}>
                         {s.role === 'coach' ? 'Coach' : 'Receptionist'}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-900">{s.phone}</p>
-                      {s.email && <p className="text-xs text-gray-500">{s.email}</p>}
+                    <td className="px-4">
+                      <p className="text-table-row text-text-primary">{s.phone}</p>
+                      {s.email && <p className="text-caption text-text-secondary">{s.email}</p>}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{formatDate(s.createdAt)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600 font-mono">{formatRelative(s.lastLoginAt)}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 text-table-row text-text-secondary">{formatDate(s.createdAt)}</td>
+                    <td className="px-4 text-table-row font-mono text-text-secondary">{formatRelative(s.lastLoginAt)}</td>
+                    <td className="px-4">
                       <button
                         onClick={() => toggleMutation.mutate(s.id)}
                         disabled={toggleMutation.isPending}
-                        className="transition-all duration-150"
+                        className="transition-all duration-fast"
                       >
-                        <Badge variant={s.isActive ? 'success' : 'error'}>
+                        <Badge variant={s.isActive ? 'active' : 'expired'}>
                           {s.isActive ? 'Active' : 'Inactive'}
                         </Badge>
                       </button>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => setResetTarget(s)}
-                        className="h-8 w-8 inline-flex items-center justify-center rounded-btn text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors duration-150"
-                        title="Reset Password"
-                      >
-                        <KeyRound size={16} />
-                      </button>
+                    <td className="px-4 text-right">
+                      <div className="row-actions justify-end">
+                        <button
+                          onClick={() => setResetTarget(s)}
+                          className="btn btn-ghost h-8 w-8 p-0"
+                          title="Reset Password"
+                        >
+                          <KeyRound size={16} strokeWidth={1.5} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -183,41 +186,34 @@ export default function StaffPage() {
         <StaffForm onSaved={handleSaved} onCancel={() => setDrawerOpen(false)} />
       </Drawer>
 
-      {/* Reset Password Dialog */}
+      {/* Reset Password Modal */}
       {resetTarget && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => { setResetTarget(null); setNewPassword(''); }} />
-          <div className="relative bg-surface rounded-card border border-border shadow-xl p-6 max-w-sm w-full mx-4">
-            <h3 className="text-base font-semibold mb-1">Reset Password</h3>
-            <p className="text-sm text-gray-500 mb-4">Enter a new temporary password for {resetTarget.name}.</p>
+        <ConfirmDialog
+          open={!!resetTarget}
+          title="Reset Password"
+          description={`Enter a new temporary password for ${resetTarget.name}.`}
+          confirmLabel={resetPasswordMutation.isPending ? 'Resetting...' : 'Reset Password'}
+          onConfirm={() => {
+            if (newPassword.length >= 6) {
+              resetPasswordMutation.mutate({ id: resetTarget.id, password: newPassword });
+            }
+          }}
+          onCancel={() => { setResetTarget(null); setNewPassword(''); }}
+          loading={resetPasswordMutation.isPending}
+          variant="danger"
+        >
+          <div className="mb-4">
+            <label htmlFor="reset-password" className="input-label">New Password</label>
             <input
+              id="reset-password"
               type="text"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="New password (min 6 chars)"
-              className="w-full h-10 px-3 border border-border rounded-btn text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none mb-4"
+              placeholder="Min 6 characters"
+              className="input"
             />
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => { setResetTarget(null); setNewPassword(''); }}
-                className="h-9 px-4 text-sm font-medium rounded-btn border border-border text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  if (newPassword.length >= 6) {
-                    resetPasswordMutation.mutate({ id: resetTarget.id, password: newPassword });
-                  }
-                }}
-                disabled={newPassword.length < 6 || resetPasswordMutation.isPending}
-                className="h-9 px-4 text-sm font-medium rounded-btn bg-primary text-white hover:opacity-90 disabled:opacity-50 transition-all duration-150"
-              >
-                {resetPasswordMutation.isPending ? 'Resetting...' : 'Reset Password'}
-              </button>
-            </div>
           </div>
-        </div>
+        </ConfirmDialog>
       )}
     </div>
   );
@@ -265,75 +261,32 @@ function StaffForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: () =>
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="John Doe"
-          className="w-full h-10 px-3 border border-border rounded-btn text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-150"
-        />
+        <label htmlFor="add-staff-name" className="input-label">Full Name <span className="text-danger">*</span></label>
+        <input id="add-staff-name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" className="input" />
       </div>
-
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
-        <input
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="9876543210"
-          className="w-full h-10 px-3 border border-border rounded-btn text-sm font-mono focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-150"
-        />
+        <label htmlFor="add-staff-phone" className="input-label">Phone <span className="text-danger">*</span></label>
+        <input id="add-staff-phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="9876543210" className="input font-mono" />
       </div>
-
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="john@example.com"
-          className="w-full h-10 px-3 border border-border rounded-btn text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-150"
-        />
+        <label htmlFor="add-staff-email" className="input-label">Email</label>
+        <input id="add-staff-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="john@example.com" className="input" />
       </div>
-
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Role *</label>
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value as 'receptionist' | 'coach')}
-          className="w-full h-10 px-3 border border-border rounded-btn text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white transition-shadow duration-150"
-        >
+        <label htmlFor="add-staff-role" className="input-label">Role <span className="text-danger">*</span></label>
+        <select id="add-staff-role" value={role} onChange={(e) => setRole(e.target.value as 'receptionist' | 'coach')} className="input">
           <option value="receptionist">Receptionist</option>
           <option value="coach">Coach</option>
         </select>
       </div>
-
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Temporary Password *</label>
-        <input
-          type="text"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Min 6 characters"
-          className="w-full h-10 px-3 border border-border rounded-btn text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-150"
-        />
+        <label htmlFor="add-staff-password" className="input-label">Temporary Password <span className="text-danger">*</span></label>
+        <input id="add-staff-password" type="text" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min 6 characters" className="input" />
       </div>
-
-      <div className="flex justify-end gap-3 pt-4 border-t border-border">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="h-9 px-4 text-sm font-medium rounded-btn border border-border text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors duration-150"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={saving}
-          className="h-9 px-4 text-sm font-medium rounded-btn bg-primary text-white hover:opacity-90 active:opacity-80 disabled:opacity-50 transition-all duration-150"
-        >
-          {saving ? 'Adding...' : 'Add Staff'}
+      <div className="flex justify-end gap-3 pt-4 border-t border-divider">
+        <button type="button" onClick={onCancel} className="btn btn-secondary">Cancel</button>
+        <button type="submit" disabled={saving} className="btn btn-primary">
+          {saving ? <><Loader2 size={16} className="animate-spin" strokeWidth={1.5} /> Adding...</> : 'Add Staff'}
         </button>
       </div>
     </form>

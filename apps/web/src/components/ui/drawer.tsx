@@ -10,9 +10,11 @@ interface DrawerProps {
   title: string;
   children: ReactNode;
   footer?: ReactNode;
+  /** Override max-width class, e.g. "max-w-2xl" */
+  width?: string;
 }
 
-export function Drawer({ open, onClose, title, children, footer }: DrawerProps) {
+export function Drawer({ open, onClose, title, children, footer, width }: DrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   // Lock body scroll when open
@@ -55,7 +57,7 @@ export function Drawer({ open, onClose, title, children, footer }: DrawerProps) 
       {/* Panel — 480px desktop, 100vw mobile, slide from right 220ms */}
       <div
         ref={panelRef}
-        className="drawer-panel"
+        className={cn('drawer-panel', width)}
         tabIndex={-1}
       >
         {/* Header — 24px padding, title left, X right, border-bottom */}
