@@ -25,6 +25,18 @@ export const createSubscriptionSchema = z.object({
   upiRef: z.string().optional(),
 });
 
+export const createRazorpayOrderSchema = z.object({
+  memberId: z.string().uuid().optional(),
+});
+
+export const verifyRazorpayPaymentSchema = z.object({
+  razorpayOrderId: z.string().min(10),
+  razorpayPaymentId: z.string().min(10),
+  razorpaySignature: z.string().min(10),
+});
+
 export type CollectFeeInput = z.infer<typeof collectFeeSchema>;
 export type CreatePlanInput = z.infer<typeof createPlanSchema>;
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
+export type CreateRazorpayOrderInput = z.infer<typeof createRazorpayOrderSchema>;
+export type VerifyRazorpayPaymentInput = z.infer<typeof verifyRazorpayPaymentSchema>;

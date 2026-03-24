@@ -26,3 +26,25 @@ export interface CollectFeeRequest {
   upiRef?: string;
   notes?: string;
 }
+
+export interface CreateRazorpayOrderRequest {
+  memberId?: string;
+}
+
+export interface CreateRazorpayOrderResponse {
+  keyId: string;
+  orderId: string;
+  amount: number;
+  currency: string;
+  memberId: string;
+  memberName: string;
+  memberPhone: string;
+  gymName: string;
+  description: string;
+}
+
+export interface VerifyRazorpayPaymentRequest {
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+}

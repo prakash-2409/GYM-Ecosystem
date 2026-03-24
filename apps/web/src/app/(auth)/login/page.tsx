@@ -21,8 +21,10 @@ export default function LoginPage() {
     try {
       await login(phone, password, gymSlug || undefined);
       router.push('/dashboard');
-    } catch {
-      setError('Invalid phone number or password');
+    } catch (err) {
+      const apiError = (err as { response?: { data?: { error?: string } } })
+        .response?.data?.error;
+      setError(apiError || 'Invalid phone number or password');
     } finally {
       setLoading(false);
     }

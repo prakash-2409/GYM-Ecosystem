@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'app/router.dart';
 import 'app/theme.dart';
 import 'core/fcm_handler.dart';

@@ -67,13 +67,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150',
+                  'flex items-center gap-3 pl-3 pr-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ease-out relative',
                   isActive
-                    ? 'bg-white/10 text-white'
+                    ? 'bg-primary/15 text-primary border-r-2 border-primary'
                     : 'text-gray-400 hover:bg-white/5 hover:text-white'
                 )}
               >
-                <Icon size={18} />
+                <Icon size={18} className={isActive ? 'text-primary' : ''} />
                 {item.label}
               </Link>
             );

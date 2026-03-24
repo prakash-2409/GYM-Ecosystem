@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GymOS | Member App</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8B5CF6",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#7C3AED",
+                        "secondary": "#06B6D4",
+                        "tertiary": "#22C55E",
+                        "tertiary-container": "#16A34A",
+                        "surface": "#0F0F0F",
+                        "background": "#0F0F0F",
+                        "surface-container-low": "#111111",
+                        "surface-container": "#1A1A1A",
+                        "surface-container-high": "#222222",
+                        "surface-container-highest": "#2A2A2A",
+                        "on-surface": "#F5F5F0",
+                        "on-surface-variant": "#888888",
+                        "outline-variant": "rgba(255,255,255,0.08)",
+                        "text-muted": "#555555",
+                        "error": "#EF4444",
+                        "warning": "#F59E0B",
+                        "success": "#22C55E",
+                    },
+                    fontFamily: {
+                        "headline": ["DM Sans", "sans-serif"],
+                        "body": ["DM Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "16px", "lg": "20px", "xl": "24px", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'DM Sans', sans-serif; background-color: #0F0F0F; color: #F5F5F0; overflow-x: hidden; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; display: inline-block; vertical-align: middle; }
+        .screen { display: none; min-height: 100vh; padding-bottom: 80px; }
+        .screen.active { display: block; animation: fadeIn 0.25s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .glass-card { background: rgba(26, 26, 26, 0.8); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.07); }
+        .text-glow { text-shadow: 0 0 15px rgba(139, 92, 246, 0.4); }
+        .scan-corner { position: absolute; width: 40px; height: 40px; border-color: #8B5CF6; border-width: 4px; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .activity-cell { aspect-ratio: 1/1; border-radius: 4px; }
+        .btn-press { transition: transform 0.1s ease; }
+        .btn-press:active { transform: scale(0.97); opacity: 0.9; }
+    </style>
+</head>
+<body class="antialiased">
+<!-- Global Navigation Helper -->
+<script>
+        let historyStack = ['home'];
+        function showScreen(screenId, pushToHistory = true) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(screenId);
+            if(target) target.classList.add('active');
+
+            if(pushToHistory && historyStack[historyStack.length - 1] !== screenId) {
+                historyStack.push(screenId);
+            }
+
+            // Update bottom nav active state
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const icon = btn.querySelector('.material-symbols-outlined');
+                const label = btn.querySelector('span:last-child');
+                if(btn.dataset.screen === screenId) {
+                    btn.classList.add('text-primary');
+                    btn.classList.remove('text-[#555555]');
+                    if(icon) icon.style.fontVariationSettings = "'FILL' 1";
+                } else {
+                    btn.classList.remove('text-primary');
+                    btn.classList.add('text-[#555555]');
+                    if(icon) icon.style.fontVariationSettings = "'FILL' 0";
+                }
+            });
+
+            window.scrollTo(0,0);
+        }
+
+        function goBack() {
+            if(historyStack.length > 1) {
+                historyStack.pop();
+                showScreen(historyStack[historyStack.length - 1], false);
+            }
+        }
+    </script>
+<!-- HOME SCREEN -->
+<section class="screen active" id="home">
+<header class="fixed top-0 w-full z-50 bg-[#0F0F0F]/90 backdrop-blur-xl flex justify-between items-center px-4 h-16 border-b border-white/[0.07]">
+<div class="text-lg font-semibold tracking-tight text-primary">GymOS</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-on-surface transition-colors btn-press" onclick="showScreen('notifications')">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-white/[0.07] overflow-hidden cursor-pointer btn-press" onclick="showScreen('profile')">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEby5p5uaFKVSGcXoG4WUGudNH2a22v6aFFDQcs9c4lb92VeeuTZiS5ew6hSuW6xMUUOuYJNz0VuOVGfiJpvyHq-oIl9DHYTCY0CGxUhyvSmKabSNgVxEDjVyH5bcb3kYqLc2I0Qrbs4hr9fnDExuXI-hAQJWi_pgT09oU8geTQuSt2kA4eab7FUV74SIby0Xpylpo-hb660KsUNfNsFs1psyVja7gRZAfbCMjiMogWaO-b25JKfb3H0plE2mueMQfNACHqm-0FkkM"/>
+</div>
+</div>
+</header>
+<main class="pt-20 px-4 space-y-6">
+<section class="mt-2">
+<p class="text-on-surface-variant text-xs uppercase tracking-widest mb-1">Good Morning, Victor</p>
+<h1 class="text-2xl font-semibold tracking-tight text-on-surface">Ready for the grind?</h1>
+</section>
+<div class="relative overflow-hidden rounded-2xl bg-warning/10 p-4 border border-warning/20">
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center text-warning">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">error</span>
+</div>
+<div>
+<p class="text-warning font-semibold text-sm leading-tight">Renew in 3 days</p>
+<p class="text-on-surface-variant text-xs">Your membership expires soon</p>
+</div>
+</div>
+<button class="bg-warning text-surface px-4 py-2 rounded-xl text-sm font-medium btn-press" onclick="showScreen('membership')">Renew</button>
+</div>
+</div>
+<section class="space-y-3">
+<div class="flex items-center justify-between">
+<h2 class="text-lg font-semibold tracking-tight">Today's Workout</h2>
+<span class="text-tertiary text-xs font-medium bg-tertiary/10 px-3 py-1 rounded-full">Day 42 of 90</span>
+</div>
+<div class="cursor-pointer group relative bg-surface-container rounded-2xl p-5 min-h-[200px] flex flex-col justify-end overflow-hidden border border-white/[0.07] btn-press" onclick="showScreen('workout_detail')">
+<img class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6PjQca1BMIVEBG3E35fFJI8WVUoISrIJv2t3eoyFt4cHQ00WHUdiuL98IlKrDWDVrbl2Jf8L1RcNEfXzeXQyJReraawUjtC1yib66YiZ8OvKErVntCDFP_FM_Nq7Iu6atxhCjDWu4tal4JtbXsFM69irCgAJixWQftMo2Eo4-uBqSYcqETXXdddLtfbVVJiAnwiLGWwWZWv_lhNW2r4xfo35cbWIt_y1tD3NkSQAnW7FmLokCSAMrbZ1tmHcA0w7ci4kkEVqM7lYD"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container via-surface-container/70 to-transparent"></div>
+<div class="relative z-10">
+<span class="text-primary text-[10px] uppercase tracking-[0.15em] font-medium">Hypertrophy Focus</span>
+<h3 class="text-xl font-semibold mt-1">Leg Day - Power II</h3>
+<div class="flex gap-4 mt-3 text-on-surface-variant text-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">timer</span> 75 min</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">local_fire_department</span> 640 kcal</span>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-surface-container rounded-2xl p-6 space-y-6 border border-white/[0.07]">
+<div class="flex flex-col items-center gap-2">
+<h3 class="text-xs font-medium text-on-surface-variant uppercase tracking-widest">Last 7 Days</h3>
+<div class="flex gap-3">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<div class="w-3 h-3 rounded-full border border-text-muted"></div>
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<div class="w-3 h-3 rounded-full border-2 border-primary animate-pulse"></div>
+</div>
+</div>
+<button class="w-full h-[52px] bg-primary text-on-primary rounded-xl text-base font-medium btn-press flex items-center justify-center gap-2" onclick="showScreen('scanner')">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">qr_code_scanner</span>
+                    Check In
+                </button>
+</section>
+</main>
+</section>
+<!-- WORKOUT DETAIL SCREEN -->
+<section class="screen" id="workout_detail">
+<header class="fixed top-0 w-full z-50 bg-[#0F0F0F]/90 backdrop-blur-xl flex justify-between items-center px-4 h-16 border-b border-white/[0.07]">
+<button class="btn-press text-primary" onclick="goBack()">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<h1 class="font-medium tracking-tight text-on-surface-variant text-sm">Workout Details</h1>
+<button class="text-on-surface-variant btn-press" onclick="showScreen('notifications')"><span class="material-symbols-outlined">notifications</span></button>
+</header>
+<div class="relative h-[400px] w-full flex items-end overflow-hidden">
+<img class="absolute inset-0 w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8gTHrbuTTeDScvCxulR-R6wrxVe3cE0NZY96DOrQoFkUsAqp6G_NPxhqh42Lom9DVXPq8Z9k6mUfYkLyXpQmBPDlCrJG-84dSpaj4mWSiBm5S2X9S9PmXBYt8KquMbwTVKd9v-Cr000xMCGzcGKV90-2ylG83sHcbePbVCsz_qertkCctMwZtWoa6KGmPlfwMnr-XY6eATY0QFBcMktzBpVZs1VQGGJik0hm2w5EEp-RIAc-KxtnAYDgjB1dp6Wmz5vw6KZQu_ba-"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/70 to-transparent"></div>
+<div class="relative z-10 px-4 pb-8 w-full">
+<div class="inline-flex items-center px-3 py-1 rounded-full bg-tertiary/10 border border-tertiary/20 mb-3">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse mr-2"></span>
+<span class="text-tertiary text-[10px] font-medium uppercase tracking-widest">Advanced Intensity</span>
+</div>
+<h2 class="text-3xl font-semibold tracking-tight text-on-surface mb-3">Leg Day - Power II</h2>
+<div class="grid grid-cols-3 gap-2">
+<div class="glass-card rounded-xl p-3"><span class="block text-on-surface-variant text-[10px] mb-1">Duration</span><span class="text-lg font-semibold">75 min</span></div>
+<div class="glass-card rounded-xl p-3"><span class="block text-on-surface-variant text-[10px] mb-1">Calories</span><span class="text-lg font-semibold text-glow">640</span></div>
+<div class="glass-card rounded-xl p-3"><span class="block text-on-surface-variant text-[10px] mb-1">Volume</span><span class="text-lg font-semibold">14.2t</span></div>
+</div>
+</div>
+</div>
+<main class="px-4 -mt-4 relative z-20 space-y-3">
+<h3 class="text-lg font-semibold tracking-tight mb-3">Exercises <span class="text-on-surface-variant font-normal text-sm ml-2">(5 total)</span></h3>
+<div class="bg-surface-container rounded-2xl p-5 relative overflow-hidden border border-white/[0.07]">
+<div class="flex justify-between items-start">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="bg-primary/20 text-primary w-6 h-6 rounded-lg flex items-center justify-center text-xs font-semibold">01</span>
+<h4 class="text-base font-semibold">Barbell Squat</h4>
+</div>
+<div class="flex gap-4">
+<div class="flex flex-col"><span class="text-[10px] text-on-surface-variant uppercase">Sets</span><span class="text-base font-semibold">4 x 8-10</span></div>
+<div class="flex flex-col"><span class="text-[10px] text-on-surface-variant uppercase">Load</span><span class="text-base font-semibold text-primary">120kg</span></div>
+</div>
+</div>
+<div class="relative w-14 h-14">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-high" cx="28" cy="28" fill="transparent" r="24" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-primary" cx="28" cy="28" fill="transparent" r="24" stroke="currentColor" stroke-dasharray="150" stroke-dashoffset="37" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center text-[10px] font-semibold">75%</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container rounded-2xl p-5 border border-white/[0.07] opacity-70">
+<div class="flex justify-between items-center mb-2">
+<div class="flex items-center gap-3">
+<span class="bg-surface-container-high text-on-surface-variant w-6 h-6 rounded-lg flex items-center justify-center text-xs font-semibold">02</span>
+<h4 class="text-base font-semibold">Leg Press</h4>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</div>
+<span class="text-sm text-on-surface-variant">3 Sets / 12 Reps • 240 kg</span>
+</div>
+<button class="w-full h-[52px] bg-primary text-on-primary font-medium rounded-xl btn-press mt-6">Resume Workout</button>
+</main>
+</section>
+<!-- LEADERBOARD SCREEN -->
+<section class="screen" id="leaderboard">
+<header class="fixed top-0 w-full z-50 bg-[#0F0F0F]/90 backdrop-blur-xl flex justify-between items-center px-4 h-16 border-b border-white/[0.07]">
+<h1 class="text-lg font-semibold tracking-tight text-primary">Leaderboard</h1>
+<button class="text-on-surface-variant btn-press" onclick="showScreen('notifications')"><span class="material-symbols-outlined">notifications</span></button>
+</header>
+<main class="pt-20 px-4 max-w-lg mx-auto">
+<section class="mb-6 text-center">
+<p class="text-on-surface-variant text-xs tracking-widest uppercase font-medium">Weekly Rankings</p>
+</section>
+<div class="flex bg-surface-container p-1 rounded-xl mb-8 border border-white/[0.07]">
+<button class="flex-1 py-3 text-sm font-medium rounded-lg bg-primary text-on-primary">Consistency</button>
+<button class="flex-1 py-3 text-sm font-medium text-on-surface-variant">Volume</button>
+</div>
+<section class="relative grid grid-cols-3 gap-3 items-end mb-12 h-56">
+<div class="flex flex-col items-center">
+<div class="relative mb-3">
+<div class="w-12 h-12 rounded-full p-0.5 bg-surface-container-high border border-white/[0.07]"><img class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjzJmQDrr4n8PTvCFfBOC_8UXc2_8vfq5ckx9eF0gQdqcERavvW5YtgGijX69fzZqa3DUciAt4-2v5dhKYOOx-h9QPq9464K9xM3jmr4rylnmQ8uHpbZPhzFBisX1v_vWJiE5oEiz5GzxNe1SGma5kccZyhPQN9K5A8paV9VgTlkbf5APEykqoM5wTqFdPKr6w4U_-T9KAv9P1qPBqPp5wjNrMEaTGwTzJmUJMfNxoZCuaI-kOZNXwMSeMVpR7NuKsUnsYwX8wzBJo"/></div>
+<div class="absolute -bottom-1 -right-1 w-5 h-5 bg-surface-container-high rounded-full flex items-center justify-center text-[8px] font-semibold border border-white/[0.07]">2</div>
+</div>
+<div class="w-full bg-surface-container h-24 rounded-t-xl flex flex-col items-center justify-end pb-3 border border-white/[0.07]"><span class="text-[10px] font-medium">Marcus V.</span></div>
+</div>
+<div class="flex flex-col items-center">
+<div class="relative mb-4">
+<div class="w-16 h-16 rounded-full p-1 bg-gradient-to-tr from-primary to-secondary"><img class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPSsAh9VgNMChaf6nneftCBrV4l8v1XRRmT_rQxbnXKVhr-pCfHyuWetq71K7fJhctZVn5ly_8TXGod3T85bqKxHz7FZZoHYYOgoRSMyjyzIOcREKuiU8dNHpWr6Eni_T44orPm9RH_qaYIl4xgLclr76_ar0MPRY8QQu2aQBll3a5xm6_MyN3RCC_711NE7m2EL6kDlCwFtyRLC8o8QK1TVGPbAFBFgJcwigdLfqSDopVm6lkvUsX2ljv2RLh_rcGspJie3b4cOuv"/></div>
+<div class="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-xs font-semibold text-on-primary">1</div>
+</div>
+<div class="w-full bg-surface-container-high h-32 rounded-t-2xl flex flex-col items-center justify-end pb-4 border border-primary/30"><span class="text-sm font-semibold text-primary">Elena R.</span></div>
+</div>
+<div class="flex flex-col items-center">
+<div class="relative mb-3">
+<div class="w-12 h-12 rounded-full p-0.5 bg-surface-container-high border border-white/[0.07]"><img class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAG8zLq5RcOt_nlH4hSZ4jLLfWNy3jBk82cucJ9hDXjibW9sUAGDH_LgFf_EvNfEAR4T0JxDg1o1RoQ7rz94mCV-QzkZm4CDnWFMYOBQFzxB9hL2YwCWbp5bUsE0rYQhuq8ZKBEHsofnc-D6MMOJW_QowE51XhGUo36QqnTi48aJ3vvrVmvE8rL9ygzyYw6NriyEPQbtc53mx7bpKKbeue4Vh9MLLsHsPDMFUJm7l-2wul19zN752o5xn2AtKsowjPAkaOZhC9dbvjN"/></div>
+<div class="absolute -bottom-1 -right-1 w-5 h-5 bg-surface-container-high rounded-full flex items-center justify-center text-[8px] font-semibold border border-white/[0.07]">3</div>
+</div>
+<div class="w-full bg-surface-container h-16 rounded-t-xl flex flex-col items-center justify-end pb-3 border border-white/[0.07]"><span class="text-[10px] font-medium">Kaito S.</span></div>
+</div>
+</section>
+<section class="space-y-3 mb-12">
+<div class="flex items-center justify-between p-4 bg-surface-container rounded-2xl border border-primary/30">
+<div class="flex items-center gap-3">
+<span class="text-sm font-semibold text-primary">5</span>
+<div class="w-10 h-10 rounded-full bg-primary/20 ring-2 ring-primary overflow-hidden">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3d1HureTg58zLf_FG3cmQ3VTOxIaPAA7fn9AHrAG7TfF_qTFQKt-4lJpZcpu8C0tF3B6WofzgZB3QLAcmC6dJ8d9WgyVBktOjZeyAITcBbJy8wWWeA1gZiqZbMQzxrfzKG7Vkwmpp6yVVx0DXE4pes8z0NEPjKlRUGsqp4s1K5M-5XIBa7FKD0OJt9s6D5YP25YEcX4iCLvKglffuyxk0pUSEwMRJ4veGazWiYaDDShbhCg7kB0sGKHp2bkwIxvKOKM2hevAH3FHH"/>
+</div>
+<div><p class="text-sm font-medium">Alexander (You)</p><p class="text-[10px] text-primary tracking-wide font-medium">14 Day Streak</p></div>
+</div>
+<div class="text-right"><p class="text-sm font-semibold">11,200 kg</p><p class="text-[10px] text-tertiary font-medium">87.5%</p></div>
+</div>
+</section>
+</main>
+</section>
+<!-- PROFILE SCREEN -->
+<section class="screen" id="profile">
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-4 h-16 bg-[#0F0F0F]/90 backdrop-blur-xl border-b border-white/[0.07]">
+<h1 class="font-semibold tracking-tight text-primary">Profile</h1>
+<button class="material-symbols-outlined text-on-surface-variant btn-press">settings</button>
+</header>
+<main class="mt-20 px-4 space-y-6">
+<section class="flex flex-col items-center text-center">
+<div class="relative mb-5">
+<div class="w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-primary to-secondary">
+<div class="w-full h-full rounded-full overflow-hidden border-4 border-background">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIRo6xsGJ0AHt4yiqxuWA1s9UUjGkw8ypE293rNUjRbJ6IobWNsTJuLPUxSw9iBB3ZYHPUZwl23XWuaXzV4JNksi0LKYWUgin89cQR5dAUIKimKeRitdy19u3M5agYqB637dG_DwOq7VE0-gM3CDVcpgUDU6kJJnW54u-FZdcS6vTRB8sdRQD_eBFroeSoAGFQMvgB1K47q5VX1SiReEZjON96IaCq9o-jR4pTU5T84zrfywN_AiIYKtjeHEvcoBh9imkircB05JMy"/>
+</div>
+</div>
+<div class="cursor-pointer absolute -bottom-2 left-1/2 -translate-x-1/2 bg-tertiary text-surface font-medium text-[10px] px-3 py-1 rounded-full btn-press" onclick="showScreen('membership')">Elite Member</div>
+</div>
+<h1 class="text-2xl font-semibold tracking-tight">Victor Obsidian</h1>
+</section>
+<section class="grid grid-cols-1 gap-3">
+<div class="glass-card p-5 rounded-2xl relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary rounded-r"></div>
+<div class="flex justify-between items-center mb-3">
+<div class="p-2.5 rounded-xl bg-primary/10 text-primary"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_fire_department</span></div>
+<span class="text-[10px] font-medium text-on-surface-variant uppercase">Calories</span>
+</div>
+<div class="flex items-baseline gap-1 mb-2"><span class="text-2xl font-semibold">1,240</span><span class="text-xs font-medium text-on-surface-variant">kcal</span></div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden"><div class="bg-primary h-full w-[78%] rounded-full"></div></div>
+</div>
+<div class="glass-card p-5 rounded-2xl relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-tertiary rounded-r"></div>
+<div class="flex justify-between items-center mb-3">
+<div class="p-2.5 rounded-xl bg-tertiary/10 text-tertiary"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">footprint</span></div>
+<span class="text-[10px] font-medium text-on-surface-variant uppercase">Daily Steps</span>
+</div>
+<div class="flex items-baseline gap-1 mb-2"><span class="text-2xl font-semibold">8,452</span><span class="text-xs font-medium text-on-surface-variant">steps</span></div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden"><div class="bg-tertiary h-full w-[84%] rounded-full"></div></div>
+</div>
+</section>
+<section class="bg-surface-container p-5 rounded-2xl border border-white/[0.07]">
+<h2 class="text-base font-semibold mb-4">Activity Heatmap</h2>
+<div class="grid grid-cols-7 gap-2">
+<div class="text-[10px] font-medium text-center text-text-muted">M</div>
+<div class="text-[10px] font-medium text-center text-text-muted">T</div>
+<div class="text-[10px] font-medium text-center text-text-muted">W</div>
+<div class="text-[10px] font-medium text-center text-text-muted">T</div>
+<div class="text-[10px] font-medium text-center text-text-muted">F</div>
+<div class="text-[10px] font-medium text-center text-text-muted">S</div>
+<div class="text-[10px] font-medium text-center text-text-muted">S</div>
+<div class="activity-cell bg-primary/40"></div><div class="activity-cell bg-primary"></div><div class="activity-cell bg-surface-container-high"></div><div class="activity-cell bg-primary/60"></div><div class="activity-cell bg-primary"></div><div class="activity-cell bg-surface-container-high"></div><div class="activity-cell bg-surface-container-high"></div>
+<div class="activity-cell bg-primary/20"></div><div class="activity-cell bg-primary"></div><div class="activity-cell bg-primary/80"></div><div class="activity-cell bg-surface-container-high"></div><div class="activity-cell bg-primary"></div><div class="activity-cell bg-primary/40"></div><div class="activity-cell bg-surface-container-high"></div>
+</div>
+</section>
+</main>
+</section>
+<!-- MEMBER PROFILE (QR/MEMBERSHIP) SCREEN -->
+<section class="screen" id="membership">
+<header class="fixed top-0 w-full z-50 bg-[#0F0F0F]/90 backdrop-blur-xl flex justify-between items-center px-4 h-16 border-b border-white/[0.07]">
+<button class="btn-press text-primary" onclick="goBack()"><span class="material-symbols-outlined">arrow_back</span></button>
+<h1 class="font-medium tracking-tight text-on-surface">Access Pass</h1>
+<div class="w-10"></div>
+</header>
+<main class="pt-20 px-4 space-y-6 max-w-md mx-auto">
+<div class="bg-surface-container p-5 rounded-2xl border border-white/[0.07] relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10"><span class="material-symbols-outlined text-5xl">verified_user</span></div>
+<p class="text-on-surface-variant text-xs font-medium uppercase tracking-wider mb-1">Current Membership</p>
+<h3 class="text-lg font-semibold mb-5">Elite Performance Tier</h3>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-xs"><span class="text-on-surface-variant">Plan expires in 12 days</span><span class="text-on-surface-variant">88% Used</span></div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden"><div class="h-full bg-primary" style="width: 88%"></div></div>
+</div>
+</div>
+<div class="bg-surface-container p-6 rounded-2xl border border-white/[0.07] flex flex-col items-center gap-5">
+<div class="text-center"><h4 class="text-sm font-semibold mb-1">Gym Access Pass</h4><p class="text-on-surface-variant text-xs">Scan this code at the terminal</p></div>
+<div class="p-4 bg-white rounded-xl">
+<div class="w-44 h-44 bg-white flex items-center justify-center relative">
+<div class="grid grid-cols-4 gap-1 w-full h-full p-2">
+<div class="bg-black rounded-sm"></div><div class="bg-black rounded-sm"></div><div class="bg-transparent"></div><div class="bg-black rounded-sm"></div>
+<div class="bg-black rounded-sm"></div><div class="bg-transparent"></div><div class="bg-black rounded-sm"></div><div class="bg-black rounded-sm"></div>
+<div class="bg-transparent"></div><div class="bg-black rounded-sm"></div><div class="bg-black rounded-sm"></div><div class="bg-transparent"></div>
+<div class="bg-black rounded-sm"></div><div class="bg-black rounded-sm"></div><div class="bg-transparent"></div><div class="bg-black rounded-sm"></div>
+</div>
+<div class="absolute inset-0 flex items-center justify-center"><span class="material-symbols-outlined text-4xl text-black">qr_code_2</span></div>
+</div>
+</div>
+<div class="flex items-center gap-2 text-primary text-xs font-medium">
+<span class="material-symbols-outlined text-sm">refresh</span><span>Refreshes in 45s</span>
+</div>
+</div>
+</main>
+</section>
+<!-- NOTIFICATIONS SCREEN -->
+<section class="screen" id="notifications">
+<header class="fixed top-0 w-full z-50 bg-[#0F0F0F]/90 backdrop-blur-xl flex items-center justify-between px-4 h-16 border-b border-white/[0.07]">
+<div class="flex items-center gap-3">
+<button class="material-symbols-outlined text-primary btn-press" onclick="goBack()">arrow_back</button>
+<h1 class="font-semibold tracking-tight text-on-surface text-lg">Notifications</h1>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant btn-press">settings</button>
+</header>
+<main class="pt-20 px-4 space-y-6 max-w-2xl mx-auto">
+<section>
+<h2 class="text-xs font-medium uppercase tracking-widest text-primary mb-4">Today</h2>
+<div class="space-y-3">
+<div class="glass-card flex items-start p-4 rounded-2xl btn-press border-l-4 border-primary">
+<div class="bg-primary/10 p-2.5 rounded-full mr-3 text-primary"><span class="material-symbols-outlined">fitness_center</span></div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-1"><h3 class="font-medium text-on-surface text-sm">Workout Updated</h3><span class="text-[10px] text-on-surface-variant">10:45 AM</span></div>
+<p class="text-sm text-on-surface-variant">Coach Marcus updated "Leg Day". New PR goals added.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+</section>
+<!-- QR CHECK-IN SCANNER SCREEN -->
+<section class="screen bg-surface" id="scanner">
+<header class="fixed top-0 w-full z-50 bg-[#0F0F0F]/90 backdrop-blur-xl flex items-center justify-between px-4 h-16 border-b border-white/[0.07]">
+<button class="w-10 h-10 flex items-center justify-center text-primary btn-press" onclick="goBack()"><span class="material-symbols-outlined">arrow_back</span></button>
+<h1 class="font-medium text-on-surface">Check In</h1>
+<div class="text-primary font-semibold text-sm">GymOS</div>
+</header>
+<main class="relative h-screen flex flex-col items-center justify-center px-4">
+<div class="mb-10 text-center"><h2 class="text-on-surface font-medium text-base mb-1">Scan gym QR to check in</h2><p class="text-on-surface-variant text-sm">Position the code within the frame</p></div>
+<div class="relative w-full max-w-[280px] aspect-square">
+<div class="absolute inset-0 bg-surface-container rounded-2xl overflow-hidden flex items-center justify-center border border-white/[0.07]">
+<img class="w-full h-full object-cover grayscale opacity-30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHZMOBjD0AGNvNL4pwz6gkMSfYiDJavmA418qIgJRN4aDPlJ6RiUaYATmeZoB5AXddylbGmA5gKBvacITrF2evYCqxFoFLNDtER3JFa4Gxo9zYA7iGrhthivdls3sk7eXWS14kDAL87bpR8ADWcdmO9QVmtSyGDNHODPZTs8kyVo_Emxe4mthqZyR-kPkSVArwct4gIeI-Bk73IiOJparj8qEE8WRzgw4VT2c5K75jxKOZytbBEeFSvQAHA9DqNir5S24uOV82btp7"/>
+</div>
+<div class="scan-corner top-0 left-0 border-t-4 border-l-4 rounded-tl-xl"></div>
+<div class="scan-corner top-0 right-0 border-t-4 border-r-4 rounded-tr-xl"></div>
+<div class="scan-corner bottom-0 left-0 border-b-4 border-l-4 rounded-bl-xl"></div>
+<div class="scan-corner bottom-0 right-0 border-b-4 border-r-4 rounded-br-xl"></div>
+<div class="absolute w-full h-0.5 bg-primary/50 top-1/2 -translate-y-1/2"></div>
+</div>
+<button class="mt-12 bg-surface-container px-6 py-3 rounded-xl flex items-center gap-2 btn-press border border-white/[0.07]">
+<span class="material-symbols-outlined text-primary">flashlight_on</span>
+<span class="font-medium text-sm">Toggle Flashlight</span>
+</button>
+</main>
+</section>
+<!-- BOTTOM NAV BAR -->
+<nav class="fixed bottom-0 w-full z-50 bg-[#111111] flex justify-around items-center px-4 h-16 border-t border-white/[0.07]">
+<button class="nav-btn flex flex-col items-center justify-center gap-1 w-16 h-full transition-all duration-200 btn-press" data-screen="home" onclick="showScreen('home')">
+<span class="material-symbols-outlined text-xl">home</span>
+<span class="text-[11px] font-medium">Home</span>
+</button>
+<button class="nav-btn flex flex-col items-center justify-center gap-1 w-16 h-full transition-all duration-200 btn-press" data-screen="notifications" onclick="showScreen('notifications')">
+<span class="material-symbols-outlined text-xl">notifications</span>
+<span class="text-[11px] font-medium">Alerts</span>
+</button>
+<button class="nav-btn flex flex-col items-center justify-center gap-1 w-16 h-full transition-all duration-200 btn-press" data-screen="leaderboard" onclick="showScreen('leaderboard')">
+<span class="material-symbols-outlined text-xl">emoji_events</span>
+<span class="text-[11px] font-medium">Rank</span>
+</button>
+<button class="nav-btn flex flex-col items-center justify-center gap-1 w-16 h-full transition-all duration-200 btn-press" data-screen="profile" onclick="showScreen('profile')">
+<span class="material-symbols-outlined text-xl">person</span>
+<span class="text-[11px] font-medium">Profile</span>
+</button>
+</nav>
+<script>
+        // Set initial state
+        showScreen('home');
+    </script>
+</body></html>

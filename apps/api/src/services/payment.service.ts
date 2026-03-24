@@ -18,6 +18,10 @@ export async function collectPayment(gymId: string, data: {
   amount: number;
   paymentMethod: string;
   upiRef?: string;
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
+  paymentStatus?: string;
+  paidAt?: Date;
   notes?: string;
 }) {
   const member = await prisma.member.findFirst({
@@ -43,10 +47,13 @@ export async function collectPayment(gymId: string, data: {
       gstAmount,
       totalAmount: data.amount,
       paymentMethod: data.paymentMethod,
-      paymentStatus: 'completed',
+      paymentStatus: data.paymentStatus ?? 'completed',
+      razorpayPaymentId: data.razorpayPaymentId,
+      razorpayOrderId: data.razorpayOrderId,
       upiRef: data.upiRef,
       invoiceNumber,
       notes: data.notes,
+      paidAt: data.paidAt,
     },
   });
 
@@ -65,6 +72,36 @@ export async function collectPayment(gymId: string, data: {
   // TODO: Upload PDF to R2 and update payment.invoiceUrl
 
   return { payment, invoiceNumber, pdfBuffer };
+}
+
+export async function createRazorpayPayment(gymId: string, data: {
+  memberId: string;
+  amount: number;
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  notes?: string;
+}) {
+  const existing = await prisma.payment.findFirst({
+    where: {
+      gymId,
+      razorpayPaymentId: data.razorpayPaymentId,
+    },
+  });
+  if (existing) {
+    return { payment: existing, invoiceNumber: existing.invoiceNumber, alreadyExists: true };
+  }
+
+  const result = await collectPayment(gymId, {
+    memberId: data.memberId,
+    amount: data.amount,
+    paymentMethod: 'razorpay',
+    paymentStatus: 'completed',
+    razorpayPaymentId: data.razorpayPaymentId,
+    razorpayOrderId: data.razorpayOrderId,
+    notes: data.notes,
+  });
+
+  return { ...result, alreadyExists: false };
 }
 
 export async function createSubscription(gymId: string, data: {

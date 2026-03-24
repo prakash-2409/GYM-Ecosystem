@@ -36,3 +36,17 @@ export function CardSkeleton() {
     </div>
   );
 }
+
+export function StatCardSkeleton() {
+  return (
+    <div className="bg-surface rounded-card border border-border p-5">
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-[46px] w-[46px] rounded-lg" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-6 w-16" />
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -5,8 +5,10 @@ import '../screens/splash_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/notifications_screen.dart';
-import '../screens/progress_screen.dart';
+import '../screens/leaderboard_screen.dart';
 import '../screens/profile_screen.dart';
+import '../screens/workout_detail_screen.dart';
+import '../screens/access_pass_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -14,12 +16,20 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/', builder: (_, __) => const SplashScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+      GoRoute(
+          path: '/workout', builder: (_, __) => const WorkoutDetailScreen()),
+      GoRoute(
+          path: '/access-pass', builder: (_, __) => const AccessPassScreen()),
       ShellRoute(
         builder: (context, state, child) => MainShell(child: child),
         routes: [
           GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
-          GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
-          GoRoute(path: '/progress', builder: (_, __) => const ProgressScreen()),
+          GoRoute(
+              path: '/notifications',
+              builder: (_, __) => const NotificationsScreen()),
+          GoRoute(
+              path: '/leaderboard',
+              builder: (_, __) => const LeaderboardScreen()),
           GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
         ],
       ),
@@ -38,7 +48,7 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
-  final _paths = ['/home', '/notifications', '/progress', '/profile'];
+  final _paths = ['/home', '/notifications', '/leaderboard', '/profile'];
 
   @override
   Widget build(BuildContext context) {
@@ -59,10 +69,14 @@ class _MainShellState extends State<MainShell> {
             context.go(_paths[index]);
           },
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.notifications_rounded), label: 'Alerts'),
-            BottomNavigationBarItem(icon: Icon(Icons.trending_up_rounded), label: 'Progress'),
-            BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.home_rounded), label: 'Home'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.notifications_rounded), label: 'Alerts'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.emoji_events_rounded), label: 'Rank'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.person_rounded), label: 'Profile'),
           ],
         ),
       ),
