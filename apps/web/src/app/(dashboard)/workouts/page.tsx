@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { TableSkeleton } from '@/components/ui/skeleton';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { Plus, Trash2, Dumbbell, Users, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Plus, Trash2, Dumbbell, Users, ChevronDown, ChevronUp, X, Loader2 } from 'lucide-react';
 
 interface WorkoutPlanSummary {
   id: string;
@@ -92,8 +92,8 @@ export default function WorkoutsPage() {
   if (isLoading) {
     return (
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Workout Plans</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-page-title text-text-primary">Workout Plans</h1>
         </div>
         <TableSkeleton rows={4} cols={4} />
       </div>
@@ -102,49 +102,49 @@ export default function WorkoutsPage() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold">Workout Plans</h1>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 stagger-1">
+        <h1 className="text-page-title text-text-primary">Workout Plans</h1>
         <button
           onClick={() => setDrawerOpen(true)}
-          className="flex items-center gap-2 bg-primary text-white px-4 h-9 rounded-btn text-sm font-medium hover:opacity-90 active:opacity-80 transition-all duration-150"
+          className="btn btn-primary"
         >
-          <Plus size={16} />
+          <Plus size={16} strokeWidth={1.5} />
           Create Plan
         </button>
       </div>
 
       {!plans?.length ? (
-        <div className="bg-surface rounded-card border border-border">
+        <div className="card stagger-2">
           <EmptyState
-            icon={<Dumbbell size={28} />}
+            icon={Dumbbell}
             title="No workout plans"
             description="Create workout plans and assign them to your members."
             action={
               <button
                 onClick={() => setDrawerOpen(true)}
-                className="flex items-center gap-2 bg-primary text-white px-4 h-9 rounded-btn text-sm font-medium hover:opacity-90 transition-all duration-150"
+                className="btn btn-primary"
               >
-                <Plus size={16} />
+                <Plus size={16} strokeWidth={1.5} />
                 Create Plan
               </button>
             }
           />
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 stagger-2">
           {(plans as WorkoutPlanSummary[]).map((plan) => (
-            <div key={plan.id} className="bg-surface rounded-card border border-border overflow-hidden">
+            <div key={plan.id} className="card p-0 overflow-hidden">
               <div
-                className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-[#F5F5F5] transition-colors duration-150"
+                className="flex items-center justify-between px-card-pad py-4 cursor-pointer hover:bg-page transition-colors duration-normal"
                 onClick={() => setExpandedPlan(expandedPlan === plan.id ? null : plan.id)}
               >
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                    <Dumbbell size={20} />
+                    <Dumbbell size={20} strokeWidth={1.5} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-900">{plan.name}</h3>
-                    <p className="text-xs text-gray-500">
+                    <h3 className="text-body font-medium text-text-primary">{plan.name}</h3>
+                    <p className="text-caption text-text-secondary">
                       {plan.days.length} days &middot; {plan._count.assignments} members assigned
                     </p>
                   </div>
@@ -153,49 +153,49 @@ export default function WorkoutsPage() {
                   {plan.isTemplate && <Badge variant="info">Template</Badge>}
                   <button
                     onClick={(e) => { e.stopPropagation(); openAssign(plan.id); }}
-                    className="h-8 px-3 flex items-center gap-1.5 text-xs font-medium rounded-btn border border-border text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                    className="btn btn-secondary h-8 px-3 text-badge"
                   >
-                    <Users size={14} />
+                    <Users size={14} strokeWidth={1.5} />
                     Assign
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setDeleteTarget(plan); }}
-                    className="h-8 w-8 flex items-center justify-center rounded-btn text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors duration-150"
+                    className="btn btn-ghost h-8 w-8 p-0 hover:!text-danger hover:!bg-danger-bg"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={16} strokeWidth={1.5} />
                   </button>
-                  {expandedPlan === plan.id ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                  {expandedPlan === plan.id ? <ChevronUp size={16} strokeWidth={1.5} className="text-text-muted" /> : <ChevronDown size={16} strokeWidth={1.5} className="text-text-muted" />}
                 </div>
               </div>
 
               {expandedPlan === plan.id && (
-                <div className="border-t border-border px-6 py-4">
+                <div className="border-t border-divider px-card-pad py-4">
                   {plan.description && (
-                    <p className="text-sm text-gray-500 mb-4">{plan.description}</p>
+                    <p className="text-body text-text-secondary mb-4">{plan.description}</p>
                   )}
                   <div className="space-y-4">
                     {plan.days.sort((a, b) => a.dayNumber - b.dayNumber).map((day) => (
                       <div key={day.id}>
-                        <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">
+                        <h4 className="text-label font-medium text-text-secondary uppercase mb-2">
                           Day {day.dayNumber}{day.dayName ? ` — ${day.dayName}` : ''}
                         </h4>
-                        <div className="bg-gray-50 rounded-btn overflow-hidden">
+                        <div className="stat-card rounded-btn overflow-hidden p-0">
                           <table className="w-full">
                             <thead>
                               <tr className="text-left">
-                                <th className="px-4 py-2 text-xs font-medium text-gray-500">Exercise</th>
-                                <th className="px-4 py-2 text-xs font-medium text-gray-500">Sets</th>
-                                <th className="px-4 py-2 text-xs font-medium text-gray-500">Reps</th>
-                                <th className="px-4 py-2 text-xs font-medium text-gray-500">Rest</th>
+                                <th className="table-header">Exercise</th>
+                                <th className="table-header">Sets</th>
+                                <th className="table-header">Reps</th>
+                                <th className="table-header">Rest</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-border">
+                            <tbody className="divide-y divide-divider">
                               {day.exercises.map((ex) => (
                                 <tr key={ex.id}>
-                                  <td className="px-4 py-2 text-sm text-gray-900">{ex.exercise.name}</td>
-                                  <td className="px-4 py-2 text-sm font-mono text-gray-600">{ex.sets}</td>
-                                  <td className="px-4 py-2 text-sm font-mono text-gray-600">{ex.reps}</td>
-                                  <td className="px-4 py-2 text-sm font-mono text-gray-600">{ex.restSeconds}s</td>
+                                  <td className="px-4 py-2 text-body text-text-primary">{ex.exercise.name}</td>
+                                  <td className="px-4 py-2 text-body font-mono text-text-secondary">{ex.sets}</td>
+                                  <td className="px-4 py-2 text-body font-mono text-text-secondary">{ex.reps}</td>
+                                  <td className="px-4 py-2 text-body font-mono text-text-secondary">{ex.restSeconds}s</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -237,6 +237,7 @@ export default function WorkoutsPage() {
         message={`Are you sure you want to delete "${deleteTarget?.name}"?`}
         confirmLabel="Delete"
         destructive
+        loading={deleteMutation.isPending}
         onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
         onCancel={() => setDeleteTarget(null)}
       />
@@ -336,23 +337,25 @@ function WorkoutPlanForm({ onSaved, onCancel }: { onSaved: () => void; onCancel:
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Plan Name *</label>
+          <label htmlFor="workout-name" className="input-label">Plan Name <span className="text-danger">*</span></label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Beginner Push Pull Legs"
-            className="w-full h-10 px-3 border border-border rounded-btn text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-150"
+            className="input"
+            id="workout-name"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <label htmlFor="workout-desc" className="input-label">Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Optional"
             rows={2}
-            className="w-full px-3 py-2 border border-border rounded-btn text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none transition-shadow duration-150"
+            id="workout-desc"
+            className="input h-auto py-3 resize-none"
           />
         </div>
       </div>
@@ -360,7 +363,7 @@ function WorkoutPlanForm({ onSaved, onCancel }: { onSaved: () => void; onCancel:
       {/* Days */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900">Days</h3>
+          <h3 className="text-body font-medium text-text-primary">Days</h3>
           <button
             type="button"
             onClick={addDay}
@@ -373,7 +376,7 @@ function WorkoutPlanForm({ onSaved, onCancel }: { onSaved: () => void; onCancel:
         {days.map((day, dayIdx) => (
           <div key={dayIdx} className="border border-border rounded-card p-4 space-y-3">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold text-gray-500 uppercase shrink-0">Day {day.dayNumber}</span>
+              <span className="text-label font-medium text-text-secondary uppercase shrink-0">Day {day.dayNumber}</span>
               <input
                 type="text"
                 value={day.dayName}
@@ -383,10 +386,10 @@ function WorkoutPlanForm({ onSaved, onCancel }: { onSaved: () => void; onCancel:
                   setDays(updated);
                 }}
                 placeholder="e.g. Chest & Triceps"
-                className="flex-1 h-8 px-2 border border-border rounded text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-150"
+                className="flex-1 h-8 px-2 border border-divider rounded text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-normal"
               />
               {days.length > 1 && (
-                <button type="button" onClick={() => removeDay(dayIdx)} className="text-gray-400 hover:text-red-500 transition-colors duration-150">
+                <button type="button" onClick={() => removeDay(dayIdx)} className="text-text-muted hover:text-danger transition-colors duration-normal">
                   <X size={16} />
                 </button>
               )}
@@ -394,8 +397,8 @@ function WorkoutPlanForm({ onSaved, onCancel }: { onSaved: () => void; onCancel:
 
             {/* Exercises list */}
             {day.exercises.map((ex, exIdx) => (
-              <div key={exIdx} className="flex items-center gap-2 bg-gray-50 rounded-btn px-3 py-2">
-                <span className="text-sm text-gray-900 flex-1 truncate">{ex.exerciseName}</span>
+              <div key={exIdx} className="flex items-center gap-2 stat-card rounded-btn px-3 py-2">
+                <span className="text-body text-text-primary flex-1 truncate">{ex.exerciseName}</span>
                 <input
                   type="number"
                   value={ex.sets}
@@ -420,7 +423,7 @@ function WorkoutPlanForm({ onSaved, onCancel }: { onSaved: () => void; onCancel:
                   title="Rest (sec)"
                   min={0}
                 />
-                <button type="button" onClick={() => removeExercise(dayIdx, exIdx)} className="text-gray-400 hover:text-red-500 transition-colors duration-150">
+                <button type="button" onClick={() => removeExercise(dayIdx, exIdx)} className="text-text-muted hover:text-danger transition-colors duration-normal">
                   <X size={14} />
                 </button>
               </div>
@@ -434,7 +437,7 @@ function WorkoutPlanForm({ onSaved, onCancel }: { onSaved: () => void; onCancel:
                 onFocus={() => setActiveDay(dayIdx)}
                 onChange={(e) => { setActiveDay(dayIdx); setExerciseSearch(e.target.value); }}
                 placeholder="Search exercises to add..."
-                className="w-full h-8 px-3 border border-dashed border-gray-300 rounded-btn text-sm text-gray-500 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-150"
+                className="w-full h-8 px-3 border border-dashed border-divider rounded-btn text-body text-text-secondary focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-normal"
               />
               {activeDay === dayIdx && exercises?.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-surface border border-border rounded-btn shadow-lg max-h-48 overflow-y-auto">
@@ -456,20 +459,10 @@ function WorkoutPlanForm({ onSaved, onCancel }: { onSaved: () => void; onCancel:
         ))}
       </div>
 
-      <div className="flex justify-end gap-3 pt-4 border-t border-border">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="h-9 px-4 text-sm font-medium rounded-btn border border-border text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={saving}
-          className="h-9 px-4 text-sm font-medium rounded-btn bg-primary text-white hover:opacity-90 disabled:opacity-50 transition-all duration-150"
-        >
-          {saving ? 'Creating...' : 'Create Plan'}
+      <div className="flex justify-end gap-3 pt-4 border-t border-divider">
+        <button type="button" onClick={onCancel} className="btn btn-secondary">Cancel</button>
+        <button type="submit" disabled={saving} className="btn btn-primary">
+          {saving ? <><Loader2 size={16} className="animate-spin" strokeWidth={1.5} /> Creating...</> : 'Create Plan'}
         </button>
       </div>
     </form>
@@ -517,7 +510,7 @@ function AssignForm({ planId, onDone }: { planId: string; onDone: () => void }) 
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search members..."
-        className="w-full h-10 px-3 border border-border rounded-btn text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow duration-150"
+        className="input"
       />
 
       <div className="border border-border rounded-btn overflow-hidden max-h-80 overflow-y-auto">
@@ -527,7 +520,7 @@ function AssignForm({ planId, onDone }: { planId: string; onDone: () => void }) 
           return (
             <label
               key={memberId}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-[#F5F5F5] transition-colors duration-150 cursor-pointer border-b border-border last:border-b-0"
+              className="flex items-center gap-3 px-4 py-3 hover:bg-page transition-colors duration-normal cursor-pointer border-b border-divider last:border-b-0"
             >
               <input
                 type="checkbox"
@@ -536,8 +529,8 @@ function AssignForm({ planId, onDone }: { planId: string; onDone: () => void }) 
                 className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
               <div>
-                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                <p className="text-xs text-gray-500">{user?.phone}</p>
+                <p className="text-body font-medium text-text-primary">{user?.name}</p>
+                <p className="text-caption text-text-secondary">{user?.phone}</p>
               </div>
             </label>
           );
@@ -545,13 +538,13 @@ function AssignForm({ planId, onDone }: { planId: string; onDone: () => void }) 
       </div>
 
       {selectedIds.length > 0 && (
-        <p className="text-xs text-gray-500">{selectedIds.length} member(s) selected</p>
+        <p className="text-caption text-text-secondary">{selectedIds.length} member(s) selected</p>
       )}
 
       <button
         onClick={handleAssign}
         disabled={saving || !selectedIds.length}
-        className="w-full h-9 text-sm font-medium rounded-btn bg-primary text-white hover:opacity-90 disabled:opacity-50 transition-all duration-150"
+        className="btn btn-primary w-full"
       >
         {saving ? 'Assigning...' : `Assign to ${selectedIds.length} Member(s)`}
       </button>

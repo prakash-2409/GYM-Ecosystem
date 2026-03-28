@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/api-client';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function CollectFeePage() {
   const router = useRouter();
@@ -52,21 +54,29 @@ export default function CollectFeePage() {
 
   return (
     <div className="max-w-xl">
-      <h1 className="text-2xl font-bold mb-6">Collect Fee</h1>
+      <Link
+        href="/fees"
+        className="inline-flex items-center gap-2 text-caption text-text-secondary hover:text-text-primary mb-4 transition-colors duration-normal stagger-1"
+      >
+        <ArrowLeft size={16} strokeWidth={1.5} /> Back to Fees
+      </Link>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl border p-6 space-y-5">
+      <h1 className="text-page-title text-text-primary mb-8 stagger-2">Collect Fee</h1>
+
+      <form onSubmit={handleSubmit} className="card space-y-5 stagger-3">
         {/* Member search */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Member *</label>
+          <label htmlFor="fee-member" className="input-label">Member <span className="text-danger">*</span></label>
           <input
+            id="fee-member"
             type="text"
             placeholder="Search by name or phone..."
             value={memberSearch}
             onChange={(e) => { setMemberSearch(e.target.value); setMemberId(''); }}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+            className="input"
           />
           {members?.members?.length > 0 && !memberId && (
-            <div className="mt-1 border border-gray-200 rounded-lg overflow-hidden">
+            <div className="mt-1 border border-divider rounded-btn overflow-hidden">
               {members.members.map((m: Record<string, unknown>) => (
                 <button
                   key={m.id as string}
@@ -75,10 +85,10 @@ export default function CollectFeePage() {
                     setMemberId(m.id as string);
                     setMemberSearch(`${(m.user as Record<string, string>)?.name} (${m.memberCode})`);
                   }}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm"
+                  className="w-full text-left px-4 py-2 hover:bg-page text-body transition-colors duration-normal"
                 >
-                  <span className="font-medium">{(m.user as Record<string, string>)?.name}</span>
-                  <span className="text-gray-500 ml-2">{m.memberCode as string}</span>
+                  <span className="font-medium text-text-primary">{(m.user as Record<string, string>)?.name}</span>
+                  <span className="text-text-secondary ml-2 font-mono text-caption">{m.memberCode as string}</span>
                 </button>
               ))}
             </div>
@@ -87,9 +97,8 @@ export default function CollectFeePage() {
 
         {/* Plan selector */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Plan *</label>
-          <select value={planId} onChange={(e) => setPlanId(e.target.value)}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none">
+          <label htmlFor="fee-plan" className="input-label">Plan <span className="text-danger">*</span></label>
+          <select id="fee-plan" value={planId} onChange={(e) => setPlanId(e.target.value)} className="input">
             <option value="">Select plan</option>
             {plans?.plans?.map((p: Record<string, string | number>) => (
               <option key={p.id as string} value={p.id as string}>
@@ -101,17 +110,17 @@ export default function CollectFeePage() {
 
         {/* Payment method */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method *</label>
+          <label className="input-label mb-2 block">Payment Method <span className="text-danger">*</span></label>
           <div className="flex gap-3">
             {['cash', 'upi', 'card'].map((method) => (
               <button
                 key={method}
                 type="button"
                 onClick={() => setPaymentMethod(method)}
-                className={`px-4 py-2 rounded-lg border text-sm font-medium capitalize transition ${
+                className={`px-4 py-2 rounded-btn border text-body font-medium capitalize transition-all duration-normal ${
                   paymentMethod === method
                     ? 'bg-primary text-white border-primary'
-                    : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+                    : 'border-divider text-text-secondary hover:bg-page'
                 }`}
               >
                 {method}
@@ -122,36 +131,37 @@ export default function CollectFeePage() {
 
         {paymentMethod === 'upi' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">UPI Reference ID</label>
-            <input value={upiRef} onChange={(e) => setUpiRef(e.target.value)}
+            <label htmlFor="fee-upi-ref" className="input-label">UPI Reference ID</label>
+            <input id="fee-upi-ref" value={upiRef} onChange={(e) => setUpiRef(e.target.value)}
               placeholder="Transaction reference"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" />
+              className="input font-mono" />
           </div>
         )}
 
         {/* Amount breakdown */}
         {selectedPlan && (
-          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Base Amount</span>
-              <span>₹{(baseAmount - gstAmount).toFixed(2)}</span>
+          <div className="stat-card space-y-2">
+            <div className="flex justify-between text-body">
+              <span className="text-text-secondary">Base Amount</span>
+              <span className="text-text-primary font-mono">₹{(baseAmount - gstAmount).toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">GST (18%)</span>
-              <span>₹{gstAmount.toFixed(2)}</span>
+            <div className="flex justify-between text-body">
+              <span className="text-text-secondary">GST (18%)</span>
+              <span className="text-text-primary font-mono">₹{gstAmount.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between font-bold pt-2 border-t border-gray-200">
-              <span>Total</span>
-              <span>₹{baseAmount.toLocaleString('en-IN')}</span>
+            <div className="flex justify-between font-medium pt-2 border-t border-divider">
+              <span className="text-text-primary">Total</span>
+              <span className="text-text-primary font-mono">₹{baseAmount.toLocaleString('en-IN')}</span>
             </div>
           </div>
         )}
 
-        {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg">{error}</div>}
+        {error && (
+          <div className="bg-danger-bg text-danger text-body px-4 py-3 rounded-btn border border-danger-border">{error}</div>
+        )}
 
-        <button type="submit" disabled={loading}
-          className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:opacity-90 transition disabled:opacity-50">
-          {loading ? 'Processing...' : 'Collect Payment & Generate Invoice'}
+        <button type="submit" disabled={loading} className="btn btn-primary w-full h-input">
+          {loading ? <><Loader2 size={16} className="animate-spin" strokeWidth={1.5} /> Processing...</> : 'Collect Payment & Generate Invoice'}
         </button>
       </form>
     </div>

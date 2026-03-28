@@ -7,8 +7,6 @@ import '../screens/home_screen.dart';
 import '../screens/notifications_screen.dart';
 import '../screens/leaderboard_screen.dart';
 import '../screens/profile_screen.dart';
-import '../screens/workout_detail_screen.dart';
-import '../screens/access_pass_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -59,8 +57,15 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       body: widget.child,
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Color(0xFF333333), width: 0.5)),
+        decoration: BoxDecoration(
+          color: AppColors.navBackground,
+          // Border: 1px solid rgba(255,255,255,0.07)
+          border: Border(
+            top: BorderSide(
+              color: Colors.white.withOpacity(0.07),
+              width: 1,
+            ),
+          ),
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
@@ -74,7 +79,7 @@ class _MainShellState extends State<MainShell> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.notifications_rounded), label: 'Alerts'),
             BottomNavigationBarItem(
-                icon: Icon(Icons.emoji_events_rounded), label: 'Rank'),
+                icon: Icon(Icons.trending_up_rounded), label: 'Progress'),
             BottomNavigationBarItem(
                 icon: Icon(Icons.person_rounded), label: 'Profile'),
           ],
