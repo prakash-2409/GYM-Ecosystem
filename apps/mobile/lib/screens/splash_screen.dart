@@ -11,7 +11,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late AnimationController _pulseController;
   late AnimationController _scaleController;
@@ -97,8 +98,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                       center: Alignment.center,
                       radius: 1.5 + (_pulseAnimation.value * 0.3),
                       colors: [
-                        AppColors.brandPrimary.withOpacity(0.15 * _pulseAnimation.value),
-                        AppColors.brandSecondary.withOpacity(0.08 * _pulseAnimation.value),
+                        AppColors.brandPrimary
+                            .withOpacity(0.15 * _pulseAnimation.value),
+                        AppColors.brandSecondary
+                            .withOpacity(0.08 * _pulseAnimation.value),
                         AppColors.background,
                       ],
                       stops: const [0.0, 0.4, 1.0],
@@ -127,12 +130,14 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                             borderRadius: BorderRadius.circular(28),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.brandPrimary.withOpacity(0.4 * _pulseAnimation.value),
+                                color: AppColors.brandPrimary
+                                    .withOpacity(0.4 * _pulseAnimation.value),
                                 blurRadius: 30 + (10 * _pulseAnimation.value),
                                 spreadRadius: 5 * _pulseAnimation.value,
                               ),
                               BoxShadow(
-                                color: AppColors.brandSecondary.withOpacity(0.3 * _pulseAnimation.value),
+                                color: AppColors.brandSecondary
+                                    .withOpacity(0.3 * _pulseAnimation.value),
                                 blurRadius: 40 + (15 * _pulseAnimation.value),
                                 spreadRadius: 2 * _pulseAnimation.value,
                               ),
@@ -164,7 +169,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
                     // App name with gradient text
                     ShaderMask(
-                      shaderCallback: (bounds) => AppColors.brandGradient.createShader(bounds),
+                      shaderCallback: (bounds) =>
+                          AppColors.brandGradient.createShader(bounds),
                       child: const Text(
                         'GymStack',
                         style: TextStyle(
@@ -208,7 +214,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: AppColors.brandPrimary.withOpacity(0.2),
+                                    color:
+                                        AppColors.brandPrimary.withOpacity(0.2),
                                     width: 2,
                                   ),
                                 ),
@@ -221,7 +228,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                             height: 40,
                             child: CircularProgressIndicator(
                               strokeWidth: 3,
-                              valueColor: AlwaysStoppedAnimation<Color>(AppColors.brandPrimary),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.brandPrimary),
                               backgroundColor: Colors.transparent,
                             ),
                           ),
