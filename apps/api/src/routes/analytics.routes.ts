@@ -6,6 +6,15 @@ import * as analyticsService from '../services/analytics.service';
 const router = Router();
 router.use(authenticate, gymContext);
 
+router.get('/dashboard', requireRole('gym_owner', 'receptionist', 'coach'), async (req: Request, res: Response) => {
+  try {
+    const data = await analyticsService.getDashboardOverview(req.gymId!);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
+
 router.get('/revenue', requireRole('gym_owner'), async (req: Request, res: Response) => {
   try {
     const data = await analyticsService.getRevenueAnalytics(req.gymId!);

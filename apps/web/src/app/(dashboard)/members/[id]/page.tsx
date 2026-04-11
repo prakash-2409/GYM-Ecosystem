@@ -65,7 +65,7 @@ export default function MemberProfilePage() {
 
   const collectMutation = useMutation({
     mutationFn: (formData: { memberId: string; amount: number; paymentMethod: string; notes: string }) =>
-      apiClient.post('/payments', formData),
+      apiClient.post('/payments/collect', formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['member', id] });
       queryClient.invalidateQueries({ queryKey: ['payments', id] });

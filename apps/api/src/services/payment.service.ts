@@ -189,12 +189,14 @@ export async function getPayments(gymId: string, options: {
 
 export async function getDueMembers(gymId: string) {
   const today = new Date();
+  const sevenDaysFromNow = new Date(today);
+  sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
 
-  const expiredSubs = await prisma.memberSubscription.findMany({
+  const expiringSubs = await prisma.memberSubscription.findMany({
     where: {
       gymId,
       status: 'active',
-      endDate: { lte: today },
+      endDate: { lte: sevenDaysFromNow },
     },
     include: {
       member: { include: { user: { select: { name: true, phone: true } } } },
@@ -202,7 +204,7 @@ export async function getDueMembers(gymId: string) {
     },
   });
 
-  return expiredSubs.map((sub) => ({
+  return expiringSubs.map((sub) => ({
     memberId: sub.memberId,
     memberName: sub.member.user.name,
     memberPhone: sub.member.user.phone,

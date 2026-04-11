@@ -3,13 +3,18 @@ import prisma from '@gymstack/db';
 export async function getNotificationHistory(gymId: string, params: {
   page?: number;
   limit?: number;
+  memberId?: string;
 }) {
-  const { page = 1, limit = 20 } = params;
+  const { page = 1, limit = 20, memberId } = params;
   const skip = (page - 1) * limit;
+  const where = {
+    gymId,
+    ...(memberId ? { memberId } : {}),
+  };
 
   const [notifications, total] = await Promise.all([
     prisma.notificationLog.findMany({
-      where: { gymId },
+      where,
       include: {
         member: { include: { user: { select: { name: true } } } },
       },
@@ -17,7 +22,7 @@ export async function getNotificationHistory(gymId: string, params: {
       skip,
       take: limit,
     }),
-    prisma.notificationLog.count({ where: { gymId } }),
+    prisma.notificationLog.count({ where }),
   ]);
 
   return { notifications, total, page, limit };
@@ -27,7 +32,7 @@ export async function sendNotification(gymId: string, data: {
   title: string;
   body: string;
   channel: 'push' | 'whatsapp';
-  target: 'all' | 'plan' | 'individual';
+  target: 'all' | 'active' | 'expiring_soon' | 'overdue' | 'plan' | 'individual';
   targetId?: string;
   scheduledAt?: string;
 }) {
@@ -45,6 +50,36 @@ export async function sendNotification(gymId: string, data: {
       select: { id: true },
     });
     memberIds = members.map((m) => m.id);
+  } else if (target === 'active') {
+    const subscriptions = await prisma.memberSubscription.findMany({
+      where: { gymId, status: 'active', endDate: { gte: new Date() } },
+      select: { memberId: true },
+    });
+    memberIds = subscriptions.map((s) => s.memberId);
+  } else if (target === 'expiring_soon') {
+    const now = new Date();
+    const sevenDaysFromNow = new Date(now);
+    sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+
+    const subscriptions = await prisma.memberSubscription.findMany({
+      where: {
+        gymId,
+        status: 'active',
+        endDate: { gte: now, lte: sevenDaysFromNow },
+      },
+      select: { memberId: true },
+    });
+    memberIds = subscriptions.map((s) => s.memberId);
+  } else if (target === 'overdue') {
+    const subscriptions = await prisma.memberSubscription.findMany({
+      where: {
+        gymId,
+        status: 'active',
+        endDate: { lt: new Date() },
+      },
+      select: { memberId: true },
+    });
+    memberIds = subscriptions.map((s) => s.memberId);
   } else if (target === 'plan') {
     if (!targetId) throw new Error('targetId is required for plan target');
     const subscriptions = await prisma.memberSubscription.findMany({
@@ -64,6 +99,8 @@ export async function sendNotification(gymId: string, data: {
   if (memberIds.length === 0) {
     return { sent: 0 };
   }
+
+  memberIds = Array.from(new Set(memberIds));
 
   await prisma.notificationLog.createMany({
     data: memberIds.map((memberId) => ({

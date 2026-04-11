@@ -42,7 +42,7 @@ export default function NotificationsPage() {
 
   const sendMutation = useMutation({
     mutationFn: (data: { title: string; body: string; channel: string; target: string }) =>
-      apiClient.post('/notifications/send', data),
+      apiClient.post('/notifications', data),
     onSuccess: () => {
       setTitle('');
       setMessage('');

@@ -54,7 +54,7 @@ export default function FeesPage() {
 
   const collectMutation = useMutation({
     mutationFn: (data: { memberId: string; amount: number; paymentMethod: string; notes: string }) =>
-      apiClient.post('/payments', data),
+      apiClient.post('/payments/collect', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments-due'] });
       queryClient.invalidateQueries({ queryKey: ['payments-list'] });
@@ -65,7 +65,7 @@ export default function FeesPage() {
 
   const reminderMutation = useMutation({
     mutationFn: (data: { title: string; body: string; channel: string; target: string; targetId: string }) =>
-      apiClient.post('/notifications/send', data),
+      apiClient.post('/notifications', data),
   });
 
   const dueMembers: DueMember[] = dueData?.members || [];
