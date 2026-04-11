@@ -60,8 +60,9 @@ class _AccessPassScreenState extends State<AccessPassScreen> {
     final member = _profileData?['member'];
     final sub = _profileData?['subscription'];
     final daysRemaining = sub?['daysRemaining'] ?? 0;
-    final totalDays = 30;
-    final usagePercent = ((totalDays - daysRemaining) / totalDays * 100).clamp(0, 100);
+    const totalDays = 30;
+    final usagePercent =
+        ((totalDays - daysRemaining) / totalDays * 100).clamp(0, 100);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -70,7 +71,8 @@ class _AccessPassScreenState extends State<AccessPassScreen> {
         elevation: 0,
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_back_rounded, color: AppColors.brandPrimary),
+          child: const Icon(Icons.arrow_back_rounded,
+              color: AppColors.brandPrimary),
         ),
         title: const Text(
           'Access Pass',
@@ -114,7 +116,7 @@ class _AccessPassScreenState extends State<AccessPassScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'CURRENT MEMBERSHIP',
                               style: TextStyle(
                                 fontSize: 10,
@@ -222,11 +224,11 @@ class _AccessPassScreenState extends State<AccessPassScreen> {
                             version: QrVersions.auto,
                             size: 180,
                             backgroundColor: Colors.white,
-                            eyeStyle: QrEyeStyle(
+                            eyeStyle: const QrEyeStyle(
                               eyeShape: QrEyeShape.square,
                               color: AppColors.brandPrimary,
                             ),
-                            dataModuleStyle: QrDataModuleStyle(
+                            dataModuleStyle: const QrDataModuleStyle(
                               dataModuleShape: QrDataModuleShape.square,
                               color: AppColors.cardDark,
                             ),
@@ -237,7 +239,7 @@ class _AccessPassScreenState extends State<AccessPassScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.refresh_rounded,
                               size: 16,
                               color: AppColors.brandPrimary,
@@ -245,7 +247,7 @@ class _AccessPassScreenState extends State<AccessPassScreen> {
                             const SizedBox(width: 6),
                             Text(
                               'Refreshes in ${_refreshCountdown}s',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.brandPrimary,

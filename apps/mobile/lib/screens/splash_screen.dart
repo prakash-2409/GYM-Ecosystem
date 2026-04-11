@@ -185,7 +185,7 @@ class _SplashScreenState extends State<SplashScreen>
                     const SizedBox(height: 12),
 
                     // Tagline
-                    Text(
+                    const Text(
                       'Your fitness journey starts here',
                       style: TextStyle(
                         fontSize: 15,
@@ -223,7 +223,7 @@ class _SplashScreenState extends State<SplashScreen>
                             },
                           ),
                           // Spinning gradient ring
-                          SizedBox(
+                          const SizedBox(
                             width: 40,
                             height: 40,
                             child: CircularProgressIndicator(
@@ -239,7 +239,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                     const SizedBox(height: 16),
 
-                    Text(
+                    const Text(
                       'Loading...',
                       style: TextStyle(
                         fontSize: 13,
@@ -268,13 +268,13 @@ class _SplashScreenState extends State<SplashScreen>
                       Container(
                         width: 6,
                         height: 6,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           gradient: AppColors.brandGradient,
                           shape: BoxShape.circle,
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      const Text(
                         'Powered by GymStack',
                         style: TextStyle(
                           fontSize: 12,

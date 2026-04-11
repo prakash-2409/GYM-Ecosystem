@@ -271,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               ),
                               child: Text(
                                 '${attendance.length}/7 days',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.brandPrimary,
@@ -621,7 +621,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 color: AppColors.success.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
+              child: const Text(
                 'Day 42 of 90',
                 style: TextStyle(
                   fontSize: 12,
@@ -677,7 +677,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           color: AppColors.brandPrimary.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text(
+                        child: const Text(
                           'HYPERTROPHY FOCUS',
                           style: TextStyle(
                             fontSize: 10,
@@ -699,7 +699,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                       const SizedBox(height: 12),
                       // Stats
-                      Row(
+                      const Row(
                         children: [
                           Row(
                             children: [
@@ -708,7 +708,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 size: 16,
                                 color: AppColors.textMuted,
                               ),
-                              const SizedBox(width: 4),
+                              SizedBox(width: 4),
                               Text(
                                 '75 min',
                                 style: TextStyle(
@@ -719,7 +719,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               ),
                             ],
                           ),
-                          const SizedBox(width: 16),
+                          SizedBox(width: 16),
                           Row(
                             children: [
                               Icon(
@@ -727,7 +727,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 size: 16,
                                 color: AppColors.textMuted,
                               ),
-                              const SizedBox(width: 4),
+                              SizedBox(width: 4),
                               Text(
                                 '640 kcal',
                                 style: TextStyle(
@@ -754,7 +754,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       color: AppColors.surface,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.arrow_forward_rounded,
                       size: 18,
                       color: AppColors.textMuted,
@@ -1164,19 +1164,19 @@ class _QRScannerPageState extends State<QRScannerPage> {
                         decoration: BoxDecoration(
                           border: Border(
                             top: i < 2
-                                ? BorderSide(
+                                ? const BorderSide(
                                     color: AppColors.brandPrimary, width: 4)
                                 : BorderSide.none,
                             bottom: i >= 2
-                                ? BorderSide(
+                                ? const BorderSide(
                                     color: AppColors.brandPrimary, width: 4)
                                 : BorderSide.none,
                             left: i % 2 == 0
-                                ? BorderSide(
+                                ? const BorderSide(
                                     color: AppColors.brandPrimary, width: 4)
                                 : BorderSide.none,
                             right: i % 2 == 1
-                                ? BorderSide(
+                                ? const BorderSide(
                                     color: AppColors.brandPrimary, width: 4)
                                 : BorderSide.none,
                           ),

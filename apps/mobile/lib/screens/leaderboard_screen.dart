@@ -40,9 +40,20 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           {'rank': 2, 'name': 'Marcus V.', 'value': 12800, 'streak': 18},
           {'rank': 3, 'name': 'Kaito S.', 'value': 11500, 'streak': 15},
           {'rank': 4, 'name': 'Sarah K.', 'value': 10200, 'streak': 12},
-          {'rank': 5, 'name': 'Alexander', 'value': 11200, 'streak': 14, 'isCurrentUser': true},
+          {
+            'rank': 5,
+            'name': 'Alexander',
+            'value': 11200,
+            'streak': 14,
+            'isCurrentUser': true
+          },
         ];
-        _currentUser = {'rank': 5, 'name': 'Alexander', 'value': 11200, 'streak': 14};
+        _currentUser = {
+          'rank': 5,
+          'name': 'Alexander',
+          'value': 11200,
+          'streak': 14
+        };
         _loading = false;
       });
     }
@@ -58,7 +69,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
-              child: Column(
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -69,8 +80,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                       color: AppColors.brandPrimary,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  const Text(
+                  SizedBox(height: 4),
+                  Text(
                     'Weekly Rankings',
                     style: TextStyle(
                       fontSize: 12,
@@ -265,9 +276,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             gradient: isFirst ? AppColors.brandGradient : null,
             color: isFirst ? null : AppColors.surface,
             border: Border.all(
-              color: isFirst
-                  ? Colors.transparent
-                  : AppColors.border,
+              color: isFirst ? Colors.transparent : AppColors.border,
               width: 2,
             ),
           ),
@@ -290,9 +299,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   width: isFirst ? 24 : 20,
                   height: isFirst ? 24 : 20,
                   decoration: BoxDecoration(
-                    color: isFirst
-                        ? AppColors.brandPrimary
-                        : AppColors.surface,
+                    color: isFirst ? AppColors.brandPrimary : AppColors.surface,
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.border),
                   ),
@@ -302,9 +309,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                       style: TextStyle(
                         fontSize: isFirst ? 12 : 10,
                         fontWeight: FontWeight.w700,
-                        color: isFirst
-                            ? Colors.white
-                            : AppColors.textPrimary,
+                        color: isFirst ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -317,9 +322,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         Container(
           height: height,
           decoration: BoxDecoration(
-            color: isFirst
-                ? AppColors.cardDark
-                : AppColors.cardDark,
+            color: isFirst ? AppColors.cardDark : AppColors.cardDark,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(16),
               topRight: Radius.circular(16),
@@ -338,9 +341,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 style: TextStyle(
                   fontSize: isFirst ? 14 : 12,
                   fontWeight: FontWeight.w600,
-                  color: isFirst
-                      ? AppColors.brandPrimary
-                      : AppColors.textPrimary,
+                  color:
+                      isFirst ? AppColors.brandPrimary : AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 12),
@@ -364,7 +366,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           // Rank
           Text(
             '${_currentUser?['rank'] ?? '-'}',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppColors.brandPrimary,
@@ -386,7 +388,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             child: Center(
               child: Text(
                 (_currentUser?['name'] as String? ?? '?')[0].toUpperCase(),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: AppColors.brandPrimary,
@@ -411,7 +413,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 const SizedBox(height: 2),
                 Text(
                   '${_currentUser?['streak'] ?? 0} Day Streak',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: AppColors.brandPrimary,
@@ -433,7 +435,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
+              const Text(
                 '87.5%',
                 style: TextStyle(
                   fontSize: 12,

@@ -190,7 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Container(
                                 width: 8,
                                 height: 8,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   gradient: AppColors.brandGradient,
                                   shape: BoxShape.circle,
                                 ),
@@ -249,11 +249,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     version: QrVersions.auto,
                                     size: 180,
                                     backgroundColor: Colors.grey[50]!,
-                                    eyeStyle: QrEyeStyle(
+                                    eyeStyle: const QrEyeStyle(
                                       eyeShape: QrEyeShape.square,
                                       color: AppColors.brandPrimary,
                                     ),
-                                    dataModuleStyle: QrDataModuleStyle(
+                                    dataModuleStyle: const QrDataModuleStyle(
                                       dataModuleShape: QrDataModuleShape.square,
                                       color: AppColors.cardDark,
                                     ),
@@ -284,7 +284,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(height: 24),
 
                         // Stats Row - Calories and Steps
-                        Row(
+                        const Row(
                           children: [
                             Expanded(
                               child: _ProgressStatTile(
@@ -296,7 +296,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 color: AppColors.brandPrimary,
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: 12),
                             Expanded(
                               child: _ProgressStatTile(
                                 label: 'Daily Steps',
@@ -547,12 +547,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               border: Border.all(
                                   color: AppColors.danger.withOpacity(0.2)),
                             ),
-                            child: Row(
+                            child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.logout_rounded,
                                     color: AppColors.danger, size: 20),
-                                const SizedBox(width: 10),
+                                SizedBox(width: 10),
                                 Text(
                                   'Log Out',
                                   style: TextStyle(

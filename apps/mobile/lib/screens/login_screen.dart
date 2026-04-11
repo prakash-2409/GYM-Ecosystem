@@ -25,13 +25,23 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
-      await api.post('/auth/otp/send', data: {'phone': _phoneController.text.trim()});
+      await api.post('/auth/otp/send',
+          data: {'phone': _phoneController.text.trim()});
       HapticFeedback.lightImpact();
-      setState(() { _otpSent = true; _loading = false; });
+      setState(() {
+        _otpSent = true;
+        _loading = false;
+      });
     } catch (e) {
-      setState(() { _error = 'Failed to send OTP. Try again.'; _loading = false; });
+      setState(() {
+        _error = 'Failed to send OTP. Try again.';
+        _loading = false;
+      });
     }
   }
 
@@ -41,7 +51,10 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final res = await api.post('/auth/otp/verify', data: {
         'phone': _phoneController.text.trim(),
@@ -57,7 +70,10 @@ class _LoginScreenState extends State<LoginScreen> {
       HapticFeedback.mediumImpact();
       if (mounted) context.go('/home');
     } catch (e) {
-      setState(() { _error = 'Invalid OTP. Please try again.'; _loading = false; });
+      setState(() {
+        _error = 'Invalid OTP. Please try again.';
+        _loading = false;
+      });
     }
   }
 
@@ -88,7 +104,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: AppColors.brand,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(Icons.fitness_center, color: Colors.white, size: 28),
+                child: const Icon(Icons.fitness_center,
+                    color: Colors.white, size: 28),
               ),
               const SizedBox(height: 24),
 
@@ -122,14 +139,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     hintText: '9876543210',
                     prefixIcon: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
+                      child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('🇮🇳', style: TextStyle(fontSize: 20)),
-                          const SizedBox(width: 8),
-                          const Text('+91', style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
-                          const SizedBox(width: 8),
-                          SizedBox(height: 24, child: VerticalDivider(color: AppColors.border)),
+                          Text('🇮🇳', style: TextStyle(fontSize: 20)),
+                          SizedBox(width: 8),
+                          Text('+91',
+                              style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 16)),
+                          SizedBox(width: 8),
+                          SizedBox(
+                              height: 24,
+                              child: VerticalDivider(color: AppColors.border)),
                         ],
                       ),
                     ),
@@ -143,7 +165,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   keyboardType: TextInputType.number,
                   maxLength: 6,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 24, letterSpacing: 12, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                      fontSize: 24,
+                      letterSpacing: 12,
+                      fontWeight: FontWeight.w600),
                   decoration: const InputDecoration(
                     hintText: '• • • • • •',
                     counterText: '',
@@ -152,8 +177,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 12),
                 Center(
                   child: TextButton(
-                    onPressed: () => setState(() { _otpSent = false; _otpController.clear(); _error = null; }),
-                    child: const Text('Change phone number', style: TextStyle(color: AppColors.brand, fontSize: 13)),
+                    onPressed: () => setState(() {
+                      _otpSent = false;
+                      _otpController.clear();
+                      _error = null;
+                    }),
+                    child: const Text('Change phone number',
+                        style: TextStyle(color: AppColors.brand, fontSize: 13)),
                   ),
                 ),
               ],
@@ -168,9 +198,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline, color: AppColors.danger, size: 18),
+                      const Icon(Icons.error_outline,
+                          color: AppColors.danger, size: 18),
                       const SizedBox(width: 8),
-                      Expanded(child: Text(_error!, style: const TextStyle(color: AppColors.danger, fontSize: 13))),
+                      Expanded(
+                          child: Text(_error!,
+                              style: const TextStyle(
+                                  color: AppColors.danger, fontSize: 13))),
                     ],
                   ),
                 ),
@@ -182,7 +216,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ElevatedButton(
                 onPressed: _loading ? null : (_otpSent ? _verifyOTP : _sendOTP),
                 child: _loading
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
                     : Text(_otpSent ? 'Verify & Login' : 'Send OTP'),
               ),
 

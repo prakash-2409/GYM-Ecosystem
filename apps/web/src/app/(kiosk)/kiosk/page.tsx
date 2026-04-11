@@ -1,429 +1,1356 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { lookupMemberByCode, type MockMember } from '@/lib/mock-data';
-import { CheckCircle2, XCircle, AlertTriangle, Fingerprint, Keyboard } from 'lucide-react';
+import Link from 'next/link';
 
-const RESET_DELAY = 8000;
+// ═══════════════════════════════════════════════════════════════
+// KIOSK MOCK DATA — inline, purpose-built for this screen
+// ═══════════════════════════════════════════════════════════════
 
-type KioskState = 'idle' | 'loading' | 'success' | 'error' | 'warning';
+type KioskMember = {
+  id: string;
+  name: string;
+  age: number;
+  weight: string;
+  weightLoggedAgo: string;
+  plan: string;
+  planEnd: string;
+  visitsThisMonth: number;
+  totalVisits: number;
+  streak: number;
+  memberSince: string;
+  memberSinceDuration: string;
+  attendance: boolean[]; // 15 days
+  feeStatus: 'paid' | 'due' | 'overdue';
+  feeAmount?: number;
+  accentColor: string;
+  accentBorder: string;
+  accentBg: string;
+  visitCount: number; // for toggling check in / check out
+};
+
+const KIOSK_MEMBERS: Record<string, KioskMember> = {
+  '1042': {
+    id: '1042',
+    name: 'Rahul Kumar',
+    age: 24,
+    weight: '68.5 kg',
+    weightLoggedAgo: 'logged 3 days ago',
+    plan: 'GOLD — 6 MONTHS',
+    planEnd: '2026-03-12',
+    visitsThisMonth: 10,
+    totalVisits: 187,
+    streak: 5,
+    memberSince: 'Jun 2024',
+    memberSinceDuration: '1 year 9 months',
+    attendance: [true, true, false, true, true, true, false, false, true, true, true, false, true, true, false],
+    feeStatus: 'paid',
+    accentColor: '#E85D04',
+    accentBorder: '2px solid #E85D04',
+    accentBg: 'rgba(232,93,4,0.2)',
+    visitCount: 3,
+  },
+  '2031': {
+    id: '2031',
+    name: 'Priya Sharma',
+    age: 27,
+    weight: '64.8 kg',
+    weightLoggedAgo: 'logged 1 week ago',
+    plan: 'SILVER — MONTHLY',
+    planEnd: '2026-03-03',
+    visitsThisMonth: 6,
+    totalVisits: 52,
+    streak: 2,
+    memberSince: 'Oct 2025',
+    memberSinceDuration: '5 months',
+    attendance: [true, false, true, false, true, true, false, false, false, true, false, false, true, false, false],
+    feeStatus: 'due',
+    feeAmount: 1500,
+    accentColor: '#378ADD',
+    accentBorder: '2px solid #378ADD',
+    accentBg: 'rgba(55,138,221,0.2)',
+    visitCount: 4,
+  },
+  '3105': {
+    id: '3105',
+    name: 'Arjun Verma',
+    age: 31,
+    weight: '82.3 kg',
+    weightLoggedAgo: 'logged today',
+    plan: 'PLATINUM — ANNUAL',
+    planEnd: '2026-04-20',
+    visitsThisMonth: 13,
+    totalVisits: 412,
+    streak: 8,
+    memberSince: 'Jan 2023',
+    memberSinceDuration: '3 years 3 months',
+    attendance: [true, true, true, true, true, true, true, false, true, true, true, true, true, false, true],
+    feeStatus: 'paid',
+    accentColor: '#22C55E',
+    accentBorder: '2px solid #22C55E',
+    accentBg: 'rgba(34,197,94,0.2)',
+    visitCount: 7,
+  },
+  '4088': {
+    id: '4088',
+    name: 'Sunita Rao',
+    age: 35,
+    weight: '71.2 kg',
+    weightLoggedAgo: 'logged 5 days ago',
+    plan: 'GOLD — 3 MONTHS',
+    planEnd: '2026-02-28',
+    visitsThisMonth: 3,
+    totalVisits: 98,
+    streak: 0,
+    memberSince: 'Aug 2024',
+    memberSinceDuration: '1 year 8 months',
+    attendance: [false, false, true, false, false, false, true, false, false, false, false, true, false, false, false],
+    feeStatus: 'overdue',
+    feeAmount: 3600,
+    accentColor: '#F59E0B',
+    accentBorder: '2px solid #F59E0B',
+    accentBg: 'rgba(245,158,11,0.2)',
+    visitCount: 2,
+  },
+};
+
+const QUOTES = [
+  'The only bad workout is the one that didn\'t happen.',
+  'Push yourself because no one else will do it for you.',
+  'Your body can do it. It\'s your mind you need to convince.',
+  'Sweat now. Shine later.',
+  'No pain no gain. Shut up and train.',
+];
+
+const MAX_DIGITS = 6;
+const AUTO_RESET_MS = 8000;
+
+// ═══════════════════════════════════════════════════════════════
+// KIOSK PAGE COMPONENT
+// ═══════════════════════════════════════════════════════════════
 
 export default function KioskPage() {
-  const [memberCode, setMemberCode] = useState('');
-  const [state, setState] = useState<KioskState>('idle');
-  const [member, setMember] = useState<MockMember | null>(null);
-  const [errorShake, setErrorShake] = useState(false);
-  const [pressedKey, setPressedKey] = useState<string | null>(null);
-  const [showTime, setShowTime] = useState('');
-  const resetTimer = useRef<NodeJS.Timeout | null>(null);
-  const loadingTimer = useRef<NodeJS.Timeout | null>(null);
+  // ── state ──
+  const [digits, setDigits] = useState<string[]>([]);
+  const [kioskState, setKioskState] = useState<'idle' | 'member'>('idle');
+  const [member, setMember] = useState<KioskMember | null>(null);
+  const [error, setError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(false);
+  const [shaking, setShaking] = useState(false);
+  const [clock, setClock] = useState({ time: '', date: '' });
+  const [quoteIdx, setQuoteIdx] = useState(0);
+  const [quoteFading, setQuoteFading] = useState(false);
+  const [memberCardVisible, setMemberCardVisible] = useState(false);
+  const [idleCardVisible, setIdleCardVisible] = useState(true);
+  const [resetProgress, setResetProgress] = useState(100);
+  const [showContinueHint, setShowContinueHint] = useState(false);
+  const [isCheckIn, setIsCheckIn] = useState(true);
 
-  // Live clock
+  const resetTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── clock ──
   useEffect(() => {
     const tick = () => {
-      setShowTime(new Date().toLocaleTimeString('en-IN', {
-        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true,
-      }));
+      const now = new Date();
+      const h = now.getHours().toString().padStart(2, '0');
+      const m = now.getMinutes().toString().padStart(2, '0');
+      const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+      const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+        'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+      setClock({
+        time: `${h}:${m}`,
+        date: `${days[now.getDay()]}  ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`,
+      });
     };
     tick();
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const resetKiosk = useCallback(() => {
-    setMemberCode('');
-    setState('idle');
-    setMember(null);
-    setErrorShake(false);
-    if (resetTimer.current) clearTimeout(resetTimer.current);
-    if (loadingTimer.current) clearTimeout(loadingTimer.current);
+  // ── quotes ──
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setQuoteFading(true);
+      setTimeout(() => {
+        setQuoteIdx(prev => (prev + 1) % QUOTES.length);
+        setQuoteFading(false);
+      }, 400);
+    }, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  const startResetTimer = useCallback(() => {
-    if (resetTimer.current) clearTimeout(resetTimer.current);
-    resetTimer.current = setTimeout(resetKiosk, RESET_DELAY);
-  }, [resetKiosk]);
-
-  const handleCheckIn = useCallback(() => {
-    const code = memberCode.trim();
-    if (!code) return;
-
-    setState('loading');
-
-    // Simulate 800ms network delay for realism
-    loadingTimer.current = setTimeout(() => {
-      const found = lookupMemberByCode(code);
-
-      if (found) {
-        setMember(found);
-        if (found.feesDue > 0) {
-          setState('warning');
-        } else {
-          setState('success');
-        }
-      } else {
-        setState('error');
-        setErrorShake(true);
-        setTimeout(() => setErrorShake(false), 600);
-      }
-      startResetTimer();
-    }, 800);
-  }, [memberCode, startResetTimer]);
-
-  // Keyboard input
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (state !== 'idle') {
-        if (e.key === 'Escape') resetKiosk();
-        return;
-      }
-      if (e.key === 'Enter') {
-        handleCheckIn();
-      } else if (e.key === 'Backspace') {
-        setMemberCode((prev) => prev.slice(0, -1));
-      } else if (/^[0-9]$/.test(e.key)) {
-        setMemberCode((prev) => {
-          if (prev.length >= 8) return prev;
-          return prev + e.key;
-        });
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state, handleCheckIn, resetKiosk]);
-
-  const numpadPress = (val: string) => {
-    if (state !== 'idle') return;
-    setPressedKey(val);
-    setTimeout(() => setPressedKey(null), 150);
-
-    if (val === 'C') {
-      setMemberCode('');
-    } else if (val === '⌫') {
-      setMemberCode((prev) => prev.slice(0, -1));
-    } else if (val === 'OK') {
-      handleCheckIn();
-    } else {
-      setMemberCode((prev) => {
-        if (prev.length >= 8) return prev;
-        return prev + val;
-      });
-    }
-  };
-
+  // ── helpers ──
   const daysRemaining = (endDate: string) => {
     return Math.max(0, Math.ceil((new Date(endDate).getTime() - Date.now()) / 86400000));
   };
 
+  const attendancePercent = (visits: number) => {
+    const daysInMonth = new Date().getDate();
+    return Math.round((visits / daysInMonth) * 100);
+  };
+
+  const getInitials = (name: string) => {
+    const parts = name.split(' ');
+    return parts.map(p => p[0]).join('').toUpperCase();
+  };
+
+  // ── reset ──
+  const resetKiosk = useCallback(() => {
+    // Slide member card out
+    if (kioskState === 'member') {
+      setMemberCardVisible(false);
+      setTimeout(() => {
+        setMember(null);
+        setKioskState('idle');
+        setDigits([]);
+        setError(false);
+        setErrorMsg(false);
+        setResetProgress(100);
+        setShowContinueHint(false);
+        setIdleCardVisible(true);
+      }, 350);
+    } else {
+      setMember(null);
+      setKioskState('idle');
+      setDigits([]);
+      setError(false);
+      setErrorMsg(false);
+      setResetProgress(100);
+      setShowContinueHint(false);
+      setIdleCardVisible(true);
+    }
+
+    if (resetTimerRef.current) clearInterval(resetTimerRef.current);
+    if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+    if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+  }, [kioskState]);
+
+  // ── auto reset countdown ──
+  const startAutoReset = useCallback(() => {
+    setResetProgress(100);
+    setShowContinueHint(false);
+
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, 100 - (elapsed / AUTO_RESET_MS) * 100);
+      setResetProgress(remaining);
+
+      if (remaining <= 0) {
+        clearInterval(interval);
+        // trigger reset
+        setMemberCardVisible(false);
+        setTimeout(() => {
+          setMember(null);
+          setKioskState('idle');
+          setDigits([]);
+          setError(false);
+          setErrorMsg(false);
+          setResetProgress(100);
+          setShowContinueHint(false);
+          setIdleCardVisible(true);
+        }, 350);
+      }
+    }, 50);
+    resetTimerRef.current = interval;
+
+    hintTimerRef.current = setTimeout(() => {
+      setShowContinueHint(true);
+    }, 6000);
+  }, []);
+
+  // ── check in ──
+  const handleCheckIn = useCallback(() => {
+    const code = digits.join('');
+    if (!code) return;
+
+    const found = KIOSK_MEMBERS[code];
+    if (found) {
+      setIdleCardVisible(false);
+      const checkingIn = found.visitCount % 2 === 1;
+      setIsCheckIn(checkingIn);
+
+      setTimeout(() => {
+        setMember(found);
+        setKioskState('member');
+        setTimeout(() => setMemberCardVisible(true), 50);
+        startAutoReset();
+      }, 300);
+    } else {
+      // Error
+      setError(true);
+      setShaking(true);
+      setTimeout(() => setShaking(false), 400);
+      setErrorMsg(true);
+
+      errorTimerRef.current = setTimeout(() => {
+        setError(false);
+        setErrorMsg(false);
+        setDigits([]);
+      }, 2000);
+    }
+  }, [digits, startAutoReset]);
+
+  // ── keyboard input ──
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // If member is showing, any key resets
+      if (kioskState === 'member') {
+        e.preventDefault();
+        resetKiosk();
+        return;
+      }
+
+      if (/^[0-9]$/.test(e.key)) {
+        setDigits(prev => prev.length >= MAX_DIGITS ? prev : [...prev, e.key]);
+        setError(false);
+        setErrorMsg(false);
+      } else if (e.key === 'Backspace') {
+        setDigits(prev => prev.slice(0, -1));
+        setError(false);
+        setErrorMsg(false);
+      } else if (e.key === 'Enter') {
+        handleCheckIn();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [kioskState, handleCheckIn, resetKiosk]);
+
+  // ── numpad tap ──
+  const numpadTap = (key: string) => {
+    if (kioskState === 'member') {
+      resetKiosk();
+      return;
+    }
+
+    if (key === '⌫') {
+      setDigits(prev => prev.slice(0, -1));
+      setError(false);
+      setErrorMsg(false);
+    } else if (key === 'CHECKIN') {
+      handleCheckIn();
+    } else {
+      setDigits(prev => prev.length >= MAX_DIGITS ? prev : [...prev, key]);
+      setError(false);
+      setErrorMsg(false);
+    }
+  };
+
+  const daysLeft = member ? daysRemaining(member.planEnd) : 0;
+
+  // ═══════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════
+
   return (
-    <div className="kiosk-mode min-h-screen bg-[#050508] flex flex-col items-center justify-center relative select-none overflow-hidden">
-      {/* Ambient background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-950/20 via-transparent to-cyan-950/20" />
-        <div className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] bg-violet-600/[0.07] rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] bg-cyan-600/[0.07] rounded-full blur-[120px]" />
-        {/* Grid pattern */}
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-      </div>
+    <>
+      {/* ── GOOGLE FONT ── */}
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet"
+      />
 
-      {/* Top bar — clock + branding */}
-      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 py-6 z-10">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/20">
-            <Fingerprint className="w-5 h-5 text-white" />
+      <div className="kiosk-root">
+
+        {/* ═══ BACKGROUND ═══ */}
+        <div className="kiosk-bg">
+          {/* Grid floor */}
+          <div className="kiosk-bg-grid" />
+          {/* Top glow */}
+          <div className="kiosk-bg-glow" />
+          {/* Floor strip */}
+          <div className="kiosk-bg-floor" />
+          {/* Left silhouette - barbell rack */}
+          <svg className="kiosk-bg-rack" viewBox="0 0 200 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Vertical posts */}
+            <rect x="40" y="60" width="8" height="300" fill="rgba(255,255,255,0.04)" />
+            <rect x="140" y="60" width="8" height="300" fill="rgba(255,255,255,0.04)" />
+            {/* Horizontal bars */}
+            <rect x="30" y="100" width="130" height="6" rx="3" fill="rgba(255,255,255,0.04)" />
+            <rect x="30" y="160" width="130" height="6" rx="3" fill="rgba(255,255,255,0.04)" />
+            <rect x="30" y="220" width="130" height="6" rx="3" fill="rgba(255,255,255,0.04)" />
+            <rect x="30" y="280" width="130" height="6" rx="3" fill="rgba(255,255,255,0.04)" />
+            {/* Weight plates */}
+            <rect x="15" y="88" width="20" height="30" rx="4" fill="rgba(255,255,255,0.035)" />
+            <rect x="155" y="88" width="20" height="30" rx="4" fill="rgba(255,255,255,0.035)" />
+            <rect x="15" y="148" width="20" height="30" rx="4" fill="rgba(255,255,255,0.035)" />
+            <rect x="155" y="148" width="20" height="30" rx="4" fill="rgba(255,255,255,0.035)" />
+            <rect x="10" y="208" width="25" height="30" rx="4" fill="rgba(255,255,255,0.03)" />
+            <rect x="155" y="208" width="25" height="30" rx="4" fill="rgba(255,255,255,0.03)" />
+            {/* Base */}
+            <rect x="20" y="360" width="150" height="6" rx="3" fill="rgba(255,255,255,0.04)" />
+          </svg>
+          {/* Right silhouette - person lifting */}
+          <svg className="kiosk-bg-lifter" viewBox="0 0 200 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Head */}
+            <circle cx="100" cy="80" r="16" fill="rgba(255,255,255,0.05)" />
+            {/* Torso */}
+            <path d="M88 96 L80 200 L120 200 L112 96 Z" fill="rgba(255,255,255,0.04)" />
+            {/* Arms holding barbell up */}
+            <path d="M80 110 L40 70 L160 70 L120 110" stroke="rgba(255,255,255,0.05)" strokeWidth="6" strokeLinecap="round" fill="none" />
+            {/* Barbell bar */}
+            <rect x="20" y="64" width="160" height="5" rx="2.5" fill="rgba(255,255,255,0.05)" />
+            {/* Barbell plates */}
+            <rect x="8" y="50" width="18" height="34" rx="4" fill="rgba(255,255,255,0.04)" />
+            <rect x="174" y="50" width="18" height="34" rx="4" fill="rgba(255,255,255,0.04)" />
+            {/* Legs */}
+            <path d="M86 200 L70 330 L85 330" fill="rgba(255,255,255,0.04)" />
+            <path d="M114 200 L130 330 L115 330" fill="rgba(255,255,255,0.04)" />
+            {/* Feet */}
+            <rect x="62" y="328" width="30" height="6" rx="3" fill="rgba(255,255,255,0.04)" />
+            <rect x="108" y="328" width="30" height="6" rx="3" fill="rgba(255,255,255,0.04)" />
+          </svg>
+          {/* Overlay */}
+          <div className="kiosk-bg-overlay" />
+        </div>
+
+        {/* ═══ TOP ZONE ═══ */}
+        <div className="kiosk-top">
+          <div className="kiosk-top-left">
+            <div className="kiosk-gym-name">IRONPEAK FITNESS CLUB</div>
+            <div className="kiosk-gym-tagline">Train Hard. Live Strong.</div>
+            <div className="kiosk-gym-line" />
           </div>
-          <div>
-            <p className="text-white/90 text-sm font-medium tracking-tight">Iron Paradise Gym</p>
-            <p className="text-white/30 text-[11px]">Member Check-in</p>
+          <div className="kiosk-top-center">
+            <div className="kiosk-clock">{clock.time}</div>
+            <div className="kiosk-date">{clock.date}</div>
+          </div>
+          <div className="kiosk-top-right">
+            Powered by GymOS
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-white/80 text-sm font-mono tracking-widest">{showTime}</p>
-          <p className="text-white/25 text-[11px] mt-0.5">
-            {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' })}
-          </p>
-        </div>
-      </div>
 
-      {/* ═══════ IDLE STATE ═══════ */}
-      {state === 'idle' && (
-        <div className="text-center relative z-10 w-full max-w-md px-6 animate-fade-in">
-          {/* Input display */}
-          <div className="relative mb-10">
-            <div className="absolute -inset-3 bg-gradient-to-r from-violet-500/10 to-cyan-500/10 rounded-3xl blur-2xl" />
-            <div className="relative bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] rounded-2xl px-6 py-7">
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <Keyboard size={14} className="text-white/30" />
-                <p className="text-white/30 text-xs font-medium uppercase tracking-[0.2em]">Enter Member ID</p>
-              </div>
-              <div className="text-5xl font-mono font-medium tracking-[0.4em] min-h-[72px] flex items-center justify-center">
-                {memberCode ? (
-                  <span className="bg-gradient-to-r from-violet-300 via-violet-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-lg">
-                    {memberCode}
-                  </span>
-                ) : (
-                  <span className="text-white/[0.12]">• • • •</span>
+        {/* ═══ MIDDLE ZONE ═══ */}
+        <div className="kiosk-middle">
+
+          {/* ── IDLE STATE ── */}
+          {kioskState === 'idle' && (
+            <div className={`kiosk-idle ${idleCardVisible ? 'kiosk-idle--visible' : 'kiosk-idle--hidden'}`}>
+              <h1 className="kiosk-welcome">WELCOME</h1>
+              <p className="kiosk-welcome-sub">Scan your ID or enter member number</p>
+
+              <div className={`kiosk-input-card ${shaking ? 'kiosk-shake' : ''}`}>
+                <div className="kiosk-input-label">MEMBER ID</div>
+                <div className="kiosk-digit-slots">
+                  {Array.from({ length: MAX_DIGITS }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`kiosk-digit-slot ${
+                        i === digits.length ? 'kiosk-digit-slot--active' : ''
+                      } ${error ? 'kiosk-digit-slot--error' : ''}`}
+                    >
+                      {digits[i] || <span className="kiosk-digit-empty">_</span>}
+                    </div>
+                  ))}
+                </div>
+                {digits.length > 0 && (
+                  <div className="kiosk-enter-hint">
+                    Press ENTER to check in
+                  </div>
                 )}
               </div>
-              {/* Cursor line */}
-              <div className="flex justify-center mt-2">
-                <div className="w-8 h-0.5 bg-gradient-to-r from-violet-500 to-cyan-500 rounded-full animate-pulse" />
+
+              {/* Error message */}
+              {errorMsg && (
+                <div className="kiosk-error-msg">
+                  Member not found. Please check your ID.
+                </div>
+              )}
+
+              {/* Numpad */}
+              <div className="kiosk-numpad">
+                {['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', 'CHECKIN'].map(key => (
+                  <button
+                    key={key}
+                    className={`kiosk-numpad-key ${key === 'CHECKIN' ? 'kiosk-numpad-key--checkin' : ''} ${key === '⌫' ? 'kiosk-numpad-key--back' : ''}`}
+                    onClick={() => numpadTap(key)}
+                  >
+                    {key === 'CHECKIN' ? 'CHECK IN →' : key}
+                  </button>
+                ))}
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Numpad */}
-          <div className="grid grid-cols-3 gap-2.5 max-w-[280px] mx-auto">
-            {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', 'OK'].map((key) => {
-              const isOK = key === 'OK';
-              const isClear = key === 'C';
-              const isPressed = pressedKey === key;
+          {/* ── MEMBER FOUND STATE ── */}
+          {kioskState === 'member' && member && (
+            <div
+              className={`kiosk-member-card ${memberCardVisible ? 'kiosk-member-card--visible' : 'kiosk-member-card--hidden'}`}
+              onClick={resetKiosk}
+            >
+              <div className="kiosk-member-inner">
+                {/* Left column */}
+                <div className="kiosk-member-left">
+                  <div
+                    className="kiosk-member-avatar"
+                    style={{
+                      background: member.accentBg,
+                      border: member.accentBorder,
+                    }}
+                  >
+                    {getInitials(member.name)}
+                  </div>
+                  <div className="kiosk-member-name">{member.name}</div>
+                  <div className="kiosk-member-id">ID #{member.id}</div>
+                  <div
+                    className="kiosk-member-plan-badge"
+                    style={{
+                      color: member.accentColor,
+                      background: member.accentBg,
+                      border: `1px solid ${member.accentColor}30`,
+                    }}
+                  >
+                    {member.plan}
+                  </div>
 
-              return (
-                <button
-                  key={key}
-                  onClick={() => numpadPress(key)}
-                  className={`
-                    relative h-[60px] rounded-2xl text-lg font-medium transition-all duration-150
-                    ${isPressed ? 'scale-[0.92] brightness-125' : 'scale-100'}
-                    ${isOK
-                      ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20 active:shadow-emerald-500/40'
-                      : isClear
-                      ? 'bg-white/[0.04] text-red-400 border border-red-500/20 active:bg-red-500/10'
-                      : 'bg-white/[0.05] text-white/80 border border-white/[0.06] active:bg-white/10'
-                    }
-                  `}
-                >
-                  <span className="relative z-10">{key}</span>
-                </button>
-              );
-            })}
-          </div>
+                  {/* Check In / Out badge */}
+                  <div className={`kiosk-check-badge ${isCheckIn ? 'kiosk-check-badge--in' : 'kiosk-check-badge--out'}`}>
+                    <span className="kiosk-check-badge-ring" />
+                    {isCheckIn ? '✓ CHECKED IN' : '→ CHECKED OUT'}
+                  </div>
+                </div>
 
-          {/* Backspace row */}
-          <button
-            onClick={() => numpadPress('⌫')}
-            className="mt-2.5 w-full max-w-[280px] mx-auto h-10 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white/40 text-sm font-medium transition-all active:bg-white/[0.06] flex items-center justify-center gap-2"
-          >
-            ⌫ Backspace
-          </button>
+                {/* Right column */}
+                <div className="kiosk-member-right">
+                  <div className="kiosk-info-grid">
+                    {/* Card 1 — AGE */}
+                    <div className="kiosk-info-card">
+                      <div className="kiosk-info-label">AGE</div>
+                      <div className="kiosk-info-value">{member.age} yrs</div>
+                    </div>
+                    {/* Card 2 — WEIGHT */}
+                    <div className="kiosk-info-card">
+                      <div className="kiosk-info-label">LAST WEIGHT</div>
+                      <div className="kiosk-info-value">{member.weight}</div>
+                      <div className="kiosk-info-sub">{member.weightLoggedAgo}</div>
+                    </div>
+                    {/* Card 3 — PLAN ENDS */}
+                    <div className="kiosk-info-card">
+                      <div className="kiosk-info-label">PLAN ENDS</div>
+                      <div className="kiosk-info-value" style={{ fontSize: '18px' }}>
+                        {new Date(member.planEnd).toLocaleDateString('en-IN', {
+                          day: 'numeric', month: 'short', year: 'numeric'
+                        })}
+                      </div>
+                      <div className={`kiosk-info-sub ${
+                        daysLeft > 30 ? 'kiosk-info-sub--green' :
+                        daysLeft >= 7 ? 'kiosk-info-sub--orange' :
+                        'kiosk-info-sub--red'
+                      }`}>
+                        {daysLeft > 30 ? `${daysLeft} days left` :
+                         daysLeft >= 7 ? `${daysLeft} days left ⚠` :
+                         daysLeft > 0 ? `${daysLeft} days left — RENEW NOW` :
+                         'EXPIRED — RENEW NOW'}
+                      </div>
+                    </div>
+                    {/* Card 4 — THIS MONTH */}
+                    <div className="kiosk-info-card">
+                      <div className="kiosk-info-label">THIS MONTH</div>
+                      <div className="kiosk-info-value">{member.visitsThisMonth} visits</div>
+                      <div className="kiosk-info-sub">{attendancePercent(member.visitsThisMonth)}% attendance</div>
+                    </div>
+                    {/* Card 5 — TOTAL VISITS */}
+                    <div className="kiosk-info-card">
+                      <div className="kiosk-info-label">TOTAL VISITS</div>
+                      <div className="kiosk-info-value kiosk-info-value--large">{member.totalVisits}</div>
+                    </div>
+                    {/* Card 6 — MEMBER SINCE */}
+                    <div className="kiosk-info-card">
+                      <div className="kiosk-info-label">MEMBER SINCE</div>
+                      <div className="kiosk-info-value" style={{ fontSize: '18px' }}>{member.memberSince}</div>
+                      <div className="kiosk-info-sub">{member.memberSinceDuration}</div>
+                    </div>
+                  </div>
 
-          <p className="text-white/15 text-xs mt-8">
-            Type on keyboard or use numpad  •  <span className="font-mono bg-white/[0.06] px-1.5 py-0.5 rounded">Esc</span> to reset
-          </p>
-        </div>
-      )}
+                  {/* Fee warning */}
+                  {(member.feeStatus === 'due' || member.feeStatus === 'overdue') && (
+                    <div className="kiosk-fee-warning">
+                      <div className="kiosk-fee-left">
+                        <span className="kiosk-fee-icon">⚠</span>
+                        <span className="kiosk-fee-label">
+                          {member.feeStatus === 'overdue' ? 'OVERDUE FEE' : 'PENDING FEE'}
+                        </span>
+                      </div>
+                      <div className="kiosk-fee-right">
+                        ₹{member.feeAmount?.toLocaleString('en-IN')} {member.feeStatus === 'overdue' ? 'overdue' : 'due'} — Please collect at front desk
+                      </div>
+                    </div>
+                  )}
 
-      {/* ═══════ LOADING STATE ═══════ */}
-      {state === 'loading' && (
-        <div className="text-center relative z-10 animate-fade-in">
-          <div className="relative w-20 h-20 mx-auto mb-8">
-            <div className="absolute inset-0 rounded-full border-[3px] border-white/[0.08]" />
-            <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-violet-400 border-r-cyan-400 animate-spin" />
-            <div className="absolute inset-[6px] rounded-full border-[3px] border-transparent border-b-violet-300/60 border-l-cyan-300/60 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.2s' }} />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Fingerprint className="w-6 h-6 text-white/40" />
-            </div>
-          </div>
-          <p className="text-white/90 text-lg font-medium">Verifying...</p>
-          <p className="text-white/30 text-sm mt-1 font-mono">ID: {memberCode}</p>
-        </div>
-      )}
-
-      {/* ═══════ SUCCESS STATE — No Fee Due ═══════ */}
-      {state === 'success' && member && (
-        <div className="relative z-10 w-full max-w-lg mx-4 animate-scale-in" onClick={resetKiosk}>
-          <div className="absolute -inset-6 bg-gradient-to-r from-emerald-500/15 to-cyan-500/15 rounded-[32px] blur-3xl" />
-
-          <div className="relative bg-white/[0.06] backdrop-blur-2xl border border-white/[0.12] rounded-[28px] p-8 shadow-2xl">
-            {/* Success icon */}
-            <div className="flex justify-center mb-6">
-              <div className="relative">
-                <div className="absolute inset-0 bg-emerald-500/30 rounded-full blur-xl animate-pulse" />
-                <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-xl shadow-emerald-500/30">
-                  <CheckCircle2 className="w-8 h-8 text-white" />
+                  {/* Attendance mini calendar */}
+                  <div className="kiosk-attendance">
+                    <div className="kiosk-attendance-label">
+                      {new Date().toLocaleDateString('en-US', { month: 'long' }).toUpperCase()} ATTENDANCE
+                    </div>
+                    <div className="kiosk-attendance-circles">
+                      {member.attendance.map((present, i) => {
+                        const dayNum = i + 1;
+                        const isToday = dayNum === new Date().getDate();
+                        return (
+                          <div
+                            key={i}
+                            className={`kiosk-att-circle ${
+                              isToday ? 'kiosk-att-circle--today' :
+                              present ? 'kiosk-att-circle--present' :
+                              'kiosk-att-circle--absent'
+                            }`}
+                          >
+                            {dayNum}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Member info */}
-            <div className="text-center mb-6">
-              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 p-[3px]">
-                <div className="w-full h-full rounded-full bg-[#0a0a0f] flex items-center justify-center">
-                  <span className="text-3xl font-medium bg-gradient-to-r from-violet-300 to-cyan-300 bg-clip-text text-transparent">
-                    {member.name[0]}
-                  </span>
+              {/* Continue hint */}
+              {showContinueHint && (
+                <div className="kiosk-continue-hint">
+                  TAP OR PRESS ANY KEY TO CONTINUE
                 </div>
-              </div>
-              <h2 className="text-2xl font-medium text-white tracking-tight">{member.name}</h2>
-              <p className="text-white/40 font-mono text-sm mt-1">ID: {member.memberCode}</p>
-              <div className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/20">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-emerald-400 font-medium text-sm">Checked In Successfully</span>
-              </div>
-            </div>
+              )}
 
-            {/* Plan info */}
-            <div className="bg-white/[0.04] rounded-2xl p-5 mb-5 border border-white/[0.06]">
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-white/40 text-sm">Plan</span>
-                <span className="text-white font-medium">{member.plan}</span>
-              </div>
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-white/40 text-sm">Days Remaining</span>
-                <span className={`font-medium text-lg ${
-                  daysRemaining(member.planEnd) > 30 ? 'text-emerald-400' :
-                  daysRemaining(member.planEnd) > 7 ? 'text-amber-400' : 'text-red-400'
-                }`}>
-                  {daysRemaining(member.planEnd)}
-                </span>
-              </div>
-              <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+              {/* Auto-reset progress bar */}
+              <div className="kiosk-reset-bar-track">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-1000 ease-out"
-                  style={{ width: `${Math.min(100, (daysRemaining(member.planEnd) / 180) * 100)}%` }}
+                  className="kiosk-reset-bar-fill"
+                  style={{ width: `${resetProgress}%` }}
                 />
               </div>
             </div>
-
-            {/* Quick stats */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="text-center p-3 bg-violet-500/[0.08] rounded-xl border border-violet-500/[0.12]">
-                <p className="text-xl font-medium text-violet-400 font-mono">{member.totalVisits}</p>
-                <p className="text-white/30 text-[11px] mt-1">Total Visits</p>
-              </div>
-              <div className="text-center p-3 bg-cyan-500/[0.08] rounded-xl border border-cyan-500/[0.12]">
-                <p className="text-xl font-medium text-cyan-400 font-mono">{member.thisMonthVisits}</p>
-                <p className="text-white/30 text-[11px] mt-1">This Month</p>
-              </div>
-              <div className="text-center p-3 bg-white/[0.03] rounded-xl border border-white/[0.06]">
-                <p className="text-lg font-medium text-white/70">
-                  {new Date(member.joinedAt).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' })}
-                </p>
-                <p className="text-white/30 text-[11px] mt-1">Since</p>
-              </div>
-            </div>
-
-            <p className="text-center text-white/20 text-xs mt-6">Tap anywhere to dismiss  •  Auto-resets in 8s</p>
-          </div>
+          )}
         </div>
-      )}
 
-      {/* ═══════ WARNING STATE — Fee Due ═══════ */}
-      {state === 'warning' && member && (
-        <div className="relative z-10 w-full max-w-lg mx-4 animate-scale-in" onClick={resetKiosk}>
-          <div className="absolute -inset-6 bg-gradient-to-r from-amber-500/15 to-orange-500/15 rounded-[32px] blur-3xl" />
-
-          <div className="relative bg-white/[0.06] backdrop-blur-2xl border border-amber-500/20 rounded-[28px] p-8 shadow-2xl">
-            {/* Warning icon */}
-            <div className="flex justify-center mb-6">
-              <div className="relative">
-                <div className="absolute inset-0 bg-amber-500/30 rounded-full blur-xl animate-pulse" />
-                <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-xl shadow-amber-500/30">
-                  <AlertTriangle className="w-8 h-8 text-white" />
-                </div>
-              </div>
-            </div>
-
-            {/* Member info */}
-            <div className="text-center mb-6">
-              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 p-[3px]">
-                <div className="w-full h-full rounded-full bg-[#0a0a0f] flex items-center justify-center">
-                  <span className="text-3xl font-medium bg-gradient-to-r from-amber-300 to-orange-300 bg-clip-text text-transparent">
-                    {member.name[0]}
-                  </span>
-                </div>
-              </div>
-              <h2 className="text-2xl font-medium text-white tracking-tight">{member.name}</h2>
-              <p className="text-white/40 font-mono text-sm mt-1">ID: {member.memberCode}</p>
-              <div className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/20">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-emerald-400 font-medium text-sm">Checked In</span>
-              </div>
-            </div>
-
-            {/* Fee due warning */}
-            <div className="bg-red-500/[0.08] border border-red-500/20 rounded-2xl p-5 mb-5">
-              <div className="flex items-center gap-3 mb-2">
-                <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
-                <span className="text-red-400 font-medium">Payment Due</span>
-              </div>
-              <p className="text-2xl font-medium text-red-300 font-mono">₹{member.feesDue.toLocaleString('en-IN')}</p>
-              <p className="text-red-400/60 text-sm mt-1">Please visit reception to clear dues</p>
-            </div>
-
-            {/* Plan info */}
-            <div className="bg-white/[0.04] rounded-2xl p-5 mb-5 border border-white/[0.06]">
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-white/40 text-sm">Plan</span>
-                <span className="text-white font-medium">{member.plan}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-white/40 text-sm">Days Remaining</span>
-                <span className="font-medium text-lg text-amber-400">
-                  {daysRemaining(member.planEnd)}
-                </span>
-              </div>
-            </div>
-
-            {/* Quick stats */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="text-center p-3 bg-white/[0.03] rounded-xl border border-white/[0.06]">
-                <p className="text-xl font-medium text-white/70 font-mono">{member.totalVisits}</p>
-                <p className="text-white/30 text-[11px] mt-1">Total Visits</p>
-              </div>
-              <div className="text-center p-3 bg-white/[0.03] rounded-xl border border-white/[0.06]">
-                <p className="text-xl font-medium text-white/70 font-mono">{member.thisMonthVisits}</p>
-                <p className="text-white/30 text-[11px] mt-1">This Month</p>
-              </div>
-            </div>
-
-            <p className="text-center text-white/20 text-xs mt-6">Tap anywhere to dismiss  •  Auto-resets in 8s</p>
+        {/* ═══ BOTTOM ZONE ═══ */}
+        <div className="kiosk-bottom">
+          <div className="kiosk-bottom-left">
+            <div className="kiosk-stat-pill">TODAY  43 CHECK-INS</div>
+            <div className="kiosk-stat-pill">ACTIVE MEMBERS  247</div>
+            <div className="kiosk-stat-pill">OPEN 6AM – 10PM</div>
           </div>
-        </div>
-      )}
-
-      {/* ═══════ ERROR STATE ═══════ */}
-      {state === 'error' && (
-        <div
-          className={`text-center relative z-10 ${errorShake ? 'animate-shake' : ''}`}
-          onClick={resetKiosk}
-        >
-          <div className="relative mb-6">
-            <div className="absolute inset-0 bg-red-500/20 rounded-full blur-2xl animate-pulse" />
-            <div className="relative w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-xl shadow-red-500/30">
-              <XCircle className="w-10 h-10 text-white" />
+          <div className="kiosk-bottom-center">
+            <div className={`kiosk-quote ${quoteFading ? 'kiosk-quote--fading' : ''}`}>
+              &ldquo;{QUOTES[quoteIdx]}&rdquo;
             </div>
           </div>
-          <h2 className="text-white text-2xl font-medium mb-2">Member Not Found</h2>
-          <p className="text-white/50 text-base mb-2 font-mono">ID: {memberCode}</p>
-          <p className="text-white/30 text-sm mb-8">Please check the ID and try again</p>
-          <button
-            onClick={(e) => { e.stopPropagation(); resetKiosk(); }}
-            className="px-8 py-3 bg-white/[0.06] backdrop-blur-sm border border-white/[0.12] rounded-xl text-white font-medium hover:bg-white/10 transition-all active:scale-[0.97]"
-          >
-            Try Again
-          </button>
+          <div className="kiosk-bottom-right">
+            <div className="kiosk-demo-label">DEMO NAV</div>
+            <Link href="/dashboard" className="kiosk-demo-btn">Admin Panel</Link>
+            <Link href="/member-app" className="kiosk-demo-btn">Member App</Link>
+          </div>
         </div>
-      )}
-
-      {/* Bottom branding */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/[0.08] text-[11px] font-medium tracking-[0.15em] uppercase">
-        Powered by GymOS
       </div>
 
-      {/* Inline shake animation */}
+      {/* ═══ STYLES ═══ */}
       <style jsx>{`
+        /* ── Reset & Root ── */
+        .kiosk-root {
+          position: fixed;
+          inset: 0;
+          width: 100vw;
+          height: 100vh;
+          overflow: hidden;
+          font-family: 'Inter', system-ui, sans-serif;
+          user-select: none;
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* ── Background ── */
+        .kiosk-bg {
+          position: absolute;
+          inset: 0;
+          background: #0A0A0A;
+          z-index: 0;
+        }
+
+        .kiosk-bg-grid {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 40%;
+          background-image:
+            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+          background-size: 60px 60px;
+          transform: perspective(400px) rotateX(45deg);
+          transform-origin: bottom center;
+          opacity: 0.6;
+        }
+
+        .kiosk-bg-glow {
+          position: absolute;
+          top: -20%;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 120%;
+          height: 60%;
+          background: radial-gradient(ellipse at center, rgba(232,93,4,0.08) 0%, transparent 70%);
+        }
+
+        .kiosk-bg-floor {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 8%;
+          background: linear-gradient(to top, rgba(255,255,255,0.02) 0%, transparent 100%);
+        }
+
+        .kiosk-bg-rack {
+          position: absolute;
+          left: 2%;
+          bottom: 10%;
+          width: 12%;
+          height: 50%;
+          opacity: 0.7;
+        }
+
+        .kiosk-bg-lifter {
+          position: absolute;
+          right: 3%;
+          bottom: 10%;
+          width: 10%;
+          height: 45%;
+          opacity: 0.7;
+        }
+
+        .kiosk-bg-overlay {
+          position: absolute;
+          inset: 0;
+          background: rgba(10,10,10,0.85);
+        }
+
+        /* ── Top Zone ── */
+        .kiosk-top {
+          position: relative;
+          z-index: 2;
+          flex: 0 0 20%;
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          padding: 32px 48px 0;
+        }
+
+        .kiosk-top-left {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .kiosk-gym-name {
+          font-family: 'Inter', sans-serif;
+          font-weight: 700;
+          font-size: 18px;
+          color: #FFFFFF;
+          letter-spacing: 3px;
+          font-stretch: condensed;
+        }
+
+        .kiosk-gym-tagline {
+          font-size: 12px;
+          color: #E85D04;
+          letter-spacing: 2px;
+          margin-top: 4px;
+        }
+
+        .kiosk-gym-line {
+          width: 40px;
+          height: 2px;
+          background: #E85D04;
+          margin-top: 12px;
+        }
+
+        .kiosk-top-center {
+          text-align: center;
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          top: 28px;
+        }
+
+        .kiosk-clock {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 48px;
+          color: #FFFFFF;
+          letter-spacing: 4px;
+          line-height: 1;
+        }
+
+        .kiosk-date {
+          font-size: 11px;
+          color: rgba(255,255,255,0.4);
+          letter-spacing: 4px;
+          margin-top: 4px;
+        }
+
+        .kiosk-top-right {
+          font-size: 10px;
+          color: rgba(255,255,255,0.2);
+          letter-spacing: 1px;
+        }
+
+        /* ── Middle Zone ── */
+        .kiosk-middle {
+          position: relative;
+          z-index: 2;
+          flex: 0 0 55%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* ── IDLE ── */
+        .kiosk-idle {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          transition: all 300ms ease;
+        }
+
+        .kiosk-idle--visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .kiosk-idle--hidden {
+          opacity: 0;
+          transform: translateY(-100%);
+          pointer-events: none;
+        }
+
+        .kiosk-welcome {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 72px;
+          color: #FFFFFF;
+          letter-spacing: 8px;
+          line-height: 1;
+          margin: 0;
+        }
+
+        .kiosk-welcome-sub {
+          font-size: 14px;
+          color: rgba(255,255,255,0.5);
+          letter-spacing: 1px;
+          margin-top: 8px;
+        }
+
+        /* ── Input Card ── */
+        .kiosk-input-card {
+          margin-top: 32px;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 16px;
+          padding: 32px 40px;
+          width: 480px;
+          max-width: 90vw;
+        }
+
+        .kiosk-input-label {
+          font-size: 10px;
+          color: #E85D04;
+          letter-spacing: 3px;
+          text-transform: uppercase;
+          font-weight: 600;
+        }
+
+        .kiosk-digit-slots {
+          display: flex;
+          gap: 10px;
+          margin-top: 12px;
+          justify-content: center;
+        }
+
+        .kiosk-digit-slot {
+          width: 56px;
+          height: 72px;
+          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.15);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 48px;
+          color: #FFFFFF;
+          transition: all 150ms ease;
+        }
+
+        .kiosk-digit-slot--active {
+          border-bottom: 3px solid #E85D04;
+        }
+
+        .kiosk-digit-slot--error {
+          border-color: #EF4444 !important;
+          animation: errorFlash 200ms ease 2;
+        }
+
+        .kiosk-digit-empty {
+          color: rgba(255,255,255,0.15);
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 36px;
+        }
+
+        .kiosk-enter-hint {
+          text-align: center;
+          font-size: 11px;
+          color: rgba(255,255,255,0.3);
+          margin-top: 16px;
+        }
+
+        .kiosk-error-msg {
+          font-size: 13px;
+          color: #EF4444;
+          margin-top: 16px;
+          text-align: center;
+          animation: fadeSlideUp 200ms ease forwards;
+        }
+
+        /* ── Shake ── */
+        .kiosk-shake {
+          animation: shake 400ms ease;
+        }
+
+        /* ── Numpad ── */
+        .kiosk-numpad {
+          display: grid;
+          grid-template-columns: repeat(3, 64px);
+          gap: 8px;
+          margin-top: 24px;
+        }
+
+        .kiosk-numpad-key {
+          width: 64px;
+          height: 56px;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 10px;
+          color: #FFFFFF;
+          font-size: 20px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 100ms ease;
+          font-family: 'Inter', sans-serif;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          outline: none;
+        }
+
+        .kiosk-numpad-key:hover {
+          background: rgba(255,255,255,0.12);
+        }
+
+        .kiosk-numpad-key:active {
+          transform: scale(0.95);
+          background: rgba(255,255,255,0.18);
+        }
+
+        .kiosk-numpad-key--checkin {
+          background: #E85D04;
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        .kiosk-numpad-key--checkin:hover {
+          background: #C44D00;
+        }
+
+        .kiosk-numpad-key--back {
+          font-size: 22px;
+        }
+
+        /* ── Member Card ── */
+        .kiosk-member-card {
+          width: 100%;
+          max-width: 860px;
+          padding: 0 24px;
+          transition: all 350ms cubic-bezier(0.16, 1, 0.3, 1);
+          cursor: pointer;
+        }
+
+        .kiosk-member-card--visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .kiosk-member-card--hidden {
+          opacity: 0;
+          transform: translateY(60px);
+        }
+
+        .kiosk-member-inner {
+          background: rgba(15,15,15,0.95);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 20px;
+          padding: 32px 40px;
+          backdrop-filter: blur(20px);
+          display: flex;
+          gap: 36px;
+        }
+
+        /* ── Left Column ── */
+        .kiosk-member-left {
+          flex: 0 0 35%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding-top: 8px;
+        }
+
+        .kiosk-member-avatar {
+          width: 88px;
+          height: 88px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 32px;
+          font-weight: 700;
+          color: #FFFFFF;
+          font-family: 'Inter', sans-serif;
+        }
+
+        .kiosk-member-name {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 32px;
+          color: #FFFFFF;
+          line-height: 1;
+          margin-top: 14px;
+        }
+
+        .kiosk-member-id {
+          font-size: 12px;
+          color: rgba(255,255,255,0.4);
+          margin-top: 4px;
+        }
+
+        .kiosk-member-plan-badge {
+          font-size: 10px;
+          font-weight: 700;
+          padding: 4px 12px;
+          border-radius: 999px;
+          margin-top: 8px;
+          letter-spacing: 0.5px;
+        }
+
+        /* ── Check Badge ── */
+        .kiosk-check-badge {
+          margin-top: 16px;
+          padding: 8px 20px;
+          border-radius: 10px;
+          font-size: 14px;
+          font-weight: 700;
+          letter-spacing: 2px;
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .kiosk-check-badge--in {
+          background: rgba(34,197,94,0.15);
+          border: 1px solid rgba(34,197,94,0.3);
+          color: #22C55E;
+        }
+
+        .kiosk-check-badge--out {
+          background: rgba(232,93,4,0.15);
+          border: 1px solid rgba(232,93,4,0.3);
+          color: #E85D04;
+        }
+
+        .kiosk-check-badge-ring {
+          position: absolute;
+          inset: -4px;
+          border-radius: 14px;
+          border: 2px solid currentColor;
+          opacity: 0;
+          animation: pulseRing 2s ease-out infinite;
+        }
+
+        /* ── Right Column ── */
+        .kiosk-member-right {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .kiosk-info-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+        }
+
+        .kiosk-info-card {
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 12px;
+          padding: 14px 16px;
+        }
+
+        .kiosk-info-label {
+          font-size: 10px;
+          color: #E85D04;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          font-weight: 600;
+        }
+
+        .kiosk-info-value {
+          font-size: 22px;
+          color: #FFFFFF;
+          font-weight: 700;
+          margin-top: 4px;
+          line-height: 1.2;
+        }
+
+        .kiosk-info-value--large {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 28px;
+        }
+
+        .kiosk-info-sub {
+          font-size: 10px;
+          color: rgba(255,255,255,0.35);
+          margin-top: 2px;
+        }
+
+        .kiosk-info-sub--green { color: #22C55E; }
+        .kiosk-info-sub--orange { color: #F59E0B; }
+        .kiosk-info-sub--red { color: #EF4444; font-weight: 600; }
+
+        /* ── Fee Warning ── */
+        .kiosk-fee-warning {
+          margin-top: 12px;
+          background: rgba(232,93,4,0.12);
+          border: 1px solid rgba(232,93,4,0.35);
+          border-radius: 10px;
+          padding: 14px 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .kiosk-fee-left {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .kiosk-fee-icon {
+          font-size: 18px;
+        }
+
+        .kiosk-fee-label {
+          font-size: 12px;
+          font-weight: 700;
+          color: #E85D04;
+          letter-spacing: 1px;
+        }
+
+        .kiosk-fee-right {
+          font-size: 13px;
+          color: rgba(255,255,255,0.7);
+        }
+
+        /* ── Attendance ── */
+        .kiosk-attendance {
+          margin-top: 14px;
+        }
+
+        .kiosk-attendance-label {
+          font-size: 10px;
+          color: rgba(255,255,255,0.35);
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+        }
+
+        .kiosk-attendance-circles {
+          display: flex;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+
+        .kiosk-att-circle {
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 11px;
+          font-weight: 500;
+        }
+
+        .kiosk-att-circle--present {
+          background: rgba(34,197,94,0.25);
+          border: 1px solid #22C55E;
+          color: #22C55E;
+        }
+
+        .kiosk-att-circle--absent {
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: rgba(255,255,255,0.25);
+        }
+
+        .kiosk-att-circle--today {
+          background: #E85D04;
+          color: #FFFFFF;
+          font-weight: 700;
+        }
+
+        /* ── Continue hint ── */
+        .kiosk-continue-hint {
+          text-align: center;
+          font-size: 11px;
+          color: rgba(255,255,255,0.3);
+          letter-spacing: 2px;
+          margin-top: 12px;
+          animation: fadeSlideUp 200ms ease forwards;
+        }
+
+        /* ── Reset progress bar ── */
+        .kiosk-reset-bar-track {
+          height: 3px;
+          background: rgba(255,255,255,0.05);
+          border-radius: 0 0 20px 20px;
+          margin-top: 2px;
+          overflow: hidden;
+        }
+
+        .kiosk-reset-bar-fill {
+          height: 100%;
+          background: #E85D04;
+          transition: width 50ms linear;
+          border-radius: 3px;
+        }
+
+        /* ── Bottom Zone ── */
+        .kiosk-bottom {
+          position: relative;
+          z-index: 2;
+          flex: 0 0 25%;
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          padding: 0 48px 32px;
+        }
+
+        .kiosk-bottom-left {
+          display: flex;
+          gap: 8px;
+          align-items: flex-end;
+        }
+
+        .kiosk-stat-pill {
+          background: rgba(255,255,255,0.05);
+          padding: 6px 14px;
+          border-radius: 999px;
+          font-size: 10px;
+          color: rgba(255,255,255,0.6);
+          letter-spacing: 0.5px;
+          white-space: nowrap;
+        }
+
+        .kiosk-bottom-center {
+          position: absolute;
+          bottom: 32px;
+          left: 50%;
+          transform: translateX(-50%);
+          text-align: center;
+          max-width: 500px;
+        }
+
+        .kiosk-quote {
+          font-size: 12px;
+          font-style: italic;
+          color: rgba(255,255,255,0.25);
+          transition: opacity 400ms ease;
+          line-height: 1.6;
+        }
+
+        .kiosk-quote--fading {
+          opacity: 0;
+        }
+
+        .kiosk-bottom-right {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 6px;
+        }
+
+        .kiosk-demo-label {
+          font-size: 8px;
+          color: rgba(255,255,255,0.15);
+          letter-spacing: 2px;
+          text-transform: uppercase;
+        }
+
+        .kiosk-demo-btn {
+          font-size: 10px;
+          color: rgba(255,255,255,0.4);
+          border: 1px solid rgba(255,255,255,0.15);
+          padding: 4px 14px;
+          border-radius: 6px;
+          text-decoration: none;
+          transition: all 150ms ease;
+          cursor: pointer;
+        }
+
+        .kiosk-demo-btn:hover {
+          color: rgba(255,255,255,0.7);
+          border-color: rgba(255,255,255,0.3);
+        }
+
+        /* ═══ KEYFRAMES ═══ */
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
-          20%, 40%, 60%, 80% { transform: translateX(8px); }
+          12.5% { transform: translateX(-8px); }
+          25% { transform: translateX(8px); }
+          37.5% { transform: translateX(-8px); }
+          50% { transform: translateX(8px); }
+          62.5% { transform: translateX(-6px); }
+          75% { transform: translateX(6px); }
+          87.5% { transform: translateX(-3px); }
         }
-        .animate-shake {
-          animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+
+        @keyframes pulseRing {
+          0% {
+            opacity: 0.6;
+            transform: scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(1.15);
+          }
+        }
+
+        @keyframes fadeSlideUp {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes errorFlash {
+          0%, 100% { border-color: rgba(255,255,255,0.15); }
+          50% { border-color: #EF4444; }
         }
       `}</style>
-    </div>
+    </>
   );
 }

@@ -94,7 +94,8 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                   color: Colors.black.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                child:
+                    const Icon(Icons.arrow_back_rounded, color: Colors.white),
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
@@ -151,7 +152,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                                 Container(
                                   width: 6,
                                   height: 6,
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     color: AppColors.success,
                                     shape: BoxShape.circle,
                                   ),
@@ -159,7 +160,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                                 const SizedBox(width: 6),
                                 Text(
                                   _workout['intensity'] ?? 'Advanced',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.success,
@@ -283,7 +284,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                                 ),
                                 child: Center(
                                   child: Text(
-                                    '${(index + 1).toString().padLeft(2, '0')}',
+                                    (index + 1).toString().padLeft(2, '0'),
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
@@ -338,8 +339,9 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                                         value: progress,
                                         strokeWidth: 4,
                                         backgroundColor: AppColors.surface,
-                                        valueColor: AlwaysStoppedAnimation(
-                                            AppColors.brandPrimary),
+                                        valueColor:
+                                            const AlwaysStoppedAnimation(
+                                                AppColors.brandPrimary),
                                       ),
                                       Center(
                                         child: Text(
@@ -370,7 +372,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
       // Bottom action button
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.background,
           border: Border(
             top: BorderSide(color: AppColors.border, width: 0.5),
