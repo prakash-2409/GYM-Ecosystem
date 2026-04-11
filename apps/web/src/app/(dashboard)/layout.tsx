@@ -9,12 +9,13 @@ import { useState } from 'react';
 import {
   LayoutDashboard, Users, CreditCard, CalendarCheck, Dumbbell,
   UtensilsCrossed, BarChart3, Bell, Settings, UserCog, Receipt,
-  Menu, X, LogOut, Monitor,
+  Menu, X, LogOut, Monitor, IndianRupee, Smartphone,
 } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['gym_owner', 'receptionist', 'coach'] },
   { href: '/members', label: 'Members', icon: Users, roles: ['gym_owner', 'receptionist', 'coach'] },
+  { href: '/fees', label: 'Fees', icon: IndianRupee, roles: ['gym_owner', 'receptionist'] },
   { href: '/check-ins', label: 'Check-ins', icon: CalendarCheck, roles: ['gym_owner', 'receptionist'] },
   { href: '/payments', label: 'Payments', icon: CreditCard, roles: ['gym_owner', 'receptionist'] },
   { href: '/plans', label: 'Plans', icon: Receipt, roles: ['gym_owner'] },
@@ -86,6 +87,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             <Monitor size={18} />
             Open Kiosk
+          </Link>
+          <Link
+            href="/member-app"
+            target="_blank"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-colors duration-150"
+          >
+            <Smartphone size={18} />
+            Member App
           </Link>
         </nav>
 

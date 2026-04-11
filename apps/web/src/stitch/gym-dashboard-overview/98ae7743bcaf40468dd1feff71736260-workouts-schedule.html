@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @font-face {
+            font-family: 'Geist';
+            src: url('https://cdn.jsdelivr.net/npm/geist@1.0.3/dist/fonts/geist-sans/Geist-Regular.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Geist Mono';
+            src: url('https://cdn.jsdelivr.net/npm/geist@1.0.3/dist/fonts/geist-mono/GeistMono-Regular.woff2') format('woff2');
+        }
+        body {
+            font-family: 'Geist', sans-serif;
+            background-color: #f9f9f8;
+        }
+        .mono { font-family: 'Geist Mono', monospace; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-fixed-dim": "#d6d3d7",
+              "outline": "#757c7b",
+              "primary-fixed-dim": "#d4d4d4",
+              "surface-container-high": "#e4e9e8",
+              "primary-dim": "#525252",
+              "secondary-fixed": "#e4e1e5",
+              "secondary-container": "#e4e1e5",
+              "tertiary-fixed-dim": "#0068e2",
+              "on-primary": "#f8f8f8",
+              "on-secondary-fixed": "#3f3f42",
+              "tertiary-dim": "#004faf",
+              "on-tertiary-fixed": "#ffffff",
+              "on-tertiary-container": "#000000",
+              "error-container": "#fe8983",
+              "secondary": "#5f5f62",
+              "error-dim": "#4e0309",
+              "primary-container": "#e2e2e2",
+              "on-error-container": "#752121",
+              "on-primary-fixed-variant": "#5b5b5b",
+              "error": "#9f403d",
+              "on-tertiary": "#f9f8ff",
+              "inverse-on-surface": "#9c9d9c",
+              "background": "#f9f9f8",
+              "surface-bright": "#f9f9f8",
+              "surface-tint": "#5e5e5e",
+              "secondary-dim": "#535356",
+              "tertiary": "#005ac6",
+              "on-surface-variant": "#5a6060",
+              "surface-container": "#ebeeed",
+              "surface": "#f9f9f8",
+              "on-secondary-fixed-variant": "#5c5b5e",
+              "surface-container-highest": "#dde4e3",
+              "on-surface": "#2d3433",
+              "surface-container-lowest": "#ffffff",
+              "tertiary-fixed": "#1074f7",
+              "primary": "#5e5e5e",
+              "on-background": "#2d3433",
+              "inverse-primary": "#ffffff",
+              "surface-container-low": "#f2f4f3",
+              "on-primary-fixed": "#3f3f3f",
+              "inverse-surface": "#0c0f0e",
+              "primary-fixed": "#e2e2e2",
+              "on-tertiary-fixed-variant": "#ecf0ff",
+              "on-secondary": "#fbf8fc",
+              "on-primary-container": "#525252",
+              "tertiary-container": "#1074f7",
+              "surface-variant": "#dde4e3",
+              "on-error": "#fff7f6",
+              "outline-variant": "#adb3b2",
+              "surface-dim": "#d4dcda",
+              "on-secondary-container": "#525155"
+            },
+            fontFamily: {
+              "headline": ["Geist"],
+              "body": ["Geist"],
+              "label": ["Geist"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-surface">
+<!-- SideNavBar Shell -->
+<aside class="bg-[#0c0f0e] dark:bg-[#0c0f0e] h-screen w-64 fixed left-0 top-0 flex flex-col h-full p-6 z-50">
+<div class="mb-10">
+<h1 class="text-xl font-bold tracking-tighter text-white">The Atelier</h1>
+<p class="text-[10px] text-[#5e5e5e] font-light tracking-widest uppercase mt-1">Performance Lab</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a6060] hover:text-white transition-colors hover:bg-white/5 transition-all duration-200 font-['Geist'] tracking-tight font-light" href="#">
+<span class="material-symbols-outlined text-lg">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a6060] hover:text-white transition-colors hover:bg-white/5 transition-all duration-200 font-['Geist'] tracking-tight font-light" href="#">
+<span class="material-symbols-outlined text-lg">group</span>
+<span>Members</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a6060] hover:text-white transition-colors hover:bg-white/5 transition-all duration-200 font-['Geist'] tracking-tight font-light" href="#">
+<span class="material-symbols-outlined text-lg">payments</span>
+<span>Payments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-white font-medium bg-white/10 rounded-lg font-['Geist'] tracking-tight" href="#">
+<span class="material-symbols-outlined text-lg">fitness_center</span>
+<span>Workouts</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a6060] hover:text-white transition-colors hover:bg-white/5 transition-all duration-200 font-['Geist'] tracking-tight font-light" href="#">
+<span class="material-symbols-outlined text-lg">restaurant</span>
+<span>Diets</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a6060] hover:text-white transition-colors hover:bg-white/5 transition-all duration-200 font-['Geist'] tracking-tight font-light" href="#">
+<span class="material-symbols-outlined text-lg">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<button class="mt-auto w-full bg-primary hover:bg-primary-dim text-white py-3 rounded-lg text-sm font-medium transition-all active:opacity-80">
+            New Member
+        </button>
+</aside>
+<!-- TopNavBar Shell -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-[#f9f9f8] dark:bg-[#0c0f0e] flex items-center justify-between px-8 z-40">
+<div class="flex items-center gap-4 bg-surface-container-low px-4 py-2 rounded-xl w-96">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full font-['Geist']" placeholder="Search sessions, members, or trainers..." type="text"/>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:bg-[#f2f4f3] transition-all duration-200 rounded-lg">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-[#f2f4f3] transition-all duration-200 rounded-lg">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<div class="h-8 w-px bg-outline-variant/20"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-xs font-semibold text-on-surface">Alex Rivera</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Manager</p>
+</div>
+<img class="w-10 h-10 rounded-full object-cover grayscale" data-alt="Professional headshot of a gym manager" src="https://lh3.googleusercontent.com/aida-public/AB6AXuApyQQXLKY617gK6b1wdoQsabZ7wFc7RmNd2WPhIbeDH6vfhf2y0UiYJTkFdcIkbPIBsVgLrgzdr0DnXpaH3kOp9BYKvilPFNzflkWdmju2PAbr0o1OTP0k3C8ZOwFRts9XXDoiehE7p4zmBhQkBaPZCE18nZFTGyWTDmPaAa9Itj4KrQq0jYPjjIvf_mIDz8VAzQFaJbUOE_Of-apKQDZWfKka7Ao430hZfNhpCBK8W17ii8n64ztEMYQInZADXH8PxZsa0vrd1TM"/>
+</div>
+</div>
+</header>
+<!-- Main Content Stage -->
+<main class="ml-64 pt-20 p-8 min-h-screen">
+<div class="max-w-[1400px] mx-auto">
+<!-- Page Header -->
+<div class="flex items-end justify-between mb-12">
+<div>
+<h2 class="text-4xl font-bold tracking-tighter text-on-surface">Weekly Schedule</h2>
+<p class="text-on-surface-variant font-light mt-1">Oct 23 — Oct 29 • 12 Classes Active</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-high px-4 py-2 rounded-lg text-sm font-medium hover:bg-surface-container-highest transition-all">Today</button>
+<div class="flex bg-surface-container-low rounded-lg p-1">
+<button class="px-3 py-1 bg-surface-container-lowest rounded-md shadow-sm text-sm font-medium">Week</button>
+<button class="px-3 py-1 text-sm font-medium text-on-surface-variant">Month</button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-8">
+<!-- Calendar Grid (Bento Style) -->
+<div class="col-span-12 lg:col-span-9 space-y-6">
+<div class="grid grid-cols-7 gap-4">
+<!-- Days Header -->
+<div class="text-center pb-4"><p class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Mon</p><p class="text-lg font-bold mono">23</p></div>
+<div class="text-center pb-4"><p class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Tue</p><p class="text-lg font-bold mono">24</p></div>
+<div class="text-center pb-4 border-b-2 border-tertiary"><p class="text-[10px] uppercase tracking-widest text-tertiary font-bold mb-1">Wed</p><p class="text-lg font-bold mono text-tertiary">25</p></div>
+<div class="text-center pb-4"><p class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Thu</p><p class="text-lg font-bold mono">26</p></div>
+<div class="text-center pb-4"><p class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Fri</p><p class="text-lg font-bold mono">27</p></div>
+<div class="text-center pb-4 opacity-40"><p class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Sat</p><p class="text-lg font-bold mono">28</p></div>
+<div class="text-center pb-4 opacity-40"><p class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Sun</p><p class="text-lg font-bold mono">29</p></div>
+</div>
+<!-- Weekly View Slots -->
+<div class="grid grid-cols-7 gap-4 min-h-[600px]">
+<!-- Monday -->
+<div class="space-y-4">
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-outline-variant/5">
+<span class="text-[10px] font-bold text-tertiary uppercase">07:00 AM</span>
+<h4 class="text-sm font-bold mt-1">Sunrise Yoga</h4>
+<p class="text-xs text-on-surface-variant mt-1">S. Chen</p>
+<div class="mt-4 h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[85%]"></div>
+</div>
+<p class="text-[9px] text-on-surface-variant mt-2 mono">17 / 20 SLOTS</p>
+</div>
+</div>
+<!-- Tuesday -->
+<div class="space-y-4">
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-outline-variant/5">
+<span class="text-[10px] font-bold text-error uppercase">05:30 PM</span>
+<h4 class="text-sm font-bold mt-1">HIIT Blast</h4>
+<p class="text-xs text-on-surface-variant mt-1">M. Jordan</p>
+<div class="mt-4 h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="bg-error h-full w-[100%]"></div>
+</div>
+<p class="text-[9px] text-error mt-2 font-bold mono">FULLY BOOKED</p>
+</div>
+</div>
+<!-- Wednesday (Active) -->
+<div class="space-y-4 bg-surface-container-low/50 rounded-2xl p-2 -m-2 border border-outline-variant/10">
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-outline-variant/5">
+<span class="text-[10px] font-bold text-tertiary uppercase">09:00 AM</span>
+<h4 class="text-sm font-bold mt-1">Core Power</h4>
+<p class="text-xs text-on-surface-variant mt-1">E. White</p>
+<div class="mt-4 h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[40%]"></div>
+</div>
+<p class="text-[9px] text-on-surface-variant mt-2 mono">8 / 20 SLOTS</p>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-outline-variant/5">
+<span class="text-[10px] font-bold text-tertiary uppercase">06:00 PM</span>
+<h4 class="text-sm font-bold mt-1">Strength I</h4>
+<p class="text-xs text-on-surface-variant mt-1">D. Vance</p>
+<div class="mt-4 h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[70%]"></div>
+</div>
+<p class="text-[9px] text-on-surface-variant mt-2 mono">14 / 20 SLOTS</p>
+</div>
+</div>
+<!-- Thursday -->
+<div class="space-y-4">
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-outline-variant/5">
+<span class="text-[10px] font-bold text-tertiary uppercase">08:00 AM</span>
+<h4 class="text-sm font-bold mt-1">Mobility</h4>
+<p class="text-xs text-on-surface-variant mt-1">S. Chen</p>
+<div class="mt-4 h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[25%]"></div>
+</div>
+<p class="text-[9px] text-on-surface-variant mt-2 mono">5 / 20 SLOTS</p>
+</div>
+</div>
+<!-- Friday -->
+<div class="space-y-4">
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-outline-variant/5">
+<span class="text-[10px] font-bold text-tertiary uppercase">05:00 PM</span>
+<h4 class="text-sm font-bold mt-1">Friday HIIT</h4>
+<p class="text-xs text-on-surface-variant mt-1">M. Jordan</p>
+<div class="mt-4 h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[95%]"></div>
+</div>
+<p class="text-[9px] text-on-surface-variant mt-2 mono">19 / 20 SLOTS</p>
+</div>
+</div>
+<!-- Sat & Sun (Empty States) -->
+<div class="bg-surface-container/30 rounded-xl border border-dashed border-outline-variant/20 flex items-center justify-center">
+<span class="text-[10px] text-on-surface-variant uppercase tracking-widest vertical-text rotate-180" style="writing-mode: vertical-rl;">Weekend Schedule</span>
+</div>
+<div class="bg-surface-container/30 rounded-xl border border-dashed border-outline-variant/20 flex items-center justify-center">
+<span class="text-[10px] text-on-surface-variant uppercase tracking-widest vertical-text rotate-180" style="writing-mode: vertical-rl;">Closed Sessions</span>
+</div>
+</div>
+</div>
+<!-- Trainer Sidebar -->
+<div class="col-span-12 lg:col-span-3 space-y-8">
+<div class="bg-surface-container-low rounded-2xl p-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-bold text-lg tracking-tight">Trainers</h3>
+<button class="text-tertiary text-xs font-bold hover:underline">Manage</button>
+</div>
+<div class="space-y-6">
+<!-- Trainer 1 -->
+<div class="flex items-center justify-between group cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img class="w-12 h-12 rounded-xl object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Portrait of Sarah Chen, Yoga instructor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB117iPV31sEim720B4BTLzdzlswnITIU1yetzUigo-6KJCKqLOtG3gR9e8wedHVYzXAV1Y4aJq3VH2WSsttoeQCktJipmvoEZy-wMGbE2yXPFVvhgLr-fVAIdhwBZOzu8xY7JF_nuURoJ3MTFP5FQzfAuhEvwGNl0Qc_GKe2DfjFxxtYSbXEWA2rWDmDndX73CMVDI0pYfcjMeTaA40L7xZl7Ta0T0Pk7G1OjiFWkDAs4G_ytRWI4xATx_9pvITTLrK50NWlzsXXk"/>
+<div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-surface-container-low rounded-full"></div>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Sarah Chen</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Yoga • Mobility</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant opacity-0 group-hover:opacity-100 transition-all">more_vert</span>
+</div>
+<!-- Trainer 2 -->
+<div class="flex items-center justify-between group cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img class="w-12 h-12 rounded-xl object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Portrait of Marcus Jordan, HIIT instructor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQ5x6IabtnOMNS_AL90Bv5-TacDpGOzcFQPgOYkT1wKbg6XFNo7b-NizW75iwGiM6AWwdPuenq5cDagtmi38XXoxbItumO7vTggv_Ak3o6C7gpnsk8jSccVi7dK0B5RlyoiEv08b5piHBLndxkcF0JlIPFR-m0hF4pdKXyaBS1xI9eQTSK58Xum8AqOUmCALCyeCH9CZwSxl-gXV4ygUpVvuK8PPWjm9uw77wgRvHN6pgVM1usjDAVqW6C5x4S3nB4hqdMvGjKf3c"/>
+<div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-surface-container-low rounded-full"></div>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Marcus Jordan</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">HIIT • Athletics</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant opacity-0 group-hover:opacity-100 transition-all">more_vert</span>
+</div>
+<!-- Trainer 3 -->
+<div class="flex items-center justify-between group cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img class="w-12 h-12 rounded-xl object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Portrait of Derek Vance, Strength trainer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpjBHHdknzq-Naa9Y3btnCX1IR7SpE5qFjftmfrrRcmtSizppQQtkypic3Av285ujMlcKWq_MGdsaAJPzQ3tgjnPeeGqrX93DXUqb4Rqa1oYEJj96RCRogl3FKlYtd_ANlaWOEA6a_sMK5SL9vTp7WwKhrktgkoGczU7J758A0H8npLOYuHfud8bTS9oatqs2jgimMTuFnlvHi7_CLT7jhtHLL2wwMYALKsBtq5olo7ieVpWykbMpaasmJd6ZScbPQadCj0Qz6IqE"/>
+<div class="absolute -bottom-1 -right-1 w-3 h-3 bg-amber-500 border-2 border-surface-container-low rounded-full"></div>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Derek Vance</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Strength • Power</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant opacity-0 group-hover:opacity-100 transition-all">more_vert</span>
+</div>
+<!-- Trainer 4 -->
+<div class="flex items-center justify-between group cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img class="w-12 h-12 rounded-xl object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Portrait of Elena White, Core instructor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoKPD091rUJU0yifmnE61VkP4_VPOIE0UihnL878_onrEQBp6D7WyB2X1LqlsASjUkDNcfcct4RniqUgQ8mK8yCMvTyIHXpUgR1OW8WtdL4nt1Z7AUVutGsoco97r7H-kU3BpT_L0AmzNxOP-wNZLLrJe-5wI6eO1yAi-cTuDwuBt5VmxmaPohb6q_hd77yPxHaAeq5crigbEeTJ5zVIHN5WlZNNm-x3NP8aeaZHK1fU2-Sb0gSPTHcHBY9SWL0Gxd7TJIIk9GTCc"/>
+<div class="absolute -bottom-1 -right-1 w-3 h-3 bg-outline-variant border-2 border-surface-container-low rounded-full"></div>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Elena White</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Core • Reformer</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant opacity-0 group-hover:opacity-100 transition-all">more_vert</span>
+</div>
+</div>
+</div>
+<!-- Occupancy Insight Card -->
+<div class="bg-[#0c0f0e] text-white rounded-2xl p-6 relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-[10px] uppercase tracking-widest text-[#5e5e5e] mb-1">Peak Intensity</p>
+<h3 class="text-2xl font-bold tracking-tighter">Tuesday 18:00</h3>
+<p class="text-xs text-[#5a6060] mt-4 leading-relaxed">System prediction: High demand for HIIT sessions during this window next week.</p>
+<button class="mt-6 text-xs font-bold border-b border-white/20 pb-1 hover:border-white transition-all">Review Analytics</button>
+</div>
+<div class="absolute -right-8 -bottom-8 w-32 h-32 bg-tertiary/20 rounded-full blur-3xl"></div>
+</div>
+<!-- Legend -->
+<div class="px-2">
+<h4 class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-4">Class Types</h4>
+<div class="space-y-2">
+<div class="flex items-center gap-2 text-[10px] font-medium text-on-surface">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div> Yoga / Core
+                            </div>
+<div class="flex items-center gap-2 text-[10px] font-medium text-on-surface">
+<div class="w-2 h-2 rounded-full bg-error"></div> High Intensity
+                            </div>
+<div class="flex items-center gap-2 text-[10px] font-medium text-on-surface">
+<div class="w-2 h-2 rounded-full bg-secondary"></div> Strength Lab
+                            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB Action (Contextual for Schedule) -->
+<button class="fixed bottom-8 right-8 bg-[#0c0f0e] text-white p-4 rounded-full shadow-2xl hover:scale-105 transition-all group">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined">add</span>
+<span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 whitespace-nowrap text-sm font-medium px-0 group-hover:px-2">Create Session</span>
+</div>
+</button>
+</body></html>

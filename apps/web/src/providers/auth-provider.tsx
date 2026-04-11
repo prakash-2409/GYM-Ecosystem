@@ -1,8 +1,13 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import apiClient from '@/lib/api-client';
-import type { User } from '@gymstack/shared';
+import { createContext, useContext, useState, type ReactNode } from 'react';
+
+interface User {
+  id: string;
+  name: string;
+  role: string;
+  phone: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -14,40 +19,25 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// DEMO MODE: Pre-authenticated as gym owner
+const DEMO_USER: User = {
+  id: 'demo-owner-001',
+  name: 'Rajesh Gupta',
+  role: 'gym_owner',
+  phone: '+91 99887 76655',
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user] = useState<User | null>(DEMO_USER);
+  const [token] = useState<string | null>('demo-token');
+  const [isLoading] = useState(false);
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem('gymstack_token');
-    const storedUser = localStorage.getItem('gymstack_user');
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-  }, []);
-
-  const login = async (phone: string, password: string, gymSlug?: string) => {
-    const res = await apiClient.post('/auth/login', { phone, password, gymSlug });
-    const { token: newToken, user: newUser, gym } = res.data;
-
-    localStorage.setItem('gymstack_token', newToken);
-    localStorage.setItem('gymstack_user', JSON.stringify(newUser));
-    if (gym) localStorage.setItem('gymstack_slug', gym.slug);
-
-    setToken(newToken);
-    setUser(newUser);
+  const login = async () => {
+    // Demo mode — already logged in
   };
 
   const logout = () => {
-    localStorage.removeItem('gymstack_token');
-    localStorage.removeItem('gymstack_user');
-    localStorage.removeItem('gymstack_slug');
-    setToken(null);
-    setUser(null);
-    window.location.href = '/login';
+    window.location.href = '/';
   };
 
   return (

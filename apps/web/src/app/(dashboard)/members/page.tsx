@@ -1,145 +1,196 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import apiClient from '@/lib/api-client';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Users } from 'lucide-react';
-import { EmptyState } from '@/components/ui/empty-state';
-import { TableSkeleton } from '@/components/ui/skeleton';
+import { Plus, Search, Users, Filter, Download, ChevronRight } from 'lucide-react';
+import { MOCK_MEMBERS } from '@/lib/mock-data';
+
+type FilterStatus = 'all' | 'active' | 'expiring' | 'expired';
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
 
 export default function MembersPage() {
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['members', search, page],
-    queryFn: () =>
-      apiClient
-        .get('/members', { params: { search: search || undefined, page, limit: 20 } })
-        .then((r) => r.data),
-  });
+  const filtered = useMemo(() => {
+    let list = MOCK_MEMBERS;
+
+    if (filterStatus !== 'all') {
+      list = list.filter((m) => m.status === filterStatus);
+    }
+
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(
+        (m) =>
+          m.name.toLowerCase().includes(q) ||
+          m.memberCode.includes(q) ||
+          m.phone.includes(q)
+      );
+    }
+
+    return list;
+  }, [search, filterStatus]);
+
+  const counts = useMemo(() => ({
+    total: MOCK_MEMBERS.length,
+    active: MOCK_MEMBERS.filter(m => m.status === 'active').length,
+    expiring: MOCK_MEMBERS.filter(m => m.status === 'expiring').length,
+    expired: MOCK_MEMBERS.filter(m => m.status === 'expired').length,
+  }), []);
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold">Members</h1>
-        <Link
-          href="/members/new"
-          className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg font-medium hover:opacity-90 transition"
-        >
-          <Plus size={18} />
-          Add Member
-        </Link>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 stagger-1">
+        <div>
+          <h1 className="text-page-title text-text-primary">Members</h1>
+          <p className="text-body text-text-secondary mt-2">
+            Manage all {counts.total} members — active, expiring, and expired subscriptions.
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <button className="btn btn-secondary">
+            <Download size={16} strokeWidth={1.5} />
+            Export CSV
+          </button>
+          <Link href="/members/new" className="btn btn-primary">
+            <Plus size={16} strokeWidth={1.5} />
+            Add Member
+          </Link>
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="relative mb-6">
-        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search by name, phone, or member code..."
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-        />
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-between-cards stagger-2">
+        <div className="stat-card cursor-pointer hover:shadow-card-hover transition-shadow" onClick={() => setFilterStatus('all')}>
+          <p className="stat-card-label">Total</p>
+          <p className="stat-card-value mt-2">{counts.total}</p>
+        </div>
+        <div className="stat-card cursor-pointer hover:shadow-card-hover transition-shadow" onClick={() => setFilterStatus('active')}>
+          <p className="stat-card-label">Active</p>
+          <p className="stat-card-value mt-2 text-success">{counts.active}</p>
+        </div>
+        <div className="stat-card cursor-pointer hover:shadow-card-hover transition-shadow" onClick={() => setFilterStatus('expiring')}>
+          <p className="stat-card-label">Expiring Soon</p>
+          <p className="stat-card-value mt-2 text-warning">{counts.expiring}</p>
+        </div>
+        <div className="stat-card cursor-pointer hover:shadow-card-hover transition-shadow" onClick={() => setFilterStatus('expired')}>
+          <p className="stat-card-label">Expired</p>
+          <p className="stat-card-value mt-2 text-danger">{counts.expired}</p>
+        </div>
+      </div>
+
+      {/* Search + Filter */}
+      <div className="flex flex-col md:flex-row gap-3 stagger-3">
+        <div className="relative flex-1">
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+          <input
+            type="text"
+            placeholder="Search by name, phone, or member code..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="input pl-10"
+          />
+        </div>
+        <div className="flex gap-2">
+          {(['all', 'active', 'expiring', 'expired'] as FilterStatus[]).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilterStatus(f)}
+              className={`filter-chip ${filterStatus === f ? 'active' : ''}`}
+            >
+              <Filter size={12} className="mr-1" />
+              {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Table */}
-      {isLoading ? (
-        <TableSkeleton rows={8} cols={6} />
-      ) : data?.members?.length === 0 ? (
-        <div className="bg-surface rounded-card border border-border">
-          <EmptyState
-            icon={<Users size={28} />}
-            title={search ? "No members found" : "No members yet"}
-            description={
-              search
-                ? `No members match "${search}". Try a different search term.`
-                : "Get started by adding your first member to the gym."
-            }
-            action={
-              <Link
-                href="/members/new"
-                className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg font-medium hover:opacity-90 transition"
-              >
-                <Plus size={16} />
-                Add Member
-              </Link>
-            }
-          />
+      {filtered.length === 0 ? (
+        <div className="card">
+          <div className="empty-state">
+            <Users className="empty-state-icon" />
+            <p className="empty-state-title">
+              {search ? `No members match "${search}"` : 'No members in this category'}
+            </p>
+            <p className="empty-state-description">
+              {search ? 'Try a different search term.' : 'Members will appear here once added.'}
+            </p>
+            <Link href="/members/new" className="btn btn-primary">
+              <Plus size={16} strokeWidth={1.5} />
+              Add Member
+            </Link>
+          </div>
         </div>
       ) : (
-        <div className="bg-surface rounded-card border border-border shadow-sm overflow-hidden">
+        <div className="card p-0 overflow-hidden stagger-4">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="sticky top-0 z-10 bg-surface">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expires</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="table-header text-left pl-6">#</th>
+                  <th className="table-header text-left">Member</th>
+                  <th className="table-header text-left">Phone</th>
+                  <th className="table-header text-left">Plan</th>
+                  <th className="table-header text-left">Expiry</th>
+                  <th className="table-header text-left">Status</th>
+                  <th className="table-header text-left">Visits</th>
+                  <th className="table-header text-right pr-6"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                {data?.members?.map((m: Record<string, unknown>) => {
-                  const sub = (m.subscriptions as Array<Record<string, unknown>>)?.[0];
-                  const isExpired = sub ? new Date(sub.endDate as string) < new Date() : true;
-                  return (
-                    <tr key={m.id as string} className="hover:bg-[#F5F5F5] transition-colors duration-150">
-                      <td className="px-6 py-4 text-sm font-mono text-gray-600">{m.memberCode as string}</td>
-                      <td className="px-6 py-4">
-                        <Link href={`/members/${m.id}`} className="text-sm font-medium text-primary hover:underline">
-                          {(m.user as Record<string, string>)?.name}
-                        </Link>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{(m.user as Record<string, string>)?.phone}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {sub ? (sub.plan as Record<string, string>)?.name : '—'}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {sub ? new Date(sub.endDate as string).toLocaleDateString('en-IN') : '—'}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          isExpired ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+              <tbody>
+                {filtered.map((m, idx) => (
+                  <tr key={m.id} className="table-row group">
+                    <td className="px-4 pl-6 text-caption text-text-muted">{idx + 1}</td>
+                    <td className="px-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`avatar text-badge ${
+                          m.status === 'expired' ? 'bg-red-500' :
+                          m.status === 'expiring' ? 'bg-amber-500' : ''
                         }`}>
-                          {isExpired ? 'Expired' : 'Active'}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
+                          {m.name[0]}
+                        </div>
+                        <div>
+                          <Link href={`/members/${m.id}`} className="text-table-row font-medium text-text-primary hover:underline">
+                            {m.name}
+                          </Link>
+                          <p className="text-caption text-text-muted font-mono">{m.memberCode}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 text-table-row text-text-secondary">{m.phone}</td>
+                    <td className="px-4 text-table-row text-text-secondary">{m.plan}</td>
+                    <td className="px-4 text-table-row text-text-secondary">{formatDate(m.planEnd)}</td>
+                    <td className="px-4">
+                      <span className={`badge ${
+                        m.status === 'active' ? 'badge-active' :
+                        m.status === 'expiring' ? 'badge-expiring' : 'badge-expired'
+                      }`}>
+                        {m.status === 'active' ? 'Active' :
+                         m.status === 'expiring' ? 'Expiring' : 'Expired'}
+                      </span>
+                    </td>
+                    <td className="px-4 text-table-row text-text-secondary font-mono">{m.totalVisits}</td>
+                    <td className="px-4 pr-6 text-right">
+                      <Link href={`/members/${m.id}`} className="row-actions text-primary hover:underline text-badge flex items-center gap-1 justify-end">
+                        View <ChevronRight size={14} />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-
-          {/* Pagination */}
-          {data?.total > 20 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
-              <p className="text-sm text-gray-500">
-                Showing {(page - 1) * 20 + 1}–{Math.min(page * 20, data.total)} of {data.total}
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={page * 20 >= data.total}
-                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          )}
+          <div className="px-card-pad py-3 border-t border-divider bg-stat-card">
+            <span className="text-caption text-text-muted">
+              Showing {filtered.length} of {counts.total} members
+            </span>
+          </div>
         </div>
       )}
     </div>

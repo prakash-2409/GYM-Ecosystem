@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Atelier | Elite Performance Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=Geist+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#2d3433",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#5e5e5e",
+                        "on-primary-fixed": "#3f3f3f",
+                        "on-secondary-fixed-variant": "#5c5b5e",
+                        "on-primary": "#f8f8f8",
+                        "on-error-container": "#752121",
+                        "surface-container-low": "#f2f4f3",
+                        "on-background": "#2d3433",
+                        "on-primary-container": "#525252",
+                        "error": "#9f403d",
+                        "background": "#f9f9f8",
+                        "on-secondary-container": "#525155",
+                        "surface-container-highest": "#dde4e3",
+                        "secondary-container": "#e4e1e5",
+                        "inverse-surface": "#0c0f0e",
+                        "error-container": "#fe8983",
+                        "surface-variant": "#dde4e3",
+                        "primary-dim": "#525252",
+                        "error-dim": "#4e0309",
+                        "secondary-dim": "#535356",
+                        "surface-container-high": "#e4e9e8",
+                        "on-primary-fixed-variant": "#5b5b5b",
+                        "tertiary-fixed": "#1074f7",
+                        "outline-variant": "#adb3b2",
+                        "on-tertiary-fixed-variant": "#ecf0ff",
+                        "primary-fixed-dim": "#d4d4d4",
+                        "surface-container": "#ebeeed",
+                        "on-error": "#fff7f6",
+                        "on-tertiary-container": "#000000",
+                        "secondary-fixed-dim": "#d6d3d7",
+                        "tertiary-dim": "#004faf",
+                        "inverse-on-surface": "#9c9d9c",
+                        "on-tertiary-fixed": "#ffffff",
+                        "secondary-fixed": "#e4e1e5",
+                        "on-surface-variant": "#5a6060",
+                        "on-tertiary": "#f9f8ff",
+                        "primary-fixed": "#e2e2e2",
+                        "primary-container": "#e2e2e2",
+                        "on-secondary-fixed": "#3f3f42",
+                        "primary": "#5e5e5e",
+                        "secondary": "#5f5f62",
+                        "tertiary": "#005ac6",
+                        "on-secondary": "#fbf8fc",
+                        "surface-dim": "#d4dcda",
+                        "surface-bright": "#f9f9f8",
+                        "surface": "#f9f9f8",
+                        "outline": "#757c7b",
+                        "tertiary-container": "#1074f7",
+                        "inverse-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#0068e2"
+                    },
+                    fontFamily: {
+                        "geist": ["Geist", "sans-serif"],
+                        "mono": ["Geist Mono", "monospace"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Geist', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased selection:bg-tertiary/20 selection:text-tertiary">
+<!-- SideNavBar Component -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col p-4 bg-[#0c0f0e] dark:bg-[#0c0f0e] no-border bg-[#0c0f0e] border-r border-white/5 shadow-[inset_-1px_0_0_rgba(255,255,255,0.05)] z-50">
+<div class="mb-8 px-4 flex flex-col gap-1">
+<div class="text-lg font-bold tracking-tighter text-white uppercase font-geist">The Atelier</div>
+<div class="text-[10px] uppercase tracking-[0.2em] text-neutral-500 font-medium">Elite Performance</div>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Active State: Dashboard -->
+<a class="flex items-center gap-3 px-4 py-2 text-white bg-white/5 rounded-md transition-all duration-200 font-geist tracking-tight font-light text-sm" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-neutral-500 hover:text-neutral-200 hover:bg-white/5 transition-all duration-200 font-geist tracking-tight font-light text-sm" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Members</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-neutral-500 hover:text-neutral-200 hover:bg-white/5 transition-all duration-200 font-geist tracking-tight font-light text-sm" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span>Revenue</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-neutral-500 hover:text-neutral-200 hover:bg-white/5 transition-all duration-200 font-geist tracking-tight font-light text-sm" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-neutral-500 hover:text-neutral-200 hover:bg-white/5 transition-all duration-200 font-geist tracking-tight font-light text-sm" href="#">
+<span class="material-symbols-outlined">fitness_center</span>
+<span>Workouts</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-neutral-500 hover:text-neutral-200 hover:bg-white/5 transition-all duration-200 font-geist tracking-tight font-light text-sm" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-4 border-t border-white/5 flex flex-col gap-1">
+<button class="w-full bg-white/10 hover:bg-white/20 text-white rounded-lg py-2.5 px-4 mb-4 text-xs font-semibold transition-all">
+                New Member
+            </button>
+<a class="flex items-center gap-3 px-4 py-2 text-neutral-500 hover:text-neutral-200 transition-all font-geist tracking-tight font-light text-sm" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-neutral-500 hover:text-neutral-200 transition-all font-geist tracking-tight font-light text-sm" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+<!-- TopNavBar Component -->
+<header class="h-14 w-full sticky top-0 z-40 flex items-center justify-between px-8 bg-[#f9f9f8] dark:bg-[#0c0f0e] font-geist font-medium text-sm tracking-tight no-border-bottom bg-transparent">
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant/50">search</span>
+<input class="bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-1.5 text-xs focus:ring-1 focus:ring-tertiary/20 w-64 transition-all" placeholder="Search Atelier command..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-[#5a6060]">
+<button class="hover:text-[#2d3433] transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-1.5 h-1.5 bg-tertiary rounded-full"></span>
+</button>
+<button class="hover:text-[#2d3433] transition-colors">
+<span class="material-symbols-outlined">history</span>
+</button>
+</div>
+<button class="bg-primary text-on-primary px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-primary-dim transition-all">
+                    Upgrade
+                </button>
+<div class="flex items-center gap-3 pl-4 border-l border-outline-variant/20">
+<img class="w-8 h-8 rounded-full object-cover grayscale brightness-110" data-alt="Manager profile photo in studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMxLqB25LkDDfAxVk7_mkX6sbGGofR_YZXogYThmnYCkb19oDossb_-ANR47j6zrqHPI1jjbGxdvyudKwGJHVFMipOwSidDEqt8v7-rPDwzZ6Pu6RgcjEhXnQKrOiYWDUCI_Fq3dNnn2M0SEbANk9RDywE8T9N4jg_LT89eclpO5_dQUULK-QAw3ToEp54jY7lNlp5NvLNYm2D_AhJRayY7SOoh5xJNpmfxJg4zLLHwvjbOaGJudKsfHDg-UgZx2CaDuy0WFgdEJA"/>
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="p-8 max-w-7xl mx-auto space-y-12">
+<!-- Page Header -->
+<div class="flex justify-between items-end">
+<div>
+<h1 class="text-3xl font-bold tracking-tighter text-on-surface font-geist">Performance Dashboard</h1>
+<p class="text-on-surface-variant font-light mt-1">Real-time overview of Atelier activity.</p>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold bg-surface-container-high rounded-lg hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined !text-sm">calendar_today</span>
+                        Last 30 Days
+                    </button>
+</div>
+</div>
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Stat Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(45,52,51,0.04)] group hover:shadow-[0_20px_40px_rgba(45,52,51,0.08)] transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-surface-container-low rounded-lg text-on-surface-variant">
+<span class="material-symbols-outlined">group</span>
+</div>
+<span class="text-[10px] font-mono font-medium text-tertiary-container bg-tertiary/10 px-2 py-0.5 rounded-full">+12.5%</span>
+</div>
+<div class="text-3xl font-bold tracking-tighter font-geist">1,284</div>
+<div class="text-xs text-on-surface-variant font-light mt-1 uppercase tracking-wider">Active Members</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(45,52,51,0.04)] group hover:shadow-[0_20px_40px_rgba(45,52,51,0.08)] transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-surface-container-low rounded-lg text-on-surface-variant">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<span class="text-[10px] font-mono font-medium text-tertiary-container bg-tertiary/10 px-2 py-0.5 rounded-full">+4.2%</span>
+</div>
+<div class="text-3xl font-bold tracking-tighter font-geist">$42,850</div>
+<div class="text-xs text-on-surface-variant font-light mt-1 uppercase tracking-wider">Revenue This Month</div>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(45,52,51,0.04)] group hover:shadow-[0_20px_40px_rgba(45,52,51,0.08)] transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-surface-container-low rounded-lg text-on-surface-variant">
+<span class="material-symbols-outlined">how_to_reg</span>
+</div>
+<span class="text-[10px] font-mono font-medium text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-full">Steady</span>
+</div>
+<div class="text-3xl font-bold tracking-tighter font-geist">156</div>
+<div class="text-xs text-on-surface-variant font-light mt-1 uppercase tracking-wider">Today's Check-ins</div>
+</div>
+<!-- Stat Card 4 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(45,52,51,0.04)] group hover:shadow-[0_20px_40px_rgba(45,52,51,0.08)] transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-surface-container-low rounded-lg text-on-surface-variant">
+<span class="material-symbols-outlined">pending_actions</span>
+</div>
+<span class="text-[10px] font-mono font-medium text-error bg-error/10 px-2 py-0.5 rounded-full">2 Critical</span>
+</div>
+<div class="text-3xl font-bold tracking-tighter font-geist">$2,400</div>
+<div class="text-xs text-on-surface-variant font-light mt-1 uppercase tracking-wider">Fees Pending</div>
+</div>
+</div>
+<!-- Members Table Section -->
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<h2 class="text-xl font-bold tracking-tight text-on-surface font-geist">Recent Members</h2>
+<a class="text-xs font-semibold text-tertiary hover:underline" href="#">View all members</a>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(45,52,51,0.04)] overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-semibold text-on-surface-variant">Member</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-semibold text-on-surface-variant">Plan</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-semibold text-on-surface-variant">Status</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-widest font-semibold text-on-surface-variant">Expiry Date</th>
+<th class="px-6 py-4 text-right"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover grayscale brightness-110" data-alt="Portrait of an athlete member" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAQoySrDmTpn6U3K6MHz1gwIJYXF1lkhRW0fmAPiHRUBScG1l_cRTL2Lt347J2BHbkxqYzo9w28v90a3hYyW5MCk4tiz4x62X8zrXdQXf943703O4zgjQAX2y7KFRQDY9M0V-k7qBH9VZVRUtw2qQnLHXwxFG7UflAEbpjsLQpOvVygPyQqpcMiGgTNp5Cy4d80JmdMoSKDeFanfRqHiSuyWPFYzKTP1M9204rzJgFCSWAVtKhIqOk9JfY0OyXHf_wM52L6oU5wo8"/>
+<div>
+<div class="text-sm font-semibold text-on-surface">Elena Rodriguez</div>
+<div class="text-[11px] font-mono text-on-surface-variant/70">#AT-9923</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-secondary-container text-on-secondary-container">Elite Tier</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+<span class="text-xs text-on-surface">Active</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-mono text-on-surface-variant">Dec 12, 2024</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover grayscale brightness-110" data-alt="Portrait of male gym member" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKLZjivmzRI_nVqJFFbNSNUKb2phY08PhbNZu-m0pOk3SFGdfqm-yA1E_ZF7lnHCKTv3n39UuPg7POsum-LR2HpCvhSzVok-roDtxkv0gq_4AtuQYYPX-XSWhYiLYB_zXwIdbasWv3IMc_7l5arF1DNXPwfv4rMRRrCH3DicnJreG39rJ3eK9gGfsJxaY0x8Nk8j-Fi0JsOh9nxEq-P11kNSNte4bKl4MGEZBHC8nKADU9tzG-KmNryA4CahzzZVurCkYLrGMkSBg"/>
+<div>
+<div class="text-sm font-semibold text-on-surface">Marcus Thorne</div>
+<div class="text-[11px] font-mono text-on-surface-variant/70">#AT-9844</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-surface-container text-on-surface-variant">Standard</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
+<span class="text-xs text-on-surface">Grace Period</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-mono text-on-surface-variant">Nov 28, 2023</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover grayscale brightness-110" data-alt="Female member profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2-Jyhz3zwwiVFR6Z6nDDB9NmNLLJvcmFPQLEEO2krAczi0iLbaYw1dARmHc86ZOYcyJE1fXRvvvIvWwBR6I0gdc2K9nh0aXO9x0icFY4eC76sAJOoo14L1s0ng3CaaY2n06UHgtNLKrIx6V0xRqnqcsclk11MkS8rRukhQcy8ZLalHsV5Cv9YXPVdxaHazRGuBLlPH80rlh_rntq1okidtEQ4EKRJsD5r60DoBPYtqx2cqgdH36CFipQK63CxmDJuL38vBhDGlvI"/>
+<div>
+<div class="text-sm font-semibold text-on-surface">Sarah Jenkins</div>
+<div class="text-[11px] font-mono text-on-surface-variant/70">#AT-9701</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-secondary-container text-on-secondary-container">Elite Tier</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+<span class="text-xs text-on-surface">Active</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-mono text-on-surface-variant">Jan 05, 2025</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover grayscale brightness-110" data-alt="Business executive member headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbbQQs81SaX6r-a1YXNzhirFeolDYZ5ODP08R0KxywYGbW5JTaAZ_wydwO9AicXzpkIVirj9Kl1TZeWZKj8ewoqdFxzAEyWf38ldqJpFC2_mBFQpIS-vywvNtvnTJkxstGFZM0cPUmiIY1v_m7ykNqhZJMp0CLzSKOqhI8xW6EphOGY-M5jG0B7N-ttf7k2AOwq1qOofnPqq9fPrbnlnd8TDCyCJq0J7QzDzfs57QvVTP6Hp5HT_uRnkVrIpiiy_Cm80v_7oTtUHA"/>
+<div>
+<div class="text-sm font-semibold text-on-surface">David Chen</div>
+<div class="text-[11px] font-mono text-on-surface-variant/70">#AT-9655</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-tertiary/10 text-tertiary font-mono">PT Plus</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-error"></div>
+<span class="text-xs text-on-surface">Expired</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-mono text-error">Oct 20, 2023</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Asymmetric Grid Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Training Trends -->
+<div class="lg:col-span-2 space-y-6">
+<h2 class="text-xl font-bold tracking-tight text-on-surface font-geist">Occupancy Trends</h2>
+<div class="bg-surface-container-low h-64 rounded-xl flex items-end p-8 gap-4 overflow-hidden relative group">
+<!-- Abstract "Sparkline" visualization using height shifts -->
+<div class="bg-tertiary-container/40 w-full h-[40%] rounded-t-sm transition-all duration-500 group-hover:h-[45%]"></div>
+<div class="bg-tertiary-container/40 w-full h-[60%] rounded-t-sm transition-all duration-500 group-hover:h-[55%]"></div>
+<div class="bg-tertiary-container/40 w-full h-[35%] rounded-t-sm transition-all duration-500 group-hover:h-[40%]"></div>
+<div class="bg-tertiary-container/80 w-full h-[85%] rounded-t-sm transition-all duration-500 group-hover:h-[90%]"></div>
+<div class="bg-tertiary-container/40 w-full h-[55%] rounded-t-sm transition-all duration-500 group-hover:h-[60%]"></div>
+<div class="bg-tertiary-container/40 w-full h-[70%] rounded-t-sm transition-all duration-500 group-hover:h-[65%]"></div>
+<div class="bg-tertiary-container/40 w-full h-[50%] rounded-t-sm transition-all duration-500 group-hover:h-[55%]"></div>
+<div class="absolute inset-x-8 bottom-4 flex justify-between text-[10px] font-mono text-on-surface-variant/40 uppercase tracking-widest">
+<span>Mon</span>
+<span>Tue</span>
+<span>Wed</span>
+<span>Thu</span>
+<span>Fri</span>
+<span>Sat</span>
+<span>Sun</span>
+</div>
+</div>
+</div>
+<!-- Action Panel -->
+<div class="space-y-6">
+<h2 class="text-xl font-bold tracking-tight text-on-surface font-geist">Quick Actions</h2>
+<div class="space-y-3">
+<button class="w-full flex items-center justify-between p-4 bg-surface-container-lowest hover:bg-surface-container-high rounded-xl shadow-[0_4px_12px_rgba(45,52,51,0.02)] transition-all text-sm font-semibold text-on-surface">
+<span class="flex items-center gap-3">
+<span class="material-symbols-outlined !text-lg text-tertiary">add_circle</span>
+                                Register Guest
+                            </span>
+<span class="material-symbols-outlined !text-lg text-on-surface-variant">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 bg-surface-container-lowest hover:bg-surface-container-high rounded-xl shadow-[0_4px_12px_rgba(45,52,51,0.02)] transition-all text-sm font-semibold text-on-surface">
+<span class="flex items-center gap-3">
+<span class="material-symbols-outlined !text-lg text-tertiary">receipt_long</span>
+                                Generate Report
+                            </span>
+<span class="material-symbols-outlined !text-lg text-on-surface-variant">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 bg-surface-container-lowest hover:bg-surface-container-high rounded-xl shadow-[0_4px_12px_rgba(45,52,51,0.02)] transition-all text-sm font-semibold text-on-surface">
+<span class="flex items-center gap-3">
+<span class="material-symbols-outlined !text-lg text-tertiary">campaign</span>
+                                Send Broadcast
+                            </span>
+<span class="material-symbols-outlined !text-lg text-on-surface-variant">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

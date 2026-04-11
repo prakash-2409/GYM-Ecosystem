@@ -1,572 +1,420 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
-import apiClient from '@/lib/api-client';
 import Link from 'next/link';
 import {
-  ArrowLeft, Calendar, TrendingUp, TrendingDown, Minus,
-  IndianRupee, Bell, CheckCircle2, Plus as PlusIcon, Loader2,
+  ArrowLeft, Phone, Mail, Calendar, Dumbbell,
+  CreditCard, Bell, TrendingDown, User2, Activity
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Drawer } from '@/components/ui/drawer';
-import { EmptyState } from '@/components/ui/empty-state';
-import { Skeleton } from '@/components/ui/skeleton';
+import { MOCK_MEMBERS, MOCK_FEES, MOCK_NOTIFICATIONS } from '@/lib/mock-data';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-type TabKey = 'overview' | 'attendance' | 'progress' | 'fees' | 'notifications';
+type Tab = 'overview' | 'attendance' | 'progress' | 'fees' | 'notifications';
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function formatCurrency(amount: number) {
+  return `₹${amount.toLocaleString('en-IN')}`;
+}
+
+const MONTHS = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
 
 export default function MemberProfilePage() {
-  const { id } = useParams<{ id: string }>();
-  const [activeTab, setActiveTab] = useState<TabKey>('overview');
-  const [showCollectDrawer, setShowCollectDrawer] = useState(false);
-  const [showStatDrawer, setShowStatDrawer] = useState(false);
-  const [collectForm, setCollectForm] = useState({ amount: '', method: 'cash', notes: '' });
-  const [statForm, setStatForm] = useState({ weightKg: '', chestCm: '', waistCm: '', bicepCm: '', thighCm: '', hipsCm: '' });
-  const [attendMonth, setAttendMonth] = useState(new Date().getMonth() + 1);
-  const [attendYear, setAttendYear] = useState(new Date().getFullYear());
-  const queryClient = useQueryClient();
+  const params = useParams();
+  const [activeTab, setActiveTab] = useState<Tab>('overview');
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['member', id],
-    queryFn: () => apiClient.get(`/members/${id}`).then((r) => r.data),
-    enabled: !!id,
-  });
+  const member = useMemo(() => {
+    return MOCK_MEMBERS.find((m) => m.id === params.id) || MOCK_MEMBERS[0];
+  }, [params.id]);
 
-  const { data: attendanceData } = useQuery({
-    queryKey: ['attendance', id, attendMonth, attendYear],
-    queryFn: () => apiClient.get(`/members/${id}/attendance`, { params: { month: attendMonth, year: attendYear } }).then((r) => r.data),
-    enabled: activeTab === 'attendance',
-  });
+  const memberFees = useMemo(() => {
+    return MOCK_FEES.filter((f) => f.memberId === member.id);
+  }, [member.id]);
 
-  const { data: bodyStats } = useQuery({
-    queryKey: ['bodystats', id],
-    queryFn: () => apiClient.get(`/bodystats/${id}/comparison`).then((r) => r.data),
-    enabled: activeTab === 'progress',
-  });
+  const memberNotifications = useMemo(() => {
+    return MOCK_NOTIFICATIONS.filter((n) => n.sentTo === member.name || n.sentTo === 'All Members');
+  }, [member.name]);
 
-  const { data: weightHistory } = useQuery({
-    queryKey: ['weight-history', id],
-    queryFn: () => apiClient.get(`/bodystats/${id}/weight-history`).then((r) => r.data),
-    enabled: activeTab === 'progress',
-  });
+  const weightData = member.weight.map((w, i) => ({ month: MONTHS[i], weight: w, bodyFat: member.bodyFat[i] }));
 
-  const { data: paymentHistory } = useQuery({
-    queryKey: ['payments', id],
-    queryFn: () => apiClient.get('/payments', { params: { memberId: id, limit: 50 } }).then((r) => r.data),
-    enabled: activeTab === 'fees',
-  });
+  const daysRemaining = Math.max(0, Math.ceil((new Date(member.planEnd).getTime() - Date.now()) / 86400000));
 
-  const { data: notifHistory } = useQuery({
-    queryKey: ['notifications', id],
-    queryFn: () => apiClient.get('/notifications', { params: { memberId: id } }).then((r) => r.data),
-    enabled: activeTab === 'notifications',
-  });
-
-  const collectMutation = useMutation({
-    mutationFn: (formData: { memberId: string; amount: number; paymentMethod: string; notes: string }) =>
-      apiClient.post('/payments/collect', formData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['member', id] });
-      queryClient.invalidateQueries({ queryKey: ['payments', id] });
-      setShowCollectDrawer(false);
-      setCollectForm({ amount: '', method: 'cash', notes: '' });
-    },
-  });
-
-  const statMutation = useMutation({
-    mutationFn: (formData: Record<string, number | undefined>) =>
-      apiClient.post(`/bodystats/${id}`, formData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bodystats', id] });
-      queryClient.invalidateQueries({ queryKey: ['weight-history', id] });
-      setShowStatDrawer(false);
-      setStatForm({ weightKg: '', chestCm: '', waistCm: '', bicepCm: '', thighCm: '', hipsCm: '' });
-    },
-  });
-
-  // ─── Loading skeleton ──────────────────────────────────
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-5 w-32" />
-        <div className="card space-y-4">
-          <div className="flex items-start gap-5">
-            <Skeleton className="h-16 w-16 rounded-full" />
-            <div className="space-y-2 flex-1">
-              <Skeleton className="h-6 w-48" />
-              <Skeleton className="h-4 w-24" />
-              <div className="flex gap-2">
-                <Skeleton className="h-5 w-20 rounded-badge" />
-                <Skeleton className="h-5 w-20 rounded-badge" />
-              </div>
-            </div>
-          </div>
-          <Skeleton className="h-2 w-full rounded-full" />
-          <div className="grid grid-cols-3 gap-4">
-            <Skeleton className="h-16 rounded-card" />
-            <Skeleton className="h-16 rounded-card" />
-            <Skeleton className="h-16 rounded-card" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const member = data?.member;
-  const activeSub = data?.activeSubscription;
-  const totalVisits = data?.totalVisits || 0;
-
-  if (!member) {
-    return (
-      <div className="card">
-        <EmptyState
-          title="Member not found"
-          description="This member doesn't exist or has been removed"
-          action={<Link href="/members" className="btn btn-primary">Back to Members</Link>}
-        />
-      </div>
-    );
-  }
-
-  const userName = member.user?.name || 'Unknown';
-  const daysRemaining = activeSub
-    ? Math.max(0, Math.ceil((new Date(activeSub.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-    : 0;
-  const totalDays = activeSub
-    ? Math.ceil((new Date(activeSub.endDate).getTime() - new Date(activeSub.startDate).getTime()) / (1000 * 60 * 60 * 24))
-    : 1;
-  const progressPercent = Math.min(100, Math.max(0, ((totalDays - daysRemaining) / totalDays) * 100));
-  const progressColorClass = daysRemaining <= 0 ? 'bg-danger' : daysRemaining <= 7 ? 'bg-warning' : 'bg-success';
-  const statusVariant: 'active' | 'expiring' | 'expired' = daysRemaining <= 0 ? 'expired' : daysRemaining <= 7 ? 'expiring' : 'active';
-
-  const tabs: { key: TabKey; label: string }[] = [
-    { key: 'overview', label: 'Overview' },
-    { key: 'attendance', label: 'Attendance' },
-    { key: 'progress', label: 'Progress' },
-    { key: 'fees', label: 'Fee History' },
-    { key: 'notifications', label: 'Notifications' },
+  const tabs: { key: Tab; label: string; icon: React.ElementType }[] = [
+    { key: 'overview', label: 'Overview', icon: User2 },
+    { key: 'attendance', label: 'Attendance', icon: Calendar },
+    { key: 'progress', label: 'Progress', icon: Activity },
+    { key: 'fees', label: 'Fee History', icon: CreditCard },
+    { key: 'notifications', label: 'Notifications', icon: Bell },
   ];
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Back button */}
-      <Link
-        href="/members"
-        className="inline-flex items-center gap-2 text-caption text-text-secondary hover:text-text-primary mb-4 transition-colors duration-normal stagger-1"
-      >
-        <ArrowLeft size={16} strokeWidth={1.5} /> Back to Members
+      <Link href="/members" className="inline-flex items-center gap-2 text-body text-text-secondary hover:text-text-primary transition-colors stagger-1">
+        <ArrowLeft size={16} />
+        Back to Members
       </Link>
 
-      {/* ─── Profile Header ────────────────────────────────── */}
-      <div className="card mb-between-cards stagger-2">
-        <div className="flex items-start gap-5">
-          {/* Large avatar with initials */}
-          <div className="avatar-xl flex-shrink-0">{userName[0]?.toUpperCase()}</div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-page-title text-text-primary">{userName}</h1>
-            <p className="text-caption font-mono text-text-secondary mt-1">{member.memberCode}</p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {activeSub && (
-                <Badge variant="coach">{activeSub.plan?.name}</Badge>
-              )}
-              <Badge variant={statusVariant}>
-                {daysRemaining <= 0 ? 'Expired' : `${daysRemaining} days left`}
-              </Badge>
+      {/* Profile Header */}
+      <div className="card stagger-2">
+        <div className="flex flex-col md:flex-row md:items-center gap-6">
+          <div className={`avatar-xl text-2xl ${
+            member.status === 'expired' ? 'bg-red-500' :
+            member.status === 'expiring' ? 'bg-amber-500' : ''
+          }`}>
+            {member.name[0]}
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-page-title text-text-primary">{member.name}</h1>
+              <span className={`badge ${
+                member.status === 'active' ? 'badge-active' :
+                member.status === 'expiring' ? 'badge-expiring' : 'badge-expired'
+              }`}>
+                {member.status === 'active' ? 'Active' :
+                 member.status === 'expiring' ? 'Expiring' : 'Expired'}
+              </span>
+            </div>
+            <p className="text-body text-text-secondary font-mono">ID: {member.memberCode}</p>
+            <div className="flex flex-wrap items-center gap-4 mt-3 text-caption text-text-secondary">
+              <span className="flex items-center gap-1"><Phone size={13} /> {member.phone}</span>
+              <span className="flex items-center gap-1"><Mail size={13} /> {member.email}</span>
+              <span className="flex items-center gap-1"><Calendar size={13} /> Joined {formatDate(member.joinedAt)}</span>
+              <span className="flex items-center gap-1"><Dumbbell size={13} /> {member.plan}</span>
             </div>
           </div>
-        </div>
-
-        {/* Progress bar — green to orange to red */}
-        {activeSub && (
-          <div className="mt-4">
-            <div className="flex justify-between text-caption text-text-muted mb-1">
-              <span>{new Date(activeSub.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-              <span>{new Date(activeSub.endDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-            </div>
-            <div className="h-2 bg-divider rounded-full overflow-hidden">
-              <div className={`h-full ${progressColorClass} rounded-full transition-all duration-stat`} style={{ width: `${progressPercent}%` }} />
-            </div>
-          </div>
-        )}
-
-        {/* Stats row — 4 stat cards */}
-        <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-between-cards">
-          <div className="stat-card text-center">
-            <p className="stat-card-value">{totalVisits}</p>
-            <p className="stat-card-label mt-1">Total Visits</p>
-          </div>
-          <div className="stat-card text-center">
-            <p className="stat-card-value">{daysRemaining}</p>
-            <p className="stat-card-label mt-1">Days Left</p>
-          </div>
-          <div className="stat-card text-center">
-            <p className="stat-card-value">—</p>
-            <p className="stat-card-label mt-1">This Month</p>
-          </div>
-          <div className="stat-card text-center">
-            <p className="stat-card-value">—</p>
-            <p className="stat-card-label mt-1">Streak</p>
+          <div className="flex gap-2">
+            <button className="btn btn-secondary">Edit Profile</button>
+            <button className="btn btn-primary">Renew Plan</button>
           </div>
         </div>
       </div>
 
-      {/* ─── Tab navigation ────────────────────────────────── */}
-      <div className="flex gap-1 mb-6 border-b border-divider overflow-x-auto stagger-3">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`tab-underline px-4 py-3 text-body font-medium whitespace-nowrap transition-colors duration-normal ${
-              activeTab === tab.key
-                ? 'active text-text-primary'
-                : 'text-text-secondary hover:text-text-primary'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-between-cards stagger-3">
+        <div className="stat-card">
+          <p className="stat-card-label">Total Visits</p>
+          <p className="stat-card-value mt-2 font-mono">{member.totalVisits}</p>
+        </div>
+        <div className="stat-card">
+          <p className="stat-card-label">This Month</p>
+          <p className="stat-card-value mt-2 font-mono">{member.thisMonthVisits}</p>
+        </div>
+        <div className="stat-card">
+          <p className="stat-card-label">Days Left</p>
+          <p className={`stat-card-value mt-2 font-mono ${
+            daysRemaining > 30 ? 'text-success' :
+            daysRemaining > 7 ? 'text-warning' : 'text-danger'
+          }`}>
+            {daysRemaining}
+          </p>
+        </div>
+        <div className="stat-card">
+          <p className="stat-card-label">Fees Due</p>
+          <p className={`stat-card-value mt-2 font-mono ${member.feesDue > 0 ? 'text-danger' : 'text-success'}`}>
+            {member.feesDue > 0 ? formatCurrency(member.feesDue) : '₹0'}
+          </p>
+        </div>
       </div>
 
-      {/* ─── Tab Content ───────────────────────────────────── */}
-      <div className="card stagger-4">
-        {/* ── Overview ──────────────────────────────────── */}
+      {/* Tabs */}
+      <div className="border-b border-divider stagger-4">
+        <div className="flex gap-1 overflow-x-auto">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                  activeTab === tab.key
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-text-muted hover:text-text-secondary'
+                }`}
+              >
+                <Icon size={16} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div className="animate-fade-in">
+        {/* ═══ OVERVIEW ═══ */}
         {activeTab === 'overview' && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-card-heading text-text-primary mb-4">Personal Info</h3>
-              <div className="grid grid-cols-2 gap-4 text-body">
-                <div><span className="text-text-secondary">Phone:</span> <span className="font-medium text-text-primary">{member.user?.phone}</span></div>
-                <div><span className="text-text-secondary">Email:</span> <span className="font-medium text-text-primary">{member.user?.email || '—'}</span></div>
-                <div><span className="text-text-secondary">DOB:</span> <span className="font-medium text-text-primary">{member.dateOfBirth ? new Date(member.dateOfBirth).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</span></div>
-                <div><span className="text-text-secondary">Gender:</span> <span className="font-medium text-text-primary">{member.gender || '—'}</span></div>
-                <div><span className="text-text-secondary">Blood Group:</span> <span className="font-medium text-text-primary">{member.bloodGroup || '—'}</span></div>
-                <div><span className="text-text-secondary">Emergency:</span> <span className="font-medium text-text-primary">{member.emergencyPhone || '—'}</span></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-between-cards">
+            <div className="card">
+              <h3 className="text-card-heading text-text-primary mb-4">Personal Information</h3>
+              <div className="space-y-4">
+                {[
+                  { label: 'Full Name', value: member.name },
+                  { label: 'Gender', value: member.gender },
+                  { label: 'Age', value: `${member.age} years` },
+                  { label: 'Phone', value: member.phone },
+                  { label: 'Email', value: member.email },
+                  { label: 'Member Since', value: formatDate(member.joinedAt) },
+                ].map((item) => (
+                  <div key={item.label} className="flex justify-between items-center py-2 border-b border-divider last:border-0">
+                    <span className="text-caption text-text-muted">{item.label}</span>
+                    <span className="text-body text-text-primary font-medium">{item.value}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            {activeSub && (
-              <div className="pt-6 border-t border-divider">
-                <h3 className="text-card-heading text-text-primary mb-4">Current Plan</h3>
-                <div className="grid grid-cols-2 gap-4 text-body">
-                  <div><span className="text-text-secondary">Plan:</span> <span className="font-medium text-text-primary">{activeSub.plan?.name}</span></div>
-                  <div><span className="text-text-secondary">Status:</span> <span className="font-medium text-text-primary capitalize">{activeSub.status}</span></div>
-                  <div><span className="text-text-secondary">Start:</span> <span className="font-medium text-text-primary">{new Date(activeSub.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span></div>
-                  <div><span className="text-text-secondary">End:</span> <span className="font-medium text-text-primary">{new Date(activeSub.endDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span></div>
-                </div>
+
+            <div className="card">
+              <h3 className="text-card-heading text-text-primary mb-4">Subscription Details</h3>
+              <div className="space-y-4">
+                {[
+                  { label: 'Current Plan', value: member.plan },
+                  { label: 'Amount', value: formatCurrency(member.planAmount) },
+                  { label: 'Start Date', value: formatDate(member.planStart) },
+                  { label: 'End Date', value: formatDate(member.planEnd) },
+                  { label: 'Days Remaining', value: `${daysRemaining} days` },
+                  { label: 'Status', value: member.status.charAt(0).toUpperCase() + member.status.slice(1) },
+                ].map((item) => (
+                  <div key={item.label} className="flex justify-between items-center py-2 border-b border-divider last:border-0">
+                    <span className="text-caption text-text-muted">{item.label}</span>
+                    <span className="text-body text-text-primary font-medium">{item.value}</span>
+                  </div>
+                ))}
               </div>
-            )}
-            <div className="pt-6 border-t border-divider flex gap-3">
-              <button onClick={() => setShowCollectDrawer(true)} className="btn btn-primary">
-                <IndianRupee size={16} strokeWidth={1.5} /> Mark Fee Collected
-              </button>
             </div>
           </div>
         )}
 
-        {/* ── Attendance ────────────────────────────────── */}
+        {/* ═══ ATTENDANCE ═══ */}
         {activeTab === 'attendance' && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-card-heading text-text-primary">Attendance Calendar</h3>
-              <div className="flex items-center gap-2">
-                <button onClick={() => { if (attendMonth === 1) { setAttendMonth(12); setAttendYear(attendYear - 1); } else setAttendMonth(attendMonth - 1); }} className="btn btn-secondary h-8 w-8 p-0">←</button>
-                <span className="text-body font-medium text-text-primary min-w-[140px] text-center">
-                  {new Date(attendYear, attendMonth - 1).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
-                </span>
-                <button onClick={() => { if (attendMonth === 12) { setAttendMonth(1); setAttendYear(attendYear + 1); } else setAttendMonth(attendMonth + 1); }} className="btn btn-secondary h-8 w-8 p-0">→</button>
+          <div className="card">
+            <h3 className="text-card-heading text-text-primary mb-4">
+              April 2026 Attendance — {member.thisMonthVisits} visits
+            </h3>
+            <div className="grid grid-cols-7 gap-2 mb-6">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
+                <div key={d} className="text-center text-caption text-text-muted font-medium py-1">{d}</div>
+              ))}
+              {/* April 2026 starts on Wednesday (index 3) */}
+              {Array.from({ length: 3 }, (_, i) => (
+                <div key={`empty-${i}`} />
+              ))}
+              {Array.from({ length: 30 }, (_, i) => {
+                const day = i + 1;
+                const attended = member.attendanceDays.includes(day);
+                const isToday = day === 9;
+                const isFuture = day > 9;
+                return (
+                  <div
+                    key={day}
+                    className={`aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all ${
+                      isFuture
+                        ? 'text-text-muted/30'
+                        : attended
+                        ? 'bg-success text-white shadow-sm'
+                        : isToday
+                        ? 'bg-primary/10 text-primary border border-primary/30'
+                        : 'bg-stat-card text-text-secondary'
+                    }`}
+                  >
+                    {day}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-6 text-caption text-text-muted">
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-success" /> Present
+              </span>
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-stat-card border border-border-default" /> Absent
+              </span>
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-primary/10 border border-primary/30" /> Today
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ PROGRESS ═══ */}
+        {activeTab === 'progress' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-between-cards">
+            <div className="card">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-card-heading text-text-primary">Weight Trend</h3>
+                <div className="flex items-center gap-1 text-caption text-success px-2 py-0.5 rounded-full bg-success-bg">
+                  <TrendingDown size={12} />
+                  <span>-{member.weight[0] - member.weight[member.weight.length - 1]} kg</span>
+                </div>
+              </div>
+              <div className="h-[200px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={weightData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 12 }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 12 }} domain={['auto', 'auto']} />
+                    <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #EBEBEB' }} />
+                    <Line type="monotone" dataKey="weight" stroke="#8B5CF6" strokeWidth={2.5} dot={{ fill: '#8B5CF6', r: 4 }} activeDot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </div>
-            {attendanceData && (
-              <>
-                <div className="grid grid-cols-3 gap-between-cards mb-6">
-                  <div className="stat-card text-center">
-                    <p className="stat-card-value text-success">{attendanceData.presentDays}</p>
-                    <p className="stat-card-label mt-1">Present</p>
-                  </div>
-                  <div className="stat-card text-center">
-                    <p className="stat-card-value text-danger">{attendanceData.absentDays}</p>
-                    <p className="stat-card-label mt-1">Absent</p>
-                  </div>
-                  <div className="stat-card text-center">
-                    <p className="stat-card-value text-info">{attendanceData.attendancePercent}%</p>
-                    <p className="stat-card-label mt-1">Attendance</p>
-                  </div>
+            <div className="card">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-card-heading text-text-primary">Body Fat %</h3>
+                <div className="flex items-center gap-1 text-caption text-success px-2 py-0.5 rounded-full bg-success-bg">
+                  <TrendingDown size={12} />
+                  <span>-{member.bodyFat[0] - member.bodyFat[member.bodyFat.length - 1]}%</span>
                 </div>
-                <div className="grid grid-cols-7 gap-1">
-                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => <div key={i} className="text-center text-label text-text-muted py-1">{d}</div>)}
-                  {Array.from({ length: new Date(attendYear, attendMonth - 1, 1).getDay() }, (_, i) => <div key={`empty-${i}`} />)}
-                  {Array.from({ length: attendanceData.daysInMonth }, (_, i) => {
-                    const day = i + 1;
-                    const dateStr = `${attendYear}-${String(attendMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                    const isPresent = attendanceData.checkIns.some((c: { date: string }) => c.date === dateStr);
-                    const isToday = new Date().toISOString().split('T')[0] === dateStr;
-                    return (
-                      <div
-                        key={day}
-                        className={`w-full aspect-square flex items-center justify-center rounded-btn text-caption font-medium ${
-                          isPresent
-                            ? 'bg-success text-white'
-                            : isToday
-                              ? 'bg-warning-bg text-warning ring-1 ring-warning-border'
-                              : 'bg-divider text-text-muted'
-                        }`}
-                      >
-                        {day}
-                      </div>
-                    );
-                  })}
+              </div>
+              <div className="h-[200px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={weightData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 12 }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 12 }} domain={['auto', 'auto']} />
+                    <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #EBEBEB' }} />
+                    <Line type="monotone" dataKey="bodyFat" stroke="#F59E0B" strokeWidth={2.5} dot={{ fill: '#F59E0B', r: 4 }} activeDot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div className="card md:col-span-2">
+              <h3 className="text-card-heading text-text-primary mb-4">Current Measurements</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="stat-card text-center">
+                  <p className="stat-card-label">Weight</p>
+                  <p className="stat-card-value mt-2 font-mono">{member.weight[member.weight.length - 1]} <span className="text-caption">kg</span></p>
                 </div>
-              </>
+                <div className="stat-card text-center">
+                  <p className="stat-card-label">Body Fat</p>
+                  <p className="stat-card-value mt-2 font-mono">{member.bodyFat[member.bodyFat.length - 1]}<span className="text-caption">%</span></p>
+                </div>
+                <div className="stat-card text-center">
+                  <p className="stat-card-label">BMI</p>
+                  <p className="stat-card-value mt-2 font-mono">
+                    {(member.weight[member.weight.length - 1] / ((member.gender === 'Male' ? 1.75 : 1.63) ** 2)).toFixed(1)}
+                  </p>
+                </div>
+                <div className="stat-card text-center">
+                  <p className="stat-card-label">Goal</p>
+                  <p className="stat-card-value mt-2 font-mono">{member.weight[member.weight.length - 1] - 5} <span className="text-caption">kg</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ FEES ═══ */}
+        {activeTab === 'fees' && (
+          <div className="card p-0 overflow-hidden">
+            <div className="px-card-pad py-4 border-b border-divider flex items-center justify-between">
+              <h3 className="text-card-heading text-text-primary">Fee History</h3>
+              {member.feesDue > 0 && (
+                <span className="badge badge-overdue">
+                  {formatCurrency(member.feesDue)} pending
+                </span>
+              )}
+            </div>
+            {memberFees.length > 0 ? (
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className="table-header text-left">Plan</th>
+                    <th className="table-header text-left">Amount</th>
+                    <th className="table-header text-left">Due Date</th>
+                    <th className="table-header text-left">Status</th>
+                    <th className="table-header text-left">Paid Via</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {memberFees.map((fee) => (
+                    <tr key={fee.id} className="table-row">
+                      <td className="px-4 text-table-row text-text-primary">{fee.plan}</td>
+                      <td className="px-4 text-table-row text-text-primary font-mono">{formatCurrency(fee.amount)}</td>
+                      <td className="px-4 text-table-row text-text-secondary">{formatDate(fee.dueDate)}</td>
+                      <td className="px-4">
+                        <span className={`badge ${
+                          fee.status === 'paid' ? 'badge-paid' :
+                          fee.status === 'overdue' ? 'badge-overdue' : 'badge-fee-due'
+                        }`}>
+                          {fee.status === 'paid' ? 'Paid' : fee.status === 'overdue' ? 'Overdue' : 'Due'}
+                        </span>
+                      </td>
+                      <td className="px-4 text-table-row text-text-secondary capitalize">
+                        {fee.method || '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="empty-state py-12">
+                <CreditCard className="empty-state-icon" />
+                <p className="empty-state-title">No fee records</p>
+                <p className="empty-state-description">Fee history will appear here</p>
+              </div>
             )}
           </div>
         )}
 
-        {/* ── Progress ──────────────────────────────────── */}
-        {activeTab === 'progress' && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-card-heading text-text-primary">Body Stats</h3>
-              <button onClick={() => setShowStatDrawer(true)} className="btn btn-primary">
-                <PlusIcon size={16} strokeWidth={1.5} /> Add Entry
-              </button>
+        {/* ═══ NOTIFICATIONS ═══ */}
+        {activeTab === 'notifications' && (
+          <div className="card p-0 overflow-hidden">
+            <div className="px-card-pad py-4 border-b border-divider">
+              <h3 className="text-card-heading text-text-primary">Notification Log</h3>
             </div>
-            {bodyStats?.latest ? (
-              <div className="space-y-8">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-between-cards">
-                  {[
-                    { label: 'Weight', value: bodyStats.latest.weightKg, unit: 'kg', change: bodyStats.changes?.weightKg },
-                    { label: 'Chest', value: bodyStats.latest.chestCm, unit: 'cm', change: bodyStats.changes?.chestCm },
-                    { label: 'Waist', value: bodyStats.latest.waistCm, unit: 'cm', change: bodyStats.changes?.waistCm },
-                    { label: 'Bicep', value: bodyStats.latest.bicepCm, unit: 'cm', change: bodyStats.changes?.bicepCm },
-                    { label: 'Thigh', value: bodyStats.latest.thighCm, unit: 'cm', change: bodyStats.changes?.thighCm },
-                    { label: 'Hips', value: bodyStats.latest.hipsCm, unit: 'cm', change: bodyStats.changes?.hipsCm },
-                  ].map((stat) => (
-                    <div key={stat.label} className="stat-card">
-                      <p className="stat-card-label mb-2">{stat.label}</p>
-                      <div className="flex items-end gap-2">
-                        <span className="stat-card-value text-[22px]">{stat.value ? Number(stat.value).toFixed(1) : '—'}</span>
-                        <span className="text-caption text-text-muted mb-1">{stat.value ? stat.unit : ''}</span>
-                        {stat.change != null && stat.change !== 0 && (
-                          <span className={`stat-card-trend ${stat.change > 0 ? 'down' : 'up'} mb-1`}>
-                            {stat.change > 0 ? <TrendingUp size={12} strokeWidth={1.5} /> : <TrendingDown size={12} strokeWidth={1.5} />}
-                            {Math.abs(stat.change).toFixed(1)}
+            {memberNotifications.length > 0 ? (
+              <div className="divide-y divide-divider">
+                {memberNotifications.map((n) => (
+                  <div key={n.id} className="px-card-pad py-4 hover:bg-page/50 transition-colors">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`badge ${
+                            n.type === 'fee_reminder' ? 'badge-fee-due' :
+                            n.type === 'birthday' ? 'badge-active' :
+                            n.type === 'inactivity' ? 'badge-expiring' :
+                            n.type === 'promo' ? 'badge-coach' : 'badge-receptionist'
+                          }`}>
+                            {n.type.replace('_', ' ')}
                           </span>
-                        )}
-                        {stat.change === 0 && <Minus size={12} className="text-text-muted mb-1" strokeWidth={1.5} />}
+                          <span className={`badge ${
+                            n.channel === 'whatsapp' ? 'badge-active' :
+                            n.channel === 'sms' ? 'badge-coach' : 'badge-receptionist'
+                          }`}>
+                            {n.channel}
+                          </span>
+                        </div>
+                        <p className="text-body text-text-primary font-medium">{n.title}</p>
+                        <p className="text-caption text-text-secondary mt-1">{n.message}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <span className={`badge ${
+                          n.status === 'delivered' ? 'badge-active' :
+                          n.status === 'failed' ? 'badge-overdue' : 'badge-expiring'
+                        }`}>
+                          {n.status}
+                        </span>
+                        <p className="text-caption text-text-muted mt-1">{formatDate(n.sentAt)}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-                {weightHistory?.history?.length > 0 && (
-                  <div>
-                    <h4 className="text-body font-medium text-text-secondary mb-3">Weight Trend (last 12 entries)</h4>
-                    <div className="h-40 flex items-end gap-1">
-                      {weightHistory.history.map((point: { date: string; weight: number }, i: number) => {
-                        const allWeights = weightHistory.history.map((p: { weight: number }) => p.weight);
-                        const minW = Math.min(...allWeights) - 2;
-                        const maxW = Math.max(...allWeights) + 2;
-                        const height = ((point.weight - minW) / (maxW - minW)) * 100;
-                        return (
-                          <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                            <span className="text-label text-text-muted font-mono">{point.weight}</span>
-                            <div className="w-full rounded-t-sm overflow-hidden" style={{ height: `${height}%` }}>
-                              <div className="w-full h-full bg-primary opacity-70 rounded-t-sm" />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
                   </div>
-                )}
+                ))}
               </div>
             ) : (
-              <EmptyState
-                icon={Calendar}
-                title="No body stats recorded yet"
-                description='Click "Add Entry" to log the first measurement'
-                action={
-                  <button onClick={() => setShowStatDrawer(true)} className="btn btn-primary">
-                    <PlusIcon size={16} strokeWidth={1.5} /> Add Entry
-                  </button>
-                }
-              />
+              <div className="empty-state py-12">
+                <Bell className="empty-state-icon" />
+                <p className="empty-state-title">No notifications sent</p>
+                <p className="empty-state-description">Notification history will appear here</p>
+              </div>
             )}
           </div>
         )}
-
-        {/* ── Fee History ───────────────────────────────── */}
-        {activeTab === 'fees' && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-card-heading text-text-primary">Fee History</h3>
-              <button onClick={() => setShowCollectDrawer(true)} className="btn btn-primary">
-                <PlusIcon size={16} strokeWidth={1.5} /> Add Record
-              </button>
-            </div>
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className="table-header text-left">Date</th>
-                  <th className="table-header text-left">Amount</th>
-                  <th className="table-header text-left">Method</th>
-                  <th className="table-header text-left">Invoice</th>
-                  <th className="table-header text-left">Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paymentHistory?.payments?.length > 0 ? (
-                  paymentHistory.payments.map((p: { id: string; paidAt: string; totalAmount: string; paymentMethod: string; invoiceNumber: string; notes: string | null }) => (
-                    <tr key={p.id} className="table-row">
-                      <td className="px-4 text-table-row text-text-secondary">
-                        {new Date(p.paidAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                      </td>
-                      <td className="px-4 text-table-row font-mono font-medium text-text-primary">₹{Number(p.totalAmount).toLocaleString('en-IN')}</td>
-                      <td className="px-4"><Badge variant="default">{p.paymentMethod.toUpperCase()}</Badge></td>
-                      <td className="px-4 text-table-row font-mono text-text-muted">{p.invoiceNumber}</td>
-                      <td className="px-4 text-table-row text-text-secondary">{p.notes || '—'}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="p-0">
-                      <EmptyState
-                        icon={IndianRupee}
-                        title="No payment records"
-                        description="Fee collection records will appear here"
-                      />
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* ── Notifications Log ─────────────────────────── */}
-        {activeTab === 'notifications' && (
-          <div>
-            <h3 className="text-card-heading text-text-primary mb-6">Notification Log</h3>
-            <div className="space-y-2">
-              {notifHistory?.notifications?.length > 0 ? (
-                notifHistory.notifications.map((n: { id: string; type: string; channel: string; body: string; sentAt: string; status: string }) => (
-                  <div key={n.id} className="flex items-start gap-3 p-3 rounded-btn hover:bg-divider transition-colors duration-fast">
-                    <div className={`mt-0.5 avatar text-badge ${
-                      n.channel === 'whatsapp' ? 'bg-success' : n.channel === 'push' ? 'bg-info' : 'bg-text-muted'
-                    }`}>
-                      {n.channel === 'whatsapp' ? 'W' : n.channel === 'push' ? 'P' : 'S'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-body font-medium text-text-primary capitalize">{n.type.replace(/_/g, ' ')}</p>
-                      <p className="text-caption text-text-secondary truncate">{n.body}</p>
-                      <p className="text-caption text-text-muted mt-1">
-                        {n.sentAt
-                          ? new Date(n.sentAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-                          : 'Pending'} · {n.status}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <EmptyState
-                  icon={Bell}
-                  title="No notifications sent yet"
-                  description="Notifications to this member will appear here"
-                />
-              )}
-            </div>
-          </div>
-        )}
       </div>
-
-      {/* ─── Collect Fee Drawer ─────────────────────────────── */}
-      <Drawer
-        open={showCollectDrawer}
-        onClose={() => setShowCollectDrawer(false)}
-        title="Collect Fee"
-        footer={
-          <>
-            <button onClick={() => setShowCollectDrawer(false)} className="btn btn-secondary">Cancel</button>
-            <button
-              onClick={() => collectMutation.mutate({ memberId: id, amount: Number(collectForm.amount), paymentMethod: collectForm.method, notes: collectForm.notes })}
-              disabled={collectMutation.isPending || !collectForm.amount}
-              className="btn btn-primary"
-            >
-              {collectMutation.isPending ? (
-                <><Loader2 size={16} className="animate-spin" strokeWidth={1.5} /> Processing...</>
-              ) : 'Confirm'}
-            </button>
-          </>
-        }
-      >
-        <div className="space-y-6">
-          <div>
-            <label htmlFor="fee-amount" className="input-label">Amount (₹)</label>
-            <input id="fee-amount" type="number" value={collectForm.amount} onChange={(e) => setCollectForm({ ...collectForm, amount: e.target.value })} className="input" />
-          </div>
-          <div>
-            <label className="input-label">Method</label>
-            <div className="flex gap-3">
-              {['cash', 'upi'].map((m) => (
-                <button key={m} onClick={() => setCollectForm({ ...collectForm, method: m })} className={`flex-1 btn ${collectForm.method === m ? 'btn-primary' : 'btn-secondary'}`}>{m.toUpperCase()}</button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label htmlFor="fee-notes" className="input-label">Notes</label>
-            <textarea id="fee-notes" value={collectForm.notes} onChange={(e) => setCollectForm({ ...collectForm, notes: e.target.value })} rows={2} className="input h-auto py-3 resize-none" />
-          </div>
-        </div>
-      </Drawer>
-
-      {/* ─── Add Stats Drawer ──────────────────────────────── */}
-      <Drawer
-        open={showStatDrawer}
-        onClose={() => setShowStatDrawer(false)}
-        title="Log Body Stats"
-        footer={
-          <>
-            <button onClick={() => setShowStatDrawer(false)} className="btn btn-secondary">Cancel</button>
-            <button
-              onClick={() => {
-                const payload: Record<string, number | undefined> = {};
-                Object.entries(statForm).forEach(([k, v]) => { if (v) payload[k] = Number(v); });
-                statMutation.mutate(payload);
-              }}
-              disabled={statMutation.isPending || !statForm.weightKg}
-              className="btn btn-primary"
-            >
-              {statMutation.isPending ? (
-                <><Loader2 size={16} className="animate-spin" strokeWidth={1.5} /> Saving...</>
-              ) : 'Save Entry'}
-            </button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          {[
-            { key: 'weightKg', label: 'Weight (kg)', required: true },
-            { key: 'chestCm', label: 'Chest (cm)' },
-            { key: 'waistCm', label: 'Waist (cm)' },
-            { key: 'bicepCm', label: 'Bicep (cm)' },
-            { key: 'thighCm', label: 'Thigh (cm)' },
-            { key: 'hipsCm', label: 'Hips (cm)' },
-          ].map((field) => (
-            <div key={field.key}>
-              <label htmlFor={`stat-${field.key}`} className="input-label">
-                {field.label} {field.required && <span className="text-danger">*</span>}
-              </label>
-              <input
-                id={`stat-${field.key}`}
-                type="number"
-                step="0.1"
-                value={(statForm as Record<string, string>)[field.key]}
-                onChange={(e) => setStatForm({ ...statForm, [field.key]: e.target.value })}
-                className="input"
-              />
-            </div>
-          ))}
-        </div>
-      </Drawer>
     </div>
   );
 }

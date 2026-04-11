@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+        }
+        /* Custom scrollbar for refined UI */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #dde4e3; border-radius: 10px; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-container": "#e2e2e2",
+                        "primary": "#5e5e5e",
+                        "tertiary-fixed-dim": "#0068e2",
+                        "surface-container-low": "#f2f4f3",
+                        "on-error": "#fff7f6",
+                        "secondary-fixed-dim": "#d6d3d7",
+                        "primary-dim": "#525252",
+                        "on-surface-variant": "#5a6060",
+                        "on-primary-container": "#525252",
+                        "surface-dim": "#d4dcda",
+                        "error": "#9f403d",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#757c7b",
+                        "surface-bright": "#f9f9f8",
+                        "tertiary": "#005ac6",
+                        "inverse-surface": "#0c0f0e",
+                        "error-dim": "#4e0309",
+                        "on-tertiary-container": "#000000",
+                        "inverse-primary": "#ffffff",
+                        "on-secondary-fixed": "#3f3f42",
+                        "secondary-container": "#e4e1e5",
+                        "on-primary": "#f8f8f8",
+                        "on-error-container": "#752121",
+                        "surface-container": "#ebeeed",
+                        "on-primary-fixed": "#3f3f3f",
+                        "on-secondary-container": "#525155",
+                        "on-secondary": "#fbf8fc",
+                        "outline-variant": "#adb3b2",
+                        "secondary-dim": "#535356",
+                        "on-primary-fixed-variant": "#5b5b5b",
+                        "secondary": "#5f5f62",
+                        "on-tertiary-fixed-variant": "#ecf0ff",
+                        "secondary-fixed": "#e4e1e5",
+                        "primary-fixed": "#e2e2e2",
+                        "error-container": "#fe8983",
+                        "tertiary-fixed": "#1074f7",
+                        "surface-tint": "#5e5e5e",
+                        "surface-variant": "#dde4e3",
+                        "background": "#f9f9f8",
+                        "inverse-on-surface": "#9c9d9c",
+                        "surface-container-high": "#e4e9e8",
+                        "on-background": "#2d3433",
+                        "on-secondary-fixed-variant": "#5c5b5e",
+                        "tertiary-container": "#1074f7",
+                        "on-tertiary-fixed": "#ffffff",
+                        "primary-fixed-dim": "#d4d4d4",
+                        "on-tertiary": "#f9f8ff",
+                        "tertiary-dim": "#004faf",
+                        "on-surface": "#2d3433",
+                        "surface": "#f9f9f8",
+                        "surface-container-highest": "#dde4e3"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface selection:bg-tertiary-container selection:text-on-tertiary-container antialiased">
+<!-- Sidebar Navigation Shell -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-zinc-950 dark:bg-black font-sans antialiased tracking-tight text-sm font-light shadow-[20px_0_40px_rgba(0,0,0,0.2)] flex flex-col h-full py-6 z-50">
+<div class="px-6 mb-10">
+<h1 class="text-lg font-bold tracking-tighter text-zinc-100 uppercase">The Kinetic Atelier</h1>
+<p class="text-[10px] text-zinc-500 tracking-[0.2em] uppercase mt-1">Performance Lab</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-zinc-200 transition-colors mx-2" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-zinc-200 transition-colors mx-2" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Members</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-zinc-200 transition-colors mx-2" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span>Payments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-50 bg-zinc-800/50 rounded-lg mx-2" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+<span>Workouts</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-zinc-200 transition-colors mx-2" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span>Diets</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-zinc-200 transition-colors mx-2" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="px-6 mt-auto flex items-center gap-3 border-t border-zinc-800/50 pt-6">
+<img alt="Coach Profile" class="w-8 h-8 rounded-full object-cover grayscale" data-alt="Close up of a professional fitness coach" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1AaOPbEtPGXOl6Rh-L3QBYXf8hKuiSFkBeQmhwJnrjpdtPYCVYseRu3g1RNCN66nDChIZUpCasMGX-ULNni0mytC6hTY23xqCLZmpHECHdCUVUVO4KigGAtrBQLGgORFTwqeor69XOo551c1V_wu1FRjeAOjZjuSZor9eFhXOMmSTMpbxcSO7rk1gdpdIDaz9nf2b1jwj-SNhC7YnsSahK6AF2Uh274gfxgD6kDZFvJeRjwlfM9_NfFgOXn0x_b_iGjdqb_N6_WY"/>
+<div class="flex flex-col">
+<span class="text-zinc-200 font-medium text-xs">Marcus Vane</span>
+<span class="text-zinc-500 text-[10px]">Head Performance Coach</span>
+</div>
+</div>
+</aside>
+<!-- Top Bar Navigation Shell -->
+<header class="fixed top-0 right-0 left-64 h-16 z-40 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-xl border-b border-zinc-200/10 flex justify-between items-center px-8 w-full">
+<div class="flex items-center gap-4 flex-1 max-w-md">
+<div class="relative w-full group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 text-sm">search</span>
+<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-xs w-full focus:ring-1 focus:ring-outline-variant transition-all outline-none" placeholder="Search athletes or programs..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-full p-2 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+</button>
+<button class="hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-full p-2 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="help_outline">help_outline</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 min-h-screen bg-surface">
+<div class="max-w-[1400px] mx-auto p-12">
+<!-- Header Section -->
+<header class="flex justify-between items-end mb-12">
+<div class="space-y-1">
+<h2 class="text-4xl font-extrabold tracking-tighter text-on-surface uppercase">Coach's Workout Planner</h2>
+<p class="text-on-surface-variant font-light tracking-tight max-w-xl">
+                        Suggested programs based on attendance and performance history. Adaptive training blocks for the next cycle.
+                    </p>
+</div>
+<div class="flex gap-3">
+<button class="px-6 py-2.5 bg-surface-container-high text-on-surface text-sm font-semibold rounded-lg hover:bg-surface-container-highest transition-colors">
+                        Update Coach's Log
+                    </button>
+<button class="px-6 py-2.5 bg-gradient-to-v from-primary to-primary-dim text-on-primary text-sm font-semibold rounded-lg shadow-[0_20px_40px_rgba(45,52,51,0.06)] hover:opacity-90 transition-opacity">
+                        Apply Suggested Workouts
+                    </button>
+</div>
+</header>
+<div class="grid grid-cols-12 gap-8 items-start">
+<!-- Active Attendance Alerts (Side Column) -->
+<section class="col-span-12 lg:col-span-4 space-y-6">
+<div class="flex items-center justify-between mb-2">
+<h3 class="text-xs font-bold uppercase tracking-[0.1em] text-on-surface-variant">Attendance Alerts</h3>
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+</div>
+<div class="space-y-4">
+<!-- Alert Card 1 -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border-l-2 border-error shadow-[0_4px_20px_rgba(0,0,0,0.02)] group hover:scale-[1.01] transition-transform">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<img alt="Elena Vance" class="w-10 h-10 rounded-full object-cover" data-alt="Portrait of Elena Vance" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLzdxyYjqhZddvKY2rzg1HmYnNU0lClPhaJTUq9HtZ14aSxADmz1Q742sSOT9PTM2NjIz9iPoYJU8w4i0zedC72kSwRz0AD2TKkdiR5FC9xPsDBQ-PCpkmOeGncVEYqGCTnohWPf5DjieWJgh2XxJUHppoC2NcghdUgBzVK4BzLLFftJXG-t2Q0PWw6v2NoLb53XcmHzuhddAYjCnIC0EIfk86pIm3niFzhpHQAxPPvm_HcIREOCNek2oBUXglBc7rL2xUFCQC0fA"/>
+<div>
+<h4 class="font-bold text-sm tracking-tight">Elena Vance</h4>
+<p class="text-[10px] text-error font-semibold uppercase tracking-wider">Absent for 10 days</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/40 group-hover:text-tertiary transition-colors" data-icon="arrow_forward">arrow_forward</span>
+</div>
+<div class="bg-surface-container-low p-3 rounded-lg">
+<p class="text-xs text-on-surface-variant leading-relaxed italic">"Suggest Circuit Training to re-engage cardiovascular baseline."</p>
+</div>
+</div>
+<!-- Alert Card 2 -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border-l-2 border-tertiary shadow-[0_4px_20px_rgba(0,0,0,0.02)] group hover:scale-[1.01] transition-transform">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<img alt="Julian Richter" class="w-10 h-10 rounded-full object-cover" data-alt="Portrait of Julian Richter" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2CGNyI1xv4z6-dTulxWWb8kcpKcK33hNi5v0hEbBoBAUofUka3PaSo0lRCcpDKbUlNWkCnunCyFqmOm9Y0Y8TeFnqJso04MPhwkiGV-Adg496bk79VbK73NoIObjMt7xwS8E-voe-mbPW_LxjF-PoH6ORk9Qm_jSJ9cfwwMKPjC1eIo85AMY1VvwSiMTQdKf-V2B8JOJ_EC-0bnoXsZHY9hAQeoi1BUQwvCaxrf7Jq8-pHwK3fE_K2mXkMO-zHG3n0YAnfuZHGyM"/>
+<div>
+<h4 class="font-bold text-sm tracking-tight">Julian Richter</h4>
+<p class="text-[10px] text-tertiary font-semibold uppercase tracking-wider">Performance Plateau</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/40 group-hover:text-tertiary transition-colors" data-icon="arrow_forward">arrow_forward</span>
+</div>
+<div class="bg-surface-container-low p-3 rounded-lg">
+<p class="text-xs text-on-surface-variant leading-relaxed italic">"Transition to High Intensity Interval block for metabolic shock."</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Workout Suggestion Engine (Main Grid) -->
+<section class="col-span-12 lg:col-span-8">
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.04)]">
+<div class="px-8 py-6 border-b border-surface-variant/30 flex justify-between items-center">
+<h3 class="text-sm font-bold tracking-tight">Athlete Suggestion Engine</h3>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full uppercase tracking-wider">Filter: Needs Update</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Member</th>
+<th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Last Check-in</th>
+<th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Status</th>
+<th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/70">Smart Suggestion</th>
+<th class="px-8 py-4"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-variant/20">
+<!-- Athlete Row 1 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-8 py-5">
+<div class="flex items-center gap-3">
+<img alt="Marcus Thorne" class="w-8 h-8 rounded-full grayscale group-hover:grayscale-0 transition-all" data-alt="Athlete photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsx-05UydNcA1bQQsSNpyjt9Hegez-3MTqCNIr9qVF2SYBqcSnXr06c7HhQaWIrZ7M4WANu7Kttr-imJIJ8oL70h6YejHqK1Yc6se3YWcFdQag3B58Pa6UNdJrVth3LHCCszewhA-NArXJPIBrQ_-XpnRXxy7Q7t2Wcjr-OfevdAOA8DlX0Xa_4DGopLejRB23OtmaBBmTc9ajydPXi0NA1JXC6vyS227jBUuJoqqmSc6rx5_pm20RFNEgNlNMh_9a0J9k63oh8SE"/>
+<span class="text-sm font-medium tracking-tight">Marcus Thorne</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="text-xs font-mono text-on-surface-variant">7 days ago</span>
+</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span class="text-xs">Needs Update</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-tertiary-container text-on-tertiary-container uppercase tracking-tight">
+                                                Circuit Training
+                                            </span>
+</td>
+<td class="px-8 py-5 text-right">
+<button class="text-tertiary hover:underline text-xs font-bold">Edit</button>
+</td>
+</tr>
+<!-- Athlete Row 2 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-8 py-5">
+<div class="flex items-center gap-3">
+<img alt="Sarah Jenkins" class="w-8 h-8 rounded-full grayscale group-hover:grayscale-0 transition-all" data-alt="Athlete photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVAbIOsycM-4VRZGCh7q38T04r3CPkfMPLnjVriu9StohO5-zVfasOwQef7CoXM1N_rlehmIiF2Ndi0aUyVd2rAsGNeVnEAOB_mZYhYXPbPClthvHgGvJZs-JGVlZPoa7knwtNI2k3TY03Bi5XJ9P2rHike2XEmC-Qtu0q7CCK47pyh8G5J_Cd-Dp-EFTdrAs-TUYwJZAwbMC0l_xG1PmKADifkBj3_IMw2YyLbphRKjbEXq7nKOD5c7mKzjPSNsGC1wAZhpGKRKI"/>
+<span class="text-sm font-medium tracking-tight">Sarah Jenkins</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="text-xs font-mono text-on-surface-variant">2 days ago</span>
+</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="text-xs">Pending Review</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary-container text-on-secondary-container uppercase tracking-tight">
+                                                Mobility Focus
+                                            </span>
+</td>
+<td class="px-8 py-5 text-right">
+<button class="text-tertiary hover:underline text-xs font-bold">Edit</button>
+</td>
+</tr>
+<!-- Athlete Row 3 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-8 py-5">
+<div class="flex items-center gap-3">
+<img alt="David Wu" class="w-8 h-8 rounded-full grayscale group-hover:grayscale-0 transition-all" data-alt="Athlete photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkWed6BQXPp-I5b3fJV8UXPYJckzLuEQi4FThXJwk2CfwKBb81Vd6lQ7Vxbx1JWmwK3c7SEUTxmFb1bKu5GFcZ8H_HFv7Cd0kIE7hS0bS6IRsmMSOTf5Oj_Kus1qRepdLyKFzV3NbFGt80A3Utpb-_NODIwt24kE1-VqbS-9XMgYxvDIGZP9QVLc8rwrydo-mK2YCcXKkIXKK-QmCc0KVkKLdrtk5M13BLnX6MOydeErAPfZQ8sNtSeYmiq2xUZgCBLQFAiEiV7YQ"/>
+<span class="text-sm font-medium tracking-tight">David Wu</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="text-xs font-mono text-on-surface-variant">14 days ago</span>
+</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span class="text-xs">Needs Update</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-tertiary-container text-on-tertiary-container uppercase tracking-tight">
+                                                Power Hypertrophy
+                                            </span>
+</td>
+<td class="px-8 py-5 text-right">
+<button class="text-tertiary hover:underline text-xs font-bold">Edit</button>
+</td>
+</tr>
+<!-- Athlete Row 4 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group border-b-0">
+<td class="px-8 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-[10px] font-bold text-on-surface-variant">KB</div>
+<span class="text-sm font-medium tracking-tight">Klaus Berg</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="text-xs font-mono text-on-surface-variant">Today</span>
+</td>
+<td class="px-8 py-5">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="text-xs">Active</span>
+</div>
+</td>
+<td class="px-8 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary-container text-on-secondary-container uppercase tracking-tight">
+                                                Endurance Block
+                                            </span>
+</td>
+<td class="px-8 py-5 text-right">
+<button class="text-tertiary hover:underline text-xs font-bold">Edit</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Asymmetric Footer Insight -->
+<div class="mt-8 flex justify-end">
+<div class="max-w-xs text-right">
+<h4 class="text-[10px] font-extrabold uppercase tracking-widest text-on-surface-variant/40 mb-2">System Insight</h4>
+<p class="text-xs text-on-surface-variant font-light italic leading-relaxed">
+                                Our AI has detected a correlation between Wednesday sessions and increased fatigue levels across the 6AM cohort. Review recovery protocols.
+                            </p>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Contextual Floating Button (Limited visibility to specific screen intent) -->
+<div class="fixed bottom-10 right-10">
+<button class="flex items-center justify-center w-14 h-14 rounded-full bg-inverse-surface text-surface shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform group">
+<span class="material-symbols-outlined text-2xl group-active:scale-90 transition-transform" data-icon="add">add</span>
+</button>
+</div>
+</body></html>

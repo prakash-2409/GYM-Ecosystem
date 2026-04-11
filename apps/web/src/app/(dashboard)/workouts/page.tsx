@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/api-client';
+import Link from 'next/link';
 import { useToast } from '@/components/ui/toast';
 import { Drawer } from '@/components/ui/drawer';
 import { Badge } from '@/components/ui/badge';
@@ -93,7 +94,7 @@ export default function WorkoutsPage() {
     return (
       <div>
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-page-title text-text-primary">Workout Plans</h1>
+          <h1 className="text-page-title text-text-primary">Workouts & Schedule</h1>
         </div>
         <TableSkeleton rows={4} cols={4} />
       </div>
@@ -103,14 +104,22 @@ export default function WorkoutsPage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 stagger-1">
-        <h1 className="text-page-title text-text-primary">Workout Plans</h1>
-        <button
-          onClick={() => setDrawerOpen(true)}
-          className="btn btn-primary"
-        >
-          <Plus size={16} strokeWidth={1.5} />
-          Create Plan
-        </button>
+        <div>
+          <h1 className="text-page-title text-text-primary">Workouts & Schedule</h1>
+          <p className="text-body text-text-secondary mt-2">Build class structure, assign plans, and open coach recommendations.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link href="/workouts/planner" className="btn btn-secondary">
+            Coach Planner
+          </Link>
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="btn btn-primary"
+          >
+            <Plus size={16} strokeWidth={1.5} />
+            Create Plan
+          </button>
+        </div>
       </div>
 
       {!plans?.length ? (
@@ -296,7 +305,12 @@ function WorkoutPlanForm({ onSaved, onCancel }: { onSaved: () => void; onCancel:
 
   const updateExercise = (dayIdx: number, exIdx: number, field: keyof ExerciseInput, value: string | number) => {
     const updated = [...days];
-    (updated[dayIdx].exercises[exIdx] as Record<string, unknown>)[field] = value;
+    const exercise = updated[dayIdx].exercises[exIdx];
+    if (field === 'exerciseId' || field === 'exerciseName' || field === 'reps' || field === 'notes') {
+      exercise[field] = String(value) as never;
+    } else {
+      exercise[field] = Number(value) as never;
+    }
     setDays(updated);
   };
 

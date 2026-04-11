@@ -1,8 +1,14 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import apiClient from '@/lib/api-client';
-import type { GymBranding } from '@gymstack/shared';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+
+interface GymBranding {
+  name: string;
+  logoUrl: string | null;
+  primaryColor: string;
+  secondaryColor: string;
+  slug: string;
+}
 
 interface GymContextType {
   branding: GymBranding | null;
@@ -11,38 +17,24 @@ interface GymContextType {
 
 const GymContext = createContext<GymContextType | undefined>(undefined);
 
+// DEMO MODE: Pre-configured gym branding
+const DEMO_BRANDING: GymBranding = {
+  name: 'Iron Paradise',
+  logoUrl: null,
+  primaryColor: '#8B5CF6',
+  secondaryColor: '#06B6D4',
+  slug: 'iron-paradise',
+};
+
 export function GymProvider({ children }: { children: ReactNode }) {
-  const [branding, setBranding] = useState<GymBranding | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [branding] = useState<GymBranding | null>(DEMO_BRANDING);
+  const [isLoading] = useState(false);
 
+  // Apply branding CSS variables
   useEffect(() => {
-    async function fetchBranding() {
-      try {
-        // Extract slug from subdomain or localStorage
-        const hostname = window.location.hostname;
-        const parts = hostname.split('.');
-        let slug = localStorage.getItem('gymstack_slug');
-
-        if (parts.length >= 3 && parts[0] !== 'www') {
-          slug = parts[0];
-        }
-
-        if (slug) {
-          const res = await apiClient.get(`/gym/branding?slug=${slug}`);
-          setBranding(res.data);
-
-          // Apply branding as CSS variables
-          const root = document.documentElement;
-          root.style.setProperty('--color-primary', res.data.primaryColor);
-          root.style.setProperty('--color-secondary', res.data.secondaryColor);
-        }
-      } catch {
-        // Use defaults
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchBranding();
+    const root = document.documentElement;
+    root.style.setProperty('--color-primary', DEMO_BRANDING.primaryColor);
+    root.style.setProperty('--color-primary-dark', '#7C3AED');
   }, []);
 
   return (

@@ -3,6 +3,7 @@ import '@/styles/globals.css';
 import { AuthProvider } from '@/providers/auth-provider';
 import { GymProvider } from '@/providers/gym-provider';
 import { QueryProvider } from '@/providers/query-provider';
+import { ToastProvider } from '@/components/ui/toast';
 
 export const metadata: Metadata = {
   title: 'GymOS — Gym Management Platform',
@@ -21,7 +22,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-page text-text-primary antialiased font-sans">
         <QueryProvider>
           <AuthProvider>
-            <GymProvider>{children}</GymProvider>
+            <ToastProvider>
+              <GymProvider>{children}</GymProvider>
+            </ToastProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

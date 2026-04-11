@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Member Profile | The Kinetic Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;300;400;500;600;700;800;900&amp;family=Geist+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container": "#ebeeed",
+              "on-error": "#fff7f6",
+              "error-dim": "#4e0309",
+              "surface": "#f9f9f8",
+              "secondary-container": "#e4e1e5",
+              "inverse-on-surface": "#9c9d9c",
+              "error": "#9f403d",
+              "on-primary": "#f8f8f8",
+              "on-secondary-container": "#525155",
+              "secondary-dim": "#535356",
+              "on-secondary-fixed": "#3f3f42",
+              "surface-container-high": "#e4e9e8",
+              "secondary-fixed": "#e4e1e5",
+              "background": "#f9f9f8",
+              "on-secondary": "#fbf8fc",
+              "on-primary-fixed-variant": "#5b5b5b",
+              "primary-dim": "#525252",
+              "primary": "#5e5e5e",
+              "surface-variant": "#dde4e3",
+              "surface-dim": "#d4dcda",
+              "secondary": "#5f5f62",
+              "on-surface-variant": "#5a6060",
+              "tertiary": "#005ac6",
+              "primary-fixed": "#e2e2e2",
+              "on-primary-container": "#525252",
+              "surface-container-lowest": "#ffffff",
+              "on-surface": "#2d3433",
+              "surface-container-highest": "#dde4e3",
+              "surface-container-low": "#f2f4f3",
+              "outline": "#757c7b",
+              "on-secondary-fixed-variant": "#5c5b5e",
+              "tertiary-fixed": "#1074f7",
+              "surface-tint": "#5e5e5e",
+              "primary-fixed-dim": "#d4d4d4",
+              "tertiary-dim": "#004faf",
+              "outline-variant": "#adb3b2",
+              "on-tertiary-fixed-variant": "#ecf0ff",
+              "on-tertiary-container": "#000000",
+              "inverse-surface": "#0c0f0e",
+              "on-tertiary": "#f9f8ff",
+              "secondary-fixed-dim": "#d6d3d7",
+              "tertiary-container": "#1074f7",
+              "on-error-container": "#752121",
+              "error-container": "#fe8983",
+              "on-tertiary-fixed": "#ffffff",
+              "on-background": "#2d3433",
+              "inverse-primary": "#ffffff",
+              "surface-bright": "#f9f9f8",
+              "tertiary-fixed-dim": "#0068e2",
+              "primary-container": "#e2e2e2",
+              "on-primary-fixed": "#3f3f3f"
+            },
+            fontFamily: {
+              "geist": ["Geist", "sans-serif"],
+              "mono": ["Geist Mono", "monospace"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Geist', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .attendance-dot { width: 10px; height: 10px; border-radius: 2px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-tertiary-container/30">
+<!-- SideNavBar Shell -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-[#0c0f0e] flex flex-col py-8 px-4 z-50 shadow-[20px_0_40px_rgba(0,0,0,0.2)]">
+<div class="mb-12 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-tertiary-container rounded-sm flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+</div>
+<div>
+<h1 class="text-lg font-black tracking-[-0.04em] text-white">Kinetic Atelier</h1>
+<p class="text-[10px] uppercase tracking-widest text-[#5a6060] font-bold">Performance Lab</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a6060] hover:text-[#ebeeed] hover:bg-white/5 transition-all duration-300 font-geist tracking-[-0.01em] text-sm font-light" href="#">
+<span class="material-symbols-outlined text-xl">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-white font-medium bg-gradient-to-r from-[#1074f7]/10 to-transparent border-l-2 border-[#1074f7] font-geist tracking-[-0.01em] text-sm" href="#">
+<span class="material-symbols-outlined text-xl">group</span>
+<span>Members</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a6060] hover:text-[#ebeeed] hover:bg-white/5 transition-all duration-300 font-geist tracking-[-0.01em] text-sm font-light" href="#">
+<span class="material-symbols-outlined text-xl">fitness_center</span>
+<span>Workouts</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a6060] hover:text-[#ebeeed] hover:bg-white/5 transition-all duration-300 font-geist tracking-[-0.01em] text-sm font-light" href="#">
+<span class="material-symbols-outlined text-xl">payments</span>
+<span>Revenue</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#5a6060] hover:text-[#ebeeed] hover:bg-white/5 transition-all duration-300 font-geist tracking-[-0.01em] text-sm font-light" href="#">
+<span class="material-symbols-outlined text-xl">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-8 border-t border-white/5 space-y-1">
+<button class="w-full flex items-center gap-3 px-4 py-4 mb-4 bg-tertiary-container text-white font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>New Member</span>
+</button>
+<a class="flex items-center gap-3 px-4 py-2 text-[#5a6060] hover:text-[#ebeeed] hover:bg-white/5 transition-all duration-300 font-geist tracking-[-0.01em] text-sm font-light" href="#">
+<span class="material-symbols-outlined text-xl">help_outline</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-[#5a6060] hover:text-[#ebeeed] hover:bg-white/5 transition-all duration-300 font-geist tracking-[-0.01em] text-sm font-light" href="#">
+<span class="material-symbols-outlined text-xl">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Stage -->
+<main class="ml-64 min-h-screen">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-[#f9f9f8] dark:bg-[#0c0f0e] z-40 transition-colors duration-300">
+<div class="flex justify-between items-center px-12 py-6 w-full border-b border-opacity-15 border-[#adb3b2]">
+<div class="flex items-center gap-4">
+<span class="text-sm font-geist tracking-tight text-[#5a6060]">Directory / Members / Adrian Thorne</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative">
+<span class="material-symbols-outlined text-[#5a6060] cursor-pointer hover:bg-[#ebeeed] p-2 rounded-full transition-all">notifications</span>
+<div class="absolute top-2 right-2 w-2 h-2 bg-tertiary-fixed rounded-full border-2 border-surface"></div>
+</div>
+<span class="material-symbols-outlined text-[#5a6060] cursor-pointer hover:bg-[#ebeeed] p-2 rounded-full transition-all">settings</span>
+<div class="flex items-center gap-3 pl-4 border-l border-outline-variant/20">
+<img class="w-8 h-8 rounded-full object-cover grayscale opacity-80 hover:grayscale-0 transition-all" data-alt="Admin profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzUCPg7LDj6l2YCtC84dTJr2XFHHqHiOrrmHIcmkKIgIggKoBKfUizUNqXHRRQShFEiDIXcJolAYTCL3IwjQYl5asw_qzqiDRsHHGeS1Fvli6rkEEUJV6aF41Ow688slOdlYP6kJvxPRsTqV7aJktcfCcDs47qnetAwgUjpiBLK4dnRzDfUGLRMRbZMtu8b8FVOqPVUEDKCd1Ib4m416lWRhLnF4DIQBMu7PRLSAPnWBz5UnIThvi8JInhaZopKLWZLT1nPedobcg"/>
+</div>
+</div>
+</div>
+</header>
+<div class="px-12 py-10 max-w-7xl">
+<!-- Member Hero Section -->
+<section class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-16">
+<div class="flex items-center gap-8">
+<div class="relative">
+<div class="w-32 h-32 rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(45,52,51,0.06)]">
+<img class="w-full h-full object-cover" data-alt="Portrait of Adrian Thorne" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOyoY53mO8uqzKBYD7-X3fwkDrSdbvBrK6_tG6rimed5y82OnYyJ92Zzvw3AxoRFEJZz-HLdWOIDZ7Hg9j3VxpU_djqjK79U0B72-qNE9xs3rmdks3SyQvi-4SV385j1oS1LgPu9mC1Aw5ViEtWC5Z3jjEwoubu-B7E7LZzYp8QUe2qKBtCBxL5Iq-ojCbnWYAeRWktDDYy-4POr4pE8FsA9_hvBpEXE2dbtxfK6k70OoIPRnVUx05z2VIgf-6hvbtQqerjwWlsYQ"/>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-surface-container-lowest p-1.5 rounded-lg shadow-sm border border-outline-variant/10">
+<span class="material-symbols-outlined text-tertiary-fixed text-lg" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-3 mb-1">
+<h2 class="text-4xl font-extrabold tracking-tighter text-on-surface">Adrian Thorne</h2>
+<span class="px-3 py-1 bg-tertiary-container/10 text-tertiary-fixed text-[10px] font-bold tracking-widest uppercase rounded-full">Active</span>
+</div>
+<p class="text-on-surface-variant font-geist text-lg tracking-tight mb-4">Elite Membership • #K-29402</p>
+<div class="flex gap-2">
+<button class="bg-primary text-on-primary px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary-dim transition-all shadow-sm">Edit Profile</button>
+<button class="bg-surface-container-high text-on-surface px-6 py-2 rounded-lg text-sm font-medium hover:bg-surface-container-highest transition-all">Suspend Access</button>
+</div>
+</div>
+</div>
+<!-- Plan Timeline Bento Part -->
+<div class="w-full md:w-96 bg-surface-container-low p-6 rounded-xl border border-outline-variant/10">
+<div class="flex justify-between items-end mb-4">
+<div>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Membership Plan</p>
+<h3 class="text-xl font-bold tracking-tight">Elite Annual</h3>
+</div>
+<div class="text-right">
+<p class="text-xs font-mono text-tertiary-fixed font-bold">75% Complete</p>
+</div>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden mb-4">
+<div class="h-full bg-gradient-to-r from-tertiary-fixed to-tertiary-dim w-[75%] rounded-full"></div>
+</div>
+<div class="flex justify-between text-[10px] font-mono text-on-surface-variant uppercase tracking-tighter">
+<span>Oct 12, 2023</span>
+<span>Oct 12, 2024</span>
+</div>
+</div>
+</section>
+<!-- KPI Row -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_20px_40px_rgba(45,52,51,0.06)] border border-outline-variant/5">
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-4">Total Visits</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-extrabold tracking-tighter">42</span>
+<span class="text-xs font-mono text-tertiary-fixed">+4 this week</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_20px_40px_rgba(45,52,51,0.06)] border border-outline-variant/5">
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-4">This Month</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-extrabold tracking-tighter">12</span>
+<span class="text-xs font-mono text-on-surface-variant">avg. 3.2/wk</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_20px_40px_rgba(45,52,51,0.06)] border border-outline-variant/5">
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-4">Days Remaining</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-extrabold tracking-tighter">180</span>
+<span class="text-xs font-mono text-error">Renews Apr '24</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_20px_40px_rgba(45,52,51,0.06)] border border-outline-variant/5">
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-4">Current Streak</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-extrabold tracking-tighter">5</span>
+<span class="text-xs font-mono text-tertiary-fixed">days</span>
+</div>
+</div>
+</section>
+<!-- Tabs Navigation -->
+<div class="flex gap-8 mb-8 border-b border-outline-variant/15">
+<button class="pb-4 text-sm font-semibold text-tertiary-fixed border-b-2 border-tertiary-fixed">Overview</button>
+<button class="pb-4 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">Attendance</button>
+<button class="pb-4 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">Progress</button>
+<button class="pb-4 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">Fee History</button>
+</div>
+<!-- Content Area: Attendance Grid -->
+<div class="bg-surface-container-lowest rounded-xl p-10 shadow-[0_20px_40px_rgba(45,52,51,0.06)] border border-outline-variant/5">
+<div class="flex justify-between items-center mb-10">
+<h4 class="text-lg font-bold tracking-tight">Attendance Activity</h4>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<div class="attendance-dot bg-tertiary-container"></div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Attended</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="attendance-dot bg-surface-container-high"></div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Missed</span>
+</div>
+</div>
+</div>
+<!-- Heatmap Style Grid (Simplified) -->
+<div class="space-y-6">
+<!-- Month Row Example -->
+<div class="flex items-center gap-4">
+<span class="w-12 text-[10px] font-mono font-bold uppercase text-on-surface-variant">JAN</span>
+<div class="flex-1 grid grid-cols-31 gap-2">
+<!-- JS would generate these; hardcoded representation for UI design -->
+<div class="flex gap-1.5 flex-wrap">
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="w-12 text-[10px] font-mono font-bold uppercase text-on-surface-variant">FEB</span>
+<div class="flex gap-1.5 flex-wrap">
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="w-12 text-[10px] font-mono font-bold uppercase text-on-surface-variant">MAR</span>
+<div class="flex gap-1.5 flex-wrap">
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-surface-container-high"></div>
+<div class="attendance-dot bg-tertiary-container"></div>
+</div>
+</div>
+</div>
+<div class="mt-12 pt-8 border-t border-outline-variant/10 flex justify-between items-center">
+<div>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Consistency Score</p>
+<h5 class="text-2xl font-bold tracking-tight">84% <span class="text-sm font-normal text-on-surface-variant tracking-normal">Optimal</span></h5>
+</div>
+<button class="flex items-center gap-2 text-tertiary-fixed text-sm font-semibold hover:underline decoration-2 underline-offset-4 transition-all">
+<span>View Detailed Logs</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Bottom Note -->
+<footer class="mt-12 text-center text-on-surface-variant/40 text-[10px] uppercase tracking-[0.2em] font-mono">
+                The Kinetic Atelier Performance Lab • Data synchronized Mar 14, 2024
+            </footer>
+</div>
+</main>
+</body></html>
