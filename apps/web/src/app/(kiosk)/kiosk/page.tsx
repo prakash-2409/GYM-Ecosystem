@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { useGymConfig } from '@/lib/gym-config-store';
+import { DemoNav } from '@/components/DemoNav';
 
 // ═══════════════════════════════════════════════════════════════
 // KIOSK MOCK DATA — inline, purpose-built for this screen
@@ -45,9 +47,9 @@ const KIOSK_MEMBERS: Record<string, KioskMember> = {
     memberSinceDuration: '1 year 9 months',
     attendance: [true, true, false, true, true, true, false, false, true, true, true, false, true, true, false],
     feeStatus: 'paid',
-    accentColor: '#E85D04',
-    accentBorder: '2px solid #E85D04',
-    accentBg: 'rgba(232,93,4,0.2)',
+    accentColor: '${config.primaryColor}',
+    accentBorder: '2px solid ${config.primaryColor}',
+    accentBg: 'rgba(var(--brand-color-rgb),0.2)',
     visitCount: 3,
   },
   '2031': {
@@ -130,6 +132,7 @@ const AUTO_RESET_MS = 8000;
 // ═══════════════════════════════════════════════════════════════
 
 export default function KioskPage() {
+  const { config } = useGymConfig();
   // ── state ──
   const [digits, setDigits] = useState<string[]>([]);
   const [kioskState, setKioskState] = useState<'idle' | 'member'>('idle');
@@ -412,9 +415,9 @@ export default function KioskPage() {
         {/* ═══ TOP ZONE ═══ */}
         <div className="kiosk-top">
           <div className="kiosk-top-left">
-            <div className="kiosk-gym-name">IRONPEAK FITNESS CLUB</div>
-            <div className="kiosk-gym-tagline">Train Hard. Live Strong.</div>
-            <div className="kiosk-gym-line" />
+            <div className="kiosk-gym-name">{config.gymName.toUpperCase()}</div>
+            <div className="kiosk-gym-tagline" style={{ color: config.primaryColor }}>{config.tagline}</div>
+            <div className="kiosk-gym-line" style={{ background: config.primaryColor }} />
           </div>
           <div className="kiosk-top-center">
             <div className="kiosk-clock">{clock.time}</div>
@@ -440,9 +443,8 @@ export default function KioskPage() {
                   {Array.from({ length: MAX_DIGITS }).map((_, i) => (
                     <div
                       key={i}
-                      className={`kiosk-digit-slot ${
-                        i === digits.length ? 'kiosk-digit-slot--active' : ''
-                      } ${error ? 'kiosk-digit-slot--error' : ''}`}
+                      className={`kiosk-digit-slot ${i === digits.length ? 'kiosk-digit-slot--active' : ''
+                        } ${error ? 'kiosk-digit-slot--error' : ''}`}
                     >
                       {digits[i] || <span className="kiosk-digit-empty">_</span>}
                     </div>
@@ -537,15 +539,14 @@ export default function KioskPage() {
                           day: 'numeric', month: 'short', year: 'numeric'
                         })}
                       </div>
-                      <div className={`kiosk-info-sub ${
-                        daysLeft > 30 ? 'kiosk-info-sub--green' :
-                        daysLeft >= 7 ? 'kiosk-info-sub--orange' :
-                        'kiosk-info-sub--red'
-                      }`}>
+                      <div className={`kiosk-info-sub ${daysLeft > 30 ? 'kiosk-info-sub--green' :
+                          daysLeft >= 7 ? 'kiosk-info-sub--orange' :
+                            'kiosk-info-sub--red'
+                        }`}>
                         {daysLeft > 30 ? `${daysLeft} days left` :
-                         daysLeft >= 7 ? `${daysLeft} days left ⚠` :
-                         daysLeft > 0 ? `${daysLeft} days left — RENEW NOW` :
-                         'EXPIRED — RENEW NOW'}
+                          daysLeft >= 7 ? `${daysLeft} days left ⚠` :
+                            daysLeft > 0 ? `${daysLeft} days left — RENEW NOW` :
+                              'EXPIRED — RENEW NOW'}
                       </div>
                     </div>
                     {/* Card 4 — THIS MONTH */}
@@ -594,11 +595,10 @@ export default function KioskPage() {
                         return (
                           <div
                             key={i}
-                            className={`kiosk-att-circle ${
-                              isToday ? 'kiosk-att-circle--today' :
-                              present ? 'kiosk-att-circle--present' :
-                              'kiosk-att-circle--absent'
-                            }`}
+                            className={`kiosk-att-circle ${isToday ? 'kiosk-att-circle--today' :
+                                present ? 'kiosk-att-circle--present' :
+                                  'kiosk-att-circle--absent'
+                              }`}
                           >
                             {dayNum}
                           </div>
@@ -631,21 +631,20 @@ export default function KioskPage() {
         <div className="kiosk-bottom">
           <div className="kiosk-bottom-left">
             <div className="kiosk-stat-pill">TODAY  43 CHECK-INS</div>
-            <div className="kiosk-stat-pill">ACTIVE MEMBERS  247</div>
-            <div className="kiosk-stat-pill">OPEN 6AM – 10PM</div>
+            <div className="kiosk-stat-pill">ACTIVE MEMBERS  {config.memberCount}</div>
+            <div className="kiosk-stat-pill">OPEN {config.openTime} – {config.closeTime}</div>
           </div>
           <div className="kiosk-bottom-center">
             <div className={`kiosk-quote ${quoteFading ? 'kiosk-quote--fading' : ''}`}>
               &ldquo;{QUOTES[quoteIdx]}&rdquo;
             </div>
           </div>
-          <div className="kiosk-bottom-right">
-            <div className="kiosk-demo-label">DEMO NAV</div>
-            <Link href="/dashboard" className="kiosk-demo-btn">Admin Panel</Link>
-            <Link href="/member-app" className="kiosk-demo-btn">Member App</Link>
-          </div>
+          <div className="kiosk-bottom-right" />
         </div>
       </div>
+
+      {/* Demo Navigation */}
+      <DemoNav />
 
       {/* ═══ STYLES ═══ */}
       <style jsx>{`
@@ -692,7 +691,7 @@ export default function KioskPage() {
           transform: translateX(-50%);
           width: 120%;
           height: 60%;
-          background: radial-gradient(ellipse at center, rgba(232,93,4,0.08) 0%, transparent 70%);
+          background: radial-gradient(ellipse at center, rgba(var(--brand-color-rgb),0.08) 0%, transparent 70%);
         }
 
         .kiosk-bg-floor {
@@ -755,7 +754,7 @@ export default function KioskPage() {
 
         .kiosk-gym-tagline {
           font-size: 12px;
-          color: #E85D04;
+          color: ${config.primaryColor};
           letter-spacing: 2px;
           margin-top: 4px;
         }
@@ -763,7 +762,7 @@ export default function KioskPage() {
         .kiosk-gym-line {
           width: 40px;
           height: 2px;
-          background: #E85D04;
+          background: ${config.primaryColor};
           margin-top: 12px;
         }
 
@@ -854,7 +853,7 @@ export default function KioskPage() {
 
         .kiosk-input-label {
           font-size: 10px;
-          color: #E85D04;
+          color: ${config.primaryColor};
           letter-spacing: 3px;
           text-transform: uppercase;
           font-weight: 600;
@@ -883,7 +882,7 @@ export default function KioskPage() {
         }
 
         .kiosk-digit-slot--active {
-          border-bottom: 3px solid #E85D04;
+          border-bottom: 3px solid ${config.primaryColor};
         }
 
         .kiosk-digit-slot--error {
@@ -953,7 +952,7 @@ export default function KioskPage() {
         }
 
         .kiosk-numpad-key--checkin {
-          background: #E85D04;
+          background: ${config.primaryColor};
           font-size: 13px;
           font-weight: 600;
         }
@@ -1062,9 +1061,9 @@ export default function KioskPage() {
         }
 
         .kiosk-check-badge--out {
-          background: rgba(232,93,4,0.15);
-          border: 1px solid rgba(232,93,4,0.3);
-          color: #E85D04;
+          background: rgba(var(--brand-color-rgb),0.15);
+          border: 1px solid rgba(var(--brand-color-rgb),0.3);
+          color: ${config.primaryColor};
         }
 
         .kiosk-check-badge-ring {
@@ -1097,7 +1096,7 @@ export default function KioskPage() {
 
         .kiosk-info-label {
           font-size: 10px;
-          color: #E85D04;
+          color: ${config.primaryColor};
           text-transform: uppercase;
           letter-spacing: 2px;
           font-weight: 600;
@@ -1129,8 +1128,8 @@ export default function KioskPage() {
         /* ── Fee Warning ── */
         .kiosk-fee-warning {
           margin-top: 12px;
-          background: rgba(232,93,4,0.12);
-          border: 1px solid rgba(232,93,4,0.35);
+          background: rgba(var(--brand-color-rgb),0.12);
+          border: 1px solid rgba(var(--brand-color-rgb),0.35);
           border-radius: 10px;
           padding: 14px 20px;
           display: flex;
@@ -1151,7 +1150,7 @@ export default function KioskPage() {
         .kiosk-fee-label {
           font-size: 12px;
           font-weight: 700;
-          color: #E85D04;
+          color: ${config.primaryColor};
           letter-spacing: 1px;
         }
 
@@ -1203,7 +1202,7 @@ export default function KioskPage() {
         }
 
         .kiosk-att-circle--today {
-          background: #E85D04;
+          background: ${config.primaryColor};
           color: #FFFFFF;
           font-weight: 700;
         }
@@ -1229,7 +1228,7 @@ export default function KioskPage() {
 
         .kiosk-reset-bar-fill {
           height: 100%;
-          background: #E85D04;
+          background: ${config.primaryColor};
           transition: width 50ms linear;
           border-radius: 3px;
         }

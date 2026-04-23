@@ -6,24 +6,28 @@ import {
   Calendar, ChevronRight, Dumbbell, Clock,
   CheckCircle2, Star, ArrowDown, Trophy
 } from 'lucide-react';
+import { DemoNav } from '@/components/DemoNav';
 import {
-  MEMBER_APP_USER, MEMBER_APP_NOTIFICATIONS, MEMBER_APP_STATS
+  MEMBER_APP_USER, MEMBER_APP_NOTIFICATIONS, MEMBER_APP_STATS, MOCK_MEMBER_PLANS
 } from '@/lib/mock-data';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, AreaChart, Area
 } from 'recharts';
+import { useGymConfig } from '@/lib/gym-config-store';
 
 type Tab = 'home' | 'notifications' | 'progress' | 'profile';
 
 const MONTHS = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
 
 export default function MemberAppPage() {
+  const { config } = useGymConfig();
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [showQR, setShowQR] = useState(false);
   const user = MEMBER_APP_USER;
   const stats = MEMBER_APP_STATS;
   const notifications = MEMBER_APP_NOTIFICATIONS;
+  const myPlan = MOCK_MEMBER_PLANS[user.id];
 
   const weightData = user.weight.map((w, i) => ({
     month: MONTHS[i],
@@ -65,7 +69,10 @@ export default function MemberAppPage() {
                   <p className="text-[#888] text-sm">Good morning 👋</p>
                   <h1 className="text-2xl font-semibold tracking-tight mt-0.5">{user.name}</h1>
                 </div>
-                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-lg font-semibold">
+                <div
+                  className="w-11 h-11 rounded-full flex items-center justify-center text-lg font-semibold text-white"
+                  style={{ background: config.primaryColor }}
+                >
                   {user.name[0]}
                 </div>
               </div>
@@ -73,7 +80,8 @@ export default function MemberAppPage() {
               {/* Check-in QR Button */}
               <button
                 onClick={() => setShowQR(true)}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-cyan-600 flex items-center justify-center gap-3 active:scale-[0.97] transition-transform shadow-lg shadow-violet-500/20"
+                className="w-full py-4 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.97] transition-transform shadow-lg"
+                style={{ background: config.primaryColor, boxShadow: `0 10px 15px -3px ${config.primaryColor}33` }}
               >
                 <QrCode size={22} className="text-white" />
                 <span className="text-white font-medium text-base">Check In with QR</span>
@@ -146,7 +154,7 @@ export default function MemberAppPage() {
                             : attended
                             ? 'bg-emerald-500 text-white'
                             : isToday
-                            ? 'bg-violet-500/20 text-violet-400 ring-1 ring-violet-500/40'
+                            ? 'bg-violet-500/20 text-[var(--brand-color)] ring-1 ring-violet-500/40'
                             : 'bg-white/[0.04] text-[#555]'
                         }`}
                       >
@@ -158,12 +166,61 @@ export default function MemberAppPage() {
               </div>
             </div>
 
+            {/* My Plan */}
+            {myPlan && (
+              <div className="px-5 mb-6">
+                <h2 className="text-base font-semibold mb-3">My Plan</h2>
+                <div className="bg-[#1A1A1A] rounded-2xl p-4 border border-white/[0.07]">
+                  <div className="flex items-start justify-between mb-3 border-b border-white/[0.05] pb-3">
+                    <div>
+                      <h3 className="font-semibold text-[var(--brand-color)]">{myPlan.name}</h3>
+                      <p className="text-[11px] text-[#888] mt-0.5">Assigned by Coach Suresh on {new Date(myPlan.lastUpdated).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</p>
+                    </div>
+                    <span className="bg-white/[0.05] text-white text-[10px] px-2 py-1 rounded">
+                      {myPlan.goal}
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-3 mt-3">
+                    {myPlan.days.slice(0, 2).map((day: any, dIdx: number) => (
+                      <div key={dIdx} className="bg-[#0F0F0F] rounded-xl p-3 border border-white/[0.03]">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-[#555] mb-2">{day.name}</p>
+                        {day.exercises.length > 0 ? day.exercises.map((ex: any, eIdx: number) => (
+                           <div key={eIdx} className="flex justify-between items-center text-sm py-1 border-b border-white/[0.02] last:border-0">
+                             <span className="text-gray-300 text-xs truncate mr-2">• {ex.exercise.name}</span>
+                             <span className="text-[#888] text-[10px] whitespace-nowrap">{ex.sets} × {ex.reps}</span>
+                           </div>
+                        )) : (
+                          <div className="text-xs text-gray-500 italic py-1">Rest Day</div>
+                        )}
+                      </div>
+                    ))}
+                    {myPlan.days.length > 2 && (
+                      <button className="w-full text-center text-xs text-[var(--brand-color)] py-2 font-medium active:scale-[0.98] transition-transform">
+                        View all {myPlan.days.length} days
+                      </button>
+                    )}
+                  </div>
+
+                  {myPlan.diet && myPlan.diet.morning && (
+                    <div className="mt-4 pt-4 border-t border-white/[0.05]">
+                       <h4 className="text-sm font-medium mb-3 flex items-center gap-2"><Flame size={14} className="text-emerald-400" /> Diet Plan</h4>
+                       <div className="space-y-2">
+                         <div className="text-xs flex items-start"><span className="text-[#888] w-20 flex-shrink-0">Morning:</span><span className="text-gray-300 flex-1 leading-relaxed">{myPlan.diet.morning}</span></div>
+                         <div className="text-xs flex items-start"><span className="text-[#888] w-20 flex-shrink-0">Post-W/O:</span><span className="text-gray-300 flex-1 leading-relaxed">{myPlan.diet.postWorkout}</span></div>
+                       </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Quick actions */}
             <div className="px-5 mb-6">
               <h2 className="text-base font-semibold mb-3">Quick Actions</h2>
               <div className="space-y-2">
                 {[
-                  { icon: Dumbbell, label: 'Today\'s Workout', sub: 'Chest & Triceps', color: 'text-violet-400', bg: 'bg-violet-500/10' },
+                  { icon: Dumbbell, label: 'Today\'s Workout', sub: 'Chest & Triceps', color: 'text-[var(--brand-color)]', bg: 'bg-violet-500/10' },
                   { icon: TrendingUp, label: 'Log Body Stats', sub: 'Last logged: 3 days ago', color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
                   { icon: Clock, label: 'Book PT Session', sub: '2 sessions remaining', color: 'text-amber-400', bg: 'bg-amber-500/10' },
                 ].map((action) => {
@@ -313,7 +370,7 @@ export default function MemberAppPage() {
                 {[
                   { label: 'Body Fat', value: `${user.bodyFat[user.bodyFat.length - 1]}%`, color: 'text-amber-400' },
                   { label: 'BMI', value: (user.weight[user.weight.length - 1] / (1.75 ** 2)).toFixed(1), color: 'text-cyan-400' },
-                  { label: 'Goal Weight', value: `${user.weight[user.weight.length - 1] - 5} kg`, color: 'text-violet-400' },
+                  { label: 'Goal Weight', value: `${user.weight[user.weight.length - 1] - 5} kg`, color: 'text-[var(--brand-color)]' },
                   { label: 'Visits/Month', value: String(user.thisMonthVisits), color: 'text-emerald-400' },
                 ].map((stat) => (
                   <div key={stat.label} className="bg-[#1A1A1A] rounded-2xl p-4 border border-white/[0.07] text-center">
@@ -505,7 +562,7 @@ export default function MemberAppPage() {
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-colors relative active:scale-[0.95] ${
-                  isActive ? 'text-violet-400' : 'text-[#555]'
+                  isActive ? 'text-[var(--brand-color)]' : 'text-[#555]'
                 }`}
               >
                 {isActive && (
@@ -527,6 +584,8 @@ export default function MemberAppPage() {
         {/* Safe area padding for notched phones */}
         <div className="h-[env(safe-area-inset-bottom,0px)]" />
       </div>
+      {/* Demo Navigation */}
+      <DemoNav />
     </div>
   );
 }

@@ -160,8 +160,8 @@ export default function DashboardPage() {
                     <Cell key={idx} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip
-                  formatter={(value: number, _: string, props: { payload: { name: string }}) => [value, props.payload.name]}
+                  <Tooltip
+                    formatter={(value: number, _: string, props: any) => [value, props?.payload?.name]}
                   contentStyle={{ borderRadius: '12px', border: '1px solid #EBEBEB', fontSize: '13px' }}
                 />
               </PieChart>

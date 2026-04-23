@@ -498,3 +498,136 @@ export const MEMBER_APP_STATS = {
   plan: '6 Month Premium',
   planAmount: 4500,
 };
+
+// ─── Scheduler Mock Data ──────────────────────────────────────
+
+export const MOCK_EXERCISES = [
+  { id: 'ex-1', name: 'Barbell Bench Press', muscleGroup: 'Chest' },
+  { id: 'ex-2', name: 'Incline Dumbbell Press', muscleGroup: 'Chest' },
+  { id: 'ex-3', name: 'Push Ups', muscleGroup: 'Chest' },
+  { id: 'ex-4', name: 'Cable Crossovers', muscleGroup: 'Chest' },
+  { id: 'ex-5', name: 'Pull Ups', muscleGroup: 'Back' },
+  { id: 'ex-6', name: 'Barbell Rows', muscleGroup: 'Back' },
+  { id: 'ex-7', name: 'Lat Pulldowns', muscleGroup: 'Back' },
+  { id: 'ex-8', name: 'Deadlifts', muscleGroup: 'Back' },
+  { id: 'ex-9', name: 'Overhead Press', muscleGroup: 'Shoulders' },
+  { id: 'ex-10', name: 'Lateral Raises', muscleGroup: 'Shoulders' },
+  { id: 'ex-11', name: 'Barbell Squats', muscleGroup: 'Legs' },
+  { id: 'ex-12', name: 'Leg Press', muscleGroup: 'Legs' },
+  { id: 'ex-13', name: 'Leg Extensions', muscleGroup: 'Legs' },
+  { id: 'ex-14', name: 'Romanian Deadlifts', muscleGroup: 'Legs' },
+  { id: 'ex-15', name: 'Calf Raises', muscleGroup: 'Legs' },
+  { id: 'ex-16', name: 'Barbell Curls', muscleGroup: 'Biceps' },
+  { id: 'ex-17', name: 'Hammer Curls', muscleGroup: 'Biceps' },
+  { id: 'ex-18', name: 'Tricep Pushdowns', muscleGroup: 'Triceps' },
+  { id: 'ex-19', name: 'Overhead Tricep Extension', muscleGroup: 'Triceps' },
+  { id: 'ex-20', name: 'Crunches', muscleGroup: 'Core' },
+  { id: 'ex-21', name: 'Planks', muscleGroup: 'Core' },
+];
+
+export const MOCK_TEMPLATES = [
+  {
+    id: 'tpl-1',
+    name: 'Beginner Fat Loss — Month 1',
+    goal: 'Fat Loss',
+    daysPerWeek: 3,
+    usersCount: 23,
+    lastUpdated: '2026-03-25T10:00:00',
+    days: [
+      {
+        id: 'd-1',
+        name: 'Full Body A',
+        exercises: [
+          { id: 'e-1', exercise: MOCK_EXERCISES[10], sets: 3, reps: '10-12', rest: '60s' }, // Squats
+          { id: 'e-2', exercise: MOCK_EXERCISES[0], sets: 3, reps: '10-12', rest: '60s' }, // Bench
+          { id: 'e-3', exercise: MOCK_EXERCISES[6], sets: 3, reps: '12-15', rest: '45s' }, // Lat pull
+        ]
+      },
+      {
+        id: 'd-2',
+        name: 'Active Recovery / Cardio',
+        exercises: []
+      },
+      {
+        id: 'd-3',
+        name: 'Full Body B',
+        exercises: [
+          { id: 'e-4', exercise: MOCK_EXERCISES[11], sets: 3, reps: '12-15', rest: '60s' }, // Leg press
+          { id: 'e-5', exercise: MOCK_EXERCISES[8], sets: 3, reps: '10-12', rest: '60s' }, // OHP
+          { id: 'e-6', exercise: MOCK_EXERCISES[5], sets: 3, reps: '10-12', rest: '60s' }, // Rows
+        ]
+      }
+    ],
+    diet: {
+      morning: 'Oats with protein powder and almond milk',
+      preWorkout: 'Banana and black coffee',
+      postWorkout: 'Whey protein shake and 2 egg whites',
+      night: 'Grilled chicken breast, broccoli, and quinoa'
+    },
+    coachNotes: 'Focus on form, not the weight. Stay hydrated!'
+  },
+  {
+    id: 'tpl-2',
+    name: 'Intermediate Bulk — Phase 1',
+    goal: 'Muscle Gain',
+    daysPerWeek: 4,
+    usersCount: 14,
+    lastUpdated: '2026-04-01T14:30:00',
+    days: [
+      { id: 'd-1', name: 'Upper Body', exercises: [
+        { id: 'e-1', exercise: MOCK_EXERCISES[0], sets: 4, reps: '8-10', rest: '90s' },
+        { id: 'e-2', exercise: MOCK_EXERCISES[5], sets: 4, reps: '8-10', rest: '90s' },
+      ]},
+      { id: 'd-2', name: 'Lower Body', exercises: [
+        { id: 'e-3', exercise: MOCK_EXERCISES[10], sets: 4, reps: '8-10', rest: '90s' },
+        { id: 'e-4', exercise: MOCK_EXERCISES[13], sets: 4, reps: '10-12', rest: '90s' },
+      ]},
+      { id: 'd-3', name: 'Rest', exercises: [] },
+      { id: 'd-4', name: 'Upper Body (Hypertrophy)', exercises: [
+        { id: 'e-5', exercise: MOCK_EXERCISES[1], sets: 3, reps: '12-15', rest: '60s' },
+        { id: 'e-6', exercise: MOCK_EXERCISES[6], sets: 3, reps: '12-15', rest: '60s' },
+      ]},
+      { id: 'd-5', name: 'Lower Body (Hypertrophy)', exercises: [
+        { id: 'e-7', exercise: MOCK_EXERCISES[11], sets: 3, reps: '15-20', rest: '60s' },
+        { id: 'e-8', exercise: MOCK_EXERCISES[12], sets: 3, reps: '15-20', rest: '60s' },
+      ]}
+    ],
+    diet: {
+      morning: '4 whole eggs, 2 slices whole wheat toast, spinach',
+      preWorkout: 'Greek yogurt with berries and honey',
+      postWorkout: 'Protein shake and a large meal with rice and chicken',
+      night: 'Cottage cheese and peanut butter'
+    },
+    coachNotes: 'Push the intensity on Hypertrophy days.'
+  },
+  {
+    id: 'tpl-3',
+    name: 'Advanced Cut — Week 1-4',
+    goal: 'Fat Loss',
+    daysPerWeek: 5,
+    usersCount: 8,
+    lastUpdated: '2026-04-05T09:15:00',
+    days: [],
+    diet: { morning: '', preWorkout: '', postWorkout: '', night: '' },
+    coachNotes: 'Strict diet adherence required.'
+  },
+  {
+    id: 'tpl-4',
+    name: 'Senior Low Impact',
+    goal: 'Maintenance',
+    daysPerWeek: 3,
+    usersCount: 5,
+    lastUpdated: '2025-11-20T11:00:00',
+    days: [],
+    diet: { morning: '', preWorkout: '', postWorkout: '', night: '' },
+    coachNotes: 'Keep movements slow and controlled.'
+  }
+];
+
+export const MOCK_MEMBER_PLANS: Record<string, typeof MOCK_TEMPLATES[0]> = {
+  'mem-001': {
+    ...MOCK_TEMPLATES[0],
+    id: 'assigned-1',
+    name: 'Rahul’s April Plan',
+  }
+};

@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
+import { useGymConfig } from '@/lib/gym-config-store';
 
 interface GymBranding {
   name: string;
@@ -17,28 +18,19 @@ interface GymContextType {
 
 const GymContext = createContext<GymContextType | undefined>(undefined);
 
-// DEMO MODE: Pre-configured gym branding
-const DEMO_BRANDING: GymBranding = {
-  name: 'Iron Paradise',
-  logoUrl: null,
-  primaryColor: '#8B5CF6',
-  secondaryColor: '#06B6D4',
-  slug: 'iron-paradise',
-};
-
 export function GymProvider({ children }: { children: ReactNode }) {
-  const [branding] = useState<GymBranding | null>(DEMO_BRANDING);
-  const [isLoading] = useState(false);
+  const { config } = useGymConfig();
 
-  // Apply branding CSS variables
-  useEffect(() => {
-    const root = document.documentElement;
-    root.style.setProperty('--color-primary', DEMO_BRANDING.primaryColor);
-    root.style.setProperty('--color-primary-dark', '#7C3AED');
-  }, []);
+  const branding: GymBranding = {
+    name: config.gymName,
+    logoUrl: config.logoUrl,
+    primaryColor: config.primaryColor,
+    secondaryColor: config.primaryColor,
+    slug: config.gymName.toLowerCase().replace(/\s+/g, '-'),
+  };
 
   return (
-    <GymContext.Provider value={{ branding, isLoading }}>
+    <GymContext.Provider value={{ branding, isLoading: false }}>
       {children}
     </GymContext.Provider>
   );

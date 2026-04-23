@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/providers/auth-provider';
-import { useGym } from '@/providers/gym-provider';
+import { useGymConfig } from '@/lib/gym-config-store';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -11,6 +11,7 @@ import {
   UtensilsCrossed, BarChart3, Bell, Settings, UserCog, Receipt,
   Menu, X, LogOut, Monitor, IndianRupee, Smartphone,
 } from 'lucide-react';
+import { DemoNav } from '@/components/DemoNav';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['gym_owner', 'receptionist', 'coach'] },
@@ -20,6 +21,7 @@ const navItems = [
   { href: '/payments', label: 'Payments', icon: CreditCard, roles: ['gym_owner', 'receptionist'] },
   { href: '/plans', label: 'Plans', icon: Receipt, roles: ['gym_owner'] },
   { href: '/workouts', label: 'Workouts', icon: Dumbbell, roles: ['gym_owner', 'coach'] },
+  { href: '/dashboard/plans/library', label: 'Scheduler', icon: CalendarCheck, roles: ['gym_owner', 'coach'] },
   { href: '/diets', label: 'Diets', icon: UtensilsCrossed, roles: ['gym_owner', 'coach'] },
   { href: '/analytics', label: 'Analytics', icon: BarChart3, roles: ['gym_owner'] },
   { href: '/staff', label: 'Staff', icon: UserCog, roles: ['gym_owner'] },
@@ -29,7 +31,7 @@ const navItems = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
-  const { branding } = useGym();
+  const { config } = useGymConfig();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -45,14 +47,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         )}
       >
         <div className="flex items-center gap-3 h-16 px-6 border-b border-white/10">
-          {branding?.logoUrl ? (
-            <img src={branding.logoUrl} alt={branding.name} className="h-8 w-8 rounded" />
-          ) : (
-            <div className="h-8 w-8 rounded bg-primary flex items-center justify-center text-white font-bold text-sm">
-              {branding?.name?.[0] || 'G'}
-            </div>
-          )}
-          <span className="font-bold text-lg truncate text-white">{branding?.name || 'GymStack'}</span>
+          <div
+            className="h-8 w-8 rounded flex items-center justify-center text-white font-bold text-sm"
+            style={{ backgroundColor: config.primaryColor }}
+          >
+            {config.logoInitials || config.gymName[0] || 'G'}
+          </div>
+          <span className="font-bold text-lg truncate text-white">{config.gymName || 'GymOS'}</span>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden ml-auto text-gray-400 hover:text-white transition-colors duration-150">
             <X size={20} />
           </button>
@@ -135,6 +136,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Page content */}
         <main className="flex-1 overflow-y-auto p-4 lg:p-8">{children}</main>
       </div>
+
+      {/* Demo Navigation */}
+      <DemoNav />
     </div>
   );
 }

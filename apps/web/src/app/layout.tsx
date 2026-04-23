@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import '@/styles/globals.css';
 import { AuthProvider } from '@/providers/auth-provider';
 import { GymProvider } from '@/providers/gym-provider';
+import { GymConfigProvider } from '@/lib/gym-config-store';
 import { QueryProvider } from '@/providers/query-provider';
 import { ToastProvider } from '@/components/ui/toast';
 
@@ -23,7 +24,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <QueryProvider>
           <AuthProvider>
             <ToastProvider>
-              <GymProvider>{children}</GymProvider>
+              <GymConfigProvider>
+                <GymProvider>{children}</GymProvider>
+              </GymConfigProvider>
             </ToastProvider>
           </AuthProvider>
         </QueryProvider>
