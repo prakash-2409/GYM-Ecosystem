@@ -1,6 +1,14 @@
 # GymOS - White-Label Gym Management SaaS
 
+![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)
+![GSSoC](https://img.shields.io/badge/GSSoC-2024-orange.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
+
  GymOS is a comprehensive, white-label SaaS platform designed specifically for gyms across India. It allows gym owners to manage memberships, fees, staff, attendance, and member body progress. It includes an automated notification system (WhatsApp, SMS, FCM) for fee reminders, inactivity nudges, and birthday wishes.
+
+> **🎉 GirlScript Summer of Code (GSSoC) Participants:** We are participating in GSSoC! Please check out our [Contributing Guidelines](CONTRIBUTING.md), our [Roadmap](ROADMAP.md), and look for issues labeled `gssoc` to get started!
+
 
 ## Project Structure
 
