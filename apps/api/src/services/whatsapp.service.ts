@@ -1,4 +1,5 @@
 import prisma from '@gymstack/db';
+import { Prisma } from '@prisma/client';
 import { env } from '../config/env';
 
 // ─── WATI Client ──────────────────────────────────────
@@ -259,8 +260,10 @@ export async function sendBulkMessage(
       break;
   }
 
+  const where: Prisma.MemberWhereInput = whereClause as Prisma.MemberWhereInput;
+
   const members = await prisma.member.findMany({
-    where: whereClause as Parameters<typeof prisma.member.findMany>[0]['where'],
+    where,
     include: { user: { select: { name: true, phone: true } } },
   });
 

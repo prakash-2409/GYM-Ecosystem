@@ -27,6 +27,11 @@ function AssignPlanContent() {
     if (selectedMembers.length === 0) return alert('Select at least one member.');
     // Mock save
     alert(`Successfully assigned to ${selectedMembers.length} members and sent notifications!`);
+    // If a single member was assigned, redirect to that member's page
+    if (selectedMembers.length === 1) {
+      router.push(`/members/${selectedMembers[0]}`);
+      return;
+    }
     router.push('/dashboard/plans/library');
   };
 

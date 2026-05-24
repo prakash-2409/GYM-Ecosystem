@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { authenticate, requireRole } from '../middleware/auth';
 import { gymContext } from '../middleware/gym-context';
 import * as workoutService from '../services/workout.service';
+import { asString, requireString } from '../utils/request';
 
 const router = Router();
 router.use(authenticate, gymContext);
@@ -17,10 +18,7 @@ router.get('/', requireRole('gym_owner', 'coach'), async (req: Request, res: Res
 
 router.get('/exercises', requireRole('gym_owner', 'coach'), async (req: Request, res: Response) => {
   try {
-    const exercises = await workoutService.getExercises(
-      req.query.search as string,
-      req.query.muscleGroup as string,
-    );
+    const exercises = await workoutService.getExercises(asString(req.query.search), asString(req.query.muscleGroup));
     res.json({ exercises });
   } catch (err) {
     res.status(500).json({ error: (err as Error).message });
@@ -38,7 +36,8 @@ router.get('/assignments', requireRole('gym_owner', 'coach'), async (req: Reques
 
 router.get('/:id', requireRole('gym_owner', 'coach'), async (req: Request, res: Response) => {
   try {
-    const plan = await workoutService.getWorkoutPlanById(req.params.id, req.gymId!);
+    const planId = requireString(req.params.id, 'id');
+    const plan = await workoutService.getWorkoutPlanById(planId, req.gymId!);
     res.json({ plan });
   } catch (err) {
     res.status(404).json({ error: (err as Error).message });
@@ -56,7 +55,8 @@ router.post('/', requireRole('gym_owner', 'coach'), async (req: Request, res: Re
 
 router.put('/:id', requireRole('gym_owner', 'coach'), async (req: Request, res: Response) => {
   try {
-    const plan = await workoutService.updateWorkoutPlan(req.params.id, req.gymId!, req.body);
+    const planId = requireString(req.params.id, 'id');
+    const plan = await workoutService.updateWorkoutPlan(planId, req.gymId!, req.body);
     res.json({ plan });
   } catch (err) {
     res.status(400).json({ error: (err as Error).message });
@@ -65,7 +65,8 @@ router.put('/:id', requireRole('gym_owner', 'coach'), async (req: Request, res: 
 
 router.delete('/:id', requireRole('gym_owner'), async (req: Request, res: Response) => {
   try {
-    await workoutService.deleteWorkoutPlan(req.params.id, req.gymId!);
+    const planId = requireString(req.params.id, 'id');
+    await workoutService.deleteWorkoutPlan(planId, req.gymId!);
     res.json({ success: true });
   } catch (err) {
     res.status(400).json({ error: (err as Error).message });
@@ -74,8 +75,9 @@ router.delete('/:id', requireRole('gym_owner'), async (req: Request, res: Respon
 
 router.post('/:id/assign', requireRole('gym_owner', 'coach'), async (req: Request, res: Response) => {
   try {
+    const planId = requireString(req.params.id, 'id');
     const assignments = await workoutService.assignWorkoutPlan(
-      req.params.id,
+      planId,
       req.body.memberIds,
       req.user!.userId,
     );

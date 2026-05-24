@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/api-client';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/toast';
 import { Drawer } from '@/components/ui/drawer';
 import { Badge } from '@/components/ui/badge';
@@ -485,6 +486,7 @@ function WorkoutPlanForm({ onSaved, onCancel }: { onSaved: () => void; onCancel:
 
 function AssignForm({ planId, onDone }: { planId: string; onDone: () => void }) {
   const { toast } = useToast();
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -509,6 +511,10 @@ function AssignForm({ planId, onDone }: { planId: string; onDone: () => void }) 
     try {
       await apiClient.post(`/workouts/${planId}/assign`, { memberIds: selectedIds });
       toast('success', `Plan assigned to ${selectedIds.length} member(s)`);
+      if (selectedIds.length === 1) {
+        router.push(`/members/${selectedIds[0]}`);
+        return;
+      }
       onDone();
     } catch {
       toast('error', 'Failed to assign plan');

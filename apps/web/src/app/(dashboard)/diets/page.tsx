@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/api-client';
 import { useToast } from '@/components/ui/toast';
@@ -496,6 +497,7 @@ function DietChartForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: (
 
 function AssignDietForm({ chartId, onDone }: { chartId: string; onDone: () => void }) {
   const { toast } = useToast();
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -517,6 +519,11 @@ function AssignDietForm({ chartId, onDone }: { chartId: string; onDone: () => vo
     try {
       await apiClient.post(`/diets/${chartId}/assign`, { memberIds: selectedIds });
       toast('success', `Diet assigned to ${selectedIds.length} member(s)`);
+      // If only one member selected, redirect to that member's detail page
+      if (selectedIds.length === 1) {
+        router.push(`/members/${selectedIds[0]}`);
+        return;
+      }
       onDone();
     } catch {
       toast('error', 'Failed to assign diet');

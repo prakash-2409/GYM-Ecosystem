@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { authenticate, requireRole } from '../middleware/auth';
 import { gymContext } from '../middleware/gym-context';
 import * as dietService from '../services/diet.service';
+import { requireString } from '../utils/request';
 
 const router = Router();
 router.use(authenticate, gymContext);
@@ -26,7 +27,8 @@ router.get('/assignments', requireRole('gym_owner', 'coach'), async (req: Reques
 
 router.get('/:id', requireRole('gym_owner', 'coach'), async (req: Request, res: Response) => {
   try {
-    const chart = await dietService.getDietChartById(req.params.id, req.gymId!);
+    const chartId = requireString(req.params.id, 'id');
+    const chart = await dietService.getDietChartById(chartId, req.gymId!);
     res.json({ chart });
   } catch (err) {
     res.status(404).json({ error: (err as Error).message });
@@ -44,7 +46,8 @@ router.post('/', requireRole('gym_owner', 'coach'), async (req: Request, res: Re
 
 router.put('/:id', requireRole('gym_owner', 'coach'), async (req: Request, res: Response) => {
   try {
-    const chart = await dietService.updateDietChart(req.params.id, req.gymId!, req.body);
+    const chartId = requireString(req.params.id, 'id');
+    const chart = await dietService.updateDietChart(chartId, req.gymId!, req.body);
     res.json({ chart });
   } catch (err) {
     res.status(400).json({ error: (err as Error).message });
@@ -53,7 +56,8 @@ router.put('/:id', requireRole('gym_owner', 'coach'), async (req: Request, res: 
 
 router.delete('/:id', requireRole('gym_owner'), async (req: Request, res: Response) => {
   try {
-    await dietService.deleteDietChart(req.params.id, req.gymId!);
+    const chartId = requireString(req.params.id, 'id');
+    await dietService.deleteDietChart(chartId, req.gymId!);
     res.json({ success: true });
   } catch (err) {
     res.status(400).json({ error: (err as Error).message });
@@ -62,7 +66,8 @@ router.delete('/:id', requireRole('gym_owner'), async (req: Request, res: Respon
 
 router.post('/:id/duplicate', requireRole('gym_owner', 'coach'), async (req: Request, res: Response) => {
   try {
-    const chart = await dietService.duplicateDietChart(req.params.id, req.gymId!, req.user!.userId, req.body.name);
+    const chartId = requireString(req.params.id, 'id');
+    const chart = await dietService.duplicateDietChart(chartId, req.gymId!, req.user!.userId, req.body.name);
     res.status(201).json({ chart });
   } catch (err) {
     res.status(400).json({ error: (err as Error).message });
@@ -71,7 +76,8 @@ router.post('/:id/duplicate', requireRole('gym_owner', 'coach'), async (req: Req
 
 router.post('/:id/assign', requireRole('gym_owner', 'coach'), async (req: Request, res: Response) => {
   try {
-    const assignments = await dietService.assignDietChart(req.params.id, req.body.memberIds, req.user!.userId);
+    const chartId = requireString(req.params.id, 'id');
+    const assignments = await dietService.assignDietChart(chartId, req.body.memberIds, req.user!.userId);
     res.status(201).json({ assignments });
   } catch (err) {
     res.status(400).json({ error: (err as Error).message });

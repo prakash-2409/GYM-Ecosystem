@@ -4,9 +4,11 @@ import prisma from '@gymstack/db';
 import { env } from '../config/env';
 import type { AuthTokenPayload, LoginResponse } from '@gymstack/shared';
 import { TRIAL_DAYS } from '@gymstack/shared';
+import type { SignOptions } from 'jsonwebtoken';
 
 function generateToken(payload: AuthTokenPayload): string {
-  return jwt.sign(payload, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRES_IN });
+  const expiresIn: SignOptions['expiresIn'] = env.JWT_EXPIRES_IN as SignOptions['expiresIn'];
+  return jwt.sign(payload, env.JWT_SECRET, { expiresIn });
 }
 
 export async function login(phone: string, password: string, gymSlug?: string): Promise<LoginResponse> {

@@ -1,4 +1,5 @@
 import prisma from '@gymstack/db';
+import { Prisma } from '@prisma/client';
 import { generateInvoicePdf } from '../utils/gst-invoice';
 
 async function getNextInvoiceNumber(gymId: string): Promise<string> {
@@ -162,18 +163,19 @@ export async function getPayments(gymId: string, options: {
   const { memberId, from, to, method, page = 1, limit = 20 } = options;
   const skip = (page - 1) * limit;
 
-  const where: Record<string, unknown> = { gymId };
+  const where: Prisma.PaymentWhereInput = { gymId };
   if (memberId) where.memberId = memberId;
   if (method) where.paymentMethod = method;
   if (from || to) {
-    where.paidAt = {};
-    if (from) (where.paidAt as Record<string, unknown>).gte = new Date(from);
-    if (to) (where.paidAt as Record<string, unknown>).lte = new Date(to);
+    const paidAt: Prisma.DateTimeFilter = {};
+    if (from) paidAt.gte = new Date(from);
+    if (to) paidAt.lte = new Date(to);
+    where.paidAt = paidAt;
   }
 
   const [payments, total] = await Promise.all([
     prisma.payment.findMany({
-      where: where as Parameters<typeof prisma.payment.findMany>[0]['where'],
+      where,
       include: {
         member: { include: { user: { select: { name: true } } } },
       },
@@ -181,7 +183,7 @@ export async function getPayments(gymId: string, options: {
       skip,
       take: limit,
     }),
-    prisma.payment.count({ where: where as Parameters<typeof prisma.payment.count>[0]['where'] }),
+    prisma.payment.count({ where }),
   ]);
 
   return { payments, total, page, limit };

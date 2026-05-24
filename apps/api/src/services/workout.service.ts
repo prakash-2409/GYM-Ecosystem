@@ -1,4 +1,5 @@
 import prisma from '@gymstack/db';
+import { Prisma } from '@prisma/client';
 
 export async function getWorkoutPlans(gymId: string) {
   const plans = await prisma.workoutPlan.findMany({
@@ -204,7 +205,7 @@ export async function assignWorkoutPlan(workoutPlanId: string, memberIds: string
 }
 
 export async function getExercises(search?: string, muscleGroup?: string) {
-  const where: Record<string, unknown> = {};
+  const where: Prisma.ExerciseWhereInput = {};
 
   if (search) {
     where.OR = [
@@ -218,7 +219,7 @@ export async function getExercises(search?: string, muscleGroup?: string) {
   }
 
   const exercises = await prisma.exercise.findMany({
-    where: where as Parameters<typeof prisma.exercise.findMany>[0]['where'],
+    where,
     orderBy: { name: 'asc' },
   });
 

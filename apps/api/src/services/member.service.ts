@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import prisma from '@gymstack/db';
 import type { CreateMemberInput, UpdateMemberInput } from '@gymstack/shared';
+import { Prisma } from '@prisma/client';
 
 async function generateMemberCode(gymId: string): Promise<string> {
   const lastMember = await prisma.member.findFirst({
@@ -25,7 +26,7 @@ export async function getMembers(gymId: string, options: {
   const { search, status, planId, page = 1, limit = 20 } = options;
   const skip = (page - 1) * limit;
 
-  const where: Record<string, unknown> = { gymId };
+  const where: Prisma.MemberWhereInput = { gymId };
 
   if (search) {
     where.OR = [
@@ -47,7 +48,7 @@ export async function getMembers(gymId: string, options: {
 
   const [members, total] = await Promise.all([
     prisma.member.findMany({
-      where: where as Parameters<typeof prisma.member.findMany>[0]['where'],
+      where,
       include: {
         user: { select: { name: true, phone: true, email: true, avatarUrl: true } },
         subscriptions: {
@@ -61,7 +62,7 @@ export async function getMembers(gymId: string, options: {
       skip,
       take: limit,
     }),
-    prisma.member.count({ where: where as Parameters<typeof prisma.member.count>[0]['where'] }),
+    prisma.member.count({ where }),
   ]);
 
   return { members, total, page, limit };

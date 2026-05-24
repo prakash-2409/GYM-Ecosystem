@@ -6,6 +6,7 @@ import { validate } from '../middleware/validate';
 import { createMemberSchema, updateMemberSchema } from '@gymstack/shared';
 import * as memberService from '../services/member.service';
 import { saveFCMToken } from '../services/fcm.service';
+import { asString, requireString } from '../utils/request';
 
 const router = Router();
 router.use(authenticate, gymContext);
@@ -110,16 +111,16 @@ router.get('/me', async (req: Request, res: Response) => {
 // ─── Member attendance calendar ───────────────────────
 router.get('/:id/attendance', requireRole('gym_owner', 'receptionist', 'coach', 'member'), async (req: Request, res: Response) => {
   try {
-    const { month, year } = req.query;
-    const targetMonth = Number(month) || new Date().getMonth() + 1;
-    const targetYear = Number(year) || new Date().getFullYear();
+    const memberId = requireString(req.params.id, 'id');
+    const targetMonth = Number(asString(req.query.month)) || new Date().getMonth() + 1;
+    const targetYear = Number(asString(req.query.year)) || new Date().getFullYear();
 
     const startDate = new Date(targetYear, targetMonth - 1, 1);
     const endDate = new Date(targetYear, targetMonth, 0, 23, 59, 59, 999);
 
     const checkIns = await prisma.checkIn.findMany({
       where: {
-        memberId: req.params.id,
+        memberId,
         checkedInAt: { gte: startDate, lte: endDate },
       },
       select: { checkedInAt: true },
@@ -128,7 +129,7 @@ router.get('/:id/attendance', requireRole('gym_owner', 'receptionist', 'coach', 
 
     const totalInMonth = await prisma.checkIn.count({
       where: {
-        memberId: req.params.id,
+        memberId,
         checkedInAt: { gte: startDate, lte: endDate },
       },
     });
@@ -156,10 +157,13 @@ router.get('/:id/attendance', requireRole('gym_owner', 'receptionist', 'coach', 
 
 router.get('/', requireRole('gym_owner', 'receptionist', 'coach'), async (req: Request, res: Response) => {
   try {
+    const search = asString(req.query.search);
+    const status = asString(req.query.status);
+    const planId = asString(req.query.planId);
     const result = await memberService.getMembers(req.gymId!, {
-      search: req.query.search as string,
-      status: req.query.status as string,
-      planId: req.query.planId as string,
+      search,
+      status,
+      planId,
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 20,
     });
@@ -171,7 +175,8 @@ router.get('/', requireRole('gym_owner', 'receptionist', 'coach'), async (req: R
 
 router.get('/:id', requireRole('gym_owner', 'receptionist', 'coach'), async (req: Request, res: Response) => {
   try {
-    const result = await memberService.getMemberById(req.params.id, req.gymId!);
+    const memberId = requireString(req.params.id, 'id');
+    const result = await memberService.getMemberById(memberId, req.gymId!);
     res.json(result);
   } catch (err) {
     res.status(404).json({ error: (err as Error).message });
@@ -189,7 +194,8 @@ router.post('/', requireRole('gym_owner', 'receptionist'), validate(createMember
 
 router.put('/:id', requireRole('gym_owner', 'receptionist'), validate(updateMemberSchema), async (req: Request, res: Response) => {
   try {
-    const member = await memberService.updateMember(req.params.id, req.gymId!, req.body);
+    const memberId = requireString(req.params.id, 'id');
+    const member = await memberService.updateMember(memberId, req.gymId!, req.body);
     res.json({ member });
   } catch (err) {
     res.status(400).json({ error: (err as Error).message });
@@ -198,7 +204,8 @@ router.put('/:id', requireRole('gym_owner', 'receptionist'), validate(updateMemb
 
 router.delete('/:id', requireRole('gym_owner'), async (req: Request, res: Response) => {
   try {
-    await memberService.deleteMember(req.params.id, req.gymId!);
+    const memberId = requireString(req.params.id, 'id');
+    await memberService.deleteMember(memberId, req.gymId!);
     res.json({ success: true });
   } catch (err) {
     res.status(400).json({ error: (err as Error).message });

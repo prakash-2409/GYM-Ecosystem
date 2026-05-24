@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { authenticate, requireRole } from '../middleware/auth';
 import { gymContext } from '../middleware/gym-context';
 import * as staffService from '../services/staff.service';
+import { requireString } from '../utils/request';
 
 const router = Router();
 router.use(authenticate, gymContext);
@@ -26,7 +27,8 @@ router.post('/', requireRole('gym_owner'), async (req: Request, res: Response) =
 
 router.patch('/:id/toggle', requireRole('gym_owner'), async (req: Request, res: Response) => {
   try {
-    const staff = await staffService.toggleStaffStatus(req.params.id, req.gymId!);
+    const staffId = requireString(req.params.id, 'id');
+    const staff = await staffService.toggleStaffStatus(staffId, req.gymId!);
     res.json({ staff });
   } catch (err) {
     res.status(400).json({ error: (err as Error).message });
@@ -35,7 +37,8 @@ router.patch('/:id/toggle', requireRole('gym_owner'), async (req: Request, res: 
 
 router.patch('/:id/reset-password', requireRole('gym_owner'), async (req: Request, res: Response) => {
   try {
-    const result = await staffService.resetStaffPassword(req.params.id, req.gymId!, req.body.password);
+    const staffId = requireString(req.params.id, 'id');
+    const result = await staffService.resetStaffPassword(staffId, req.gymId!, req.body.password);
     res.json(result);
   } catch (err) {
     res.status(400).json({ error: (err as Error).message });
