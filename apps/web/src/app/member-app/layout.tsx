@@ -3,12 +3,19 @@ import type { Metadata, Viewport } from 'next';
 export const metadata: Metadata = {
   title: 'Iron Paradise Gym — Member App',
   description: 'Your personal gym companion',
-  manifest: '/manifest.json',
+  manifest: '/manifest-member.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'Iron Paradise',
   },
+  icons: {
+    icon: '/icon-192.png',
+    apple: [
+      { url: '/icon-192.png', sizes: '192x192' },
+      { url: '/icon-512.png', sizes: '512x512' }
+    ]
+  }
 };
 
 export const viewport: Viewport = {

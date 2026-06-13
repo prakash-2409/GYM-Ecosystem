@@ -1,7 +1,13 @@
-const CACHE_NAME = 'gymstack-kiosk-v1';
+const CACHE_NAME = 'gymos-pwa-v1';
 const STATIC_ASSETS = [
   '/kiosk',
   '/manifest.json',
+  '/member-app',
+  '/manifest-member.json',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/icon-maskable-192.png',
+  '/icon-maskable-512.png',
 ];
 
 // Install — precache static assets
