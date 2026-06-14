@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gymos-pwa-v1';
+const CACHE_NAME = 'gymos-pwa-v2';
 const STATIC_ASSETS = [
   '/kiosk',
   '/manifest.json',
@@ -28,23 +28,42 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch — network-first for API, cache-first for static
+// Fetch — network-first for API, stale-while-revalidate for pages, cache-first for static
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
+
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') return;
 
   // API requests — network first, fallback to cache
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          // Cache GET responses for offline fallback
-          if (event.request.method === 'GET' && response.ok) {
+          if (response.ok) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           }
           return response;
         })
         .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Member app pages — stale-while-revalidate
+  if (url.pathname.startsWith('/member-app')) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        const fetchPromise = fetch(event.request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        });
+        return cached || fetchPromise;
+      })
     );
     return;
   }

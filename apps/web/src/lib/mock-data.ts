@@ -479,24 +479,154 @@ export const MOCK_PLAN_DISTRIBUTION = [
 
 export const MEMBER_APP_USER = MOCK_MEMBERS[0]; // Rahul Kumar
 
-export const MEMBER_APP_NOTIFICATIONS = [
-  { id: 'mn-001', title: 'Check-in Confirmed ✅', message: 'Welcome back, Rahul! Your check-in at 7:30 AM has been recorded.', time: '2 hours ago', read: true },
-  { id: 'mn-002', title: 'Summer Offer 🌞', message: 'Upgrade to 12 Month Gold and save ₹6,000! Offer ends 15 Apr.', time: '1 day ago', read: false },
-  { id: 'mn-003', title: 'Workout Updated', message: 'Coach Suresh has updated your workout plan for this week.', time: '2 days ago', read: true },
-  { id: 'mn-004', title: 'Monthly Progress 📊', message: 'You lost 1 kg this month! Keep pushing. 💪', time: '3 days ago', read: true },
-  { id: 'mn-005', title: 'New Batch Available', message: 'Early morning 5 AM batch now open. Limited slots!', time: '5 days ago', read: false },
+export type MemberNotification = {
+  id: string;
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+  category: 'checkin' | 'offer' | 'workout' | 'progress' | 'general' | 'fee';
+  timestamp: string; // ISO date for grouping
+};
+
+export const MEMBER_APP_NOTIFICATIONS: MemberNotification[] = [
+  { id: 'mn-001', title: 'Check-in Confirmed ✅', message: 'Welcome back, Rahul! Your check-in at 7:30 AM has been recorded.', time: '2 hours ago', read: true, category: 'checkin', timestamp: new Date().toISOString() },
+  { id: 'mn-002', title: 'Summer Offer 🌞', message: 'Upgrade to 12 Month Gold and save ₹6,000! Offer ends 15 Apr.', time: '1 day ago', read: false, category: 'offer', timestamp: new Date(Date.now() - 86400000).toISOString() },
+  { id: 'mn-003', title: 'Workout Updated', message: 'Coach Suresh has updated your workout plan for this week.', time: '2 days ago', read: true, category: 'workout', timestamp: new Date(Date.now() - 172800000).toISOString() },
+  { id: 'mn-004', title: 'Monthly Progress 📊', message: 'You lost 1 kg this month! Keep pushing. 💪', time: '3 days ago', read: true, category: 'progress', timestamp: new Date(Date.now() - 259200000).toISOString() },
+  { id: 'mn-005', title: 'New Batch Available', message: 'Early morning 5 AM batch now open. Limited slots!', time: '5 days ago', read: false, category: 'general', timestamp: new Date(Date.now() - 432000000).toISOString() },
+  { id: 'mn-006', title: 'Fee Payment Received', message: 'Your payment of ₹4,500 for 6 Month Premium has been recorded. Thank you!', time: '1 week ago', read: true, category: 'fee', timestamp: new Date(Date.now() - 604800000).toISOString() },
+  { id: 'mn-007', title: 'Streak Milestone! 🔥', message: 'Amazing! You\'ve hit a 7-day streak. Keep the momentum going!', time: '1 week ago', read: true, category: 'progress', timestamp: new Date(Date.now() - 604800000).toISOString() },
+  { id: 'mn-008', title: 'Diet Plan Updated', message: 'Coach Suresh has adjusted your post-workout nutrition. Check it out!', time: '1 week ago', read: true, category: 'workout', timestamp: new Date(Date.now() - 691200000).toISOString() },
+  { id: 'mn-009', title: 'Monsoon Membership 🌧️', message: 'Get 20% off on annual plans this monsoon season. Valid till 30 Jun.', time: '2 weeks ago', read: true, category: 'offer', timestamp: new Date(Date.now() - 1209600000).toISOString() },
+  { id: 'mn-010', title: 'Weight Goal Reached! 🎯', message: 'Congratulations! You\'ve reached your target of 75 kg. Time to set a new goal!', time: '2 weeks ago', read: true, category: 'progress', timestamp: new Date(Date.now() - 1296000000).toISOString() },
 ];
 
 // ─── Quick Actions / Stats for Member App ───────────────────
 
 export const MEMBER_APP_STATS = {
   streak: 7,
+  bestStreak: 14,
   thisMonthVisits: 7,
   totalVisits: 142,
   daysRemaining: 82,
   nextBillingDate: '30 Jun 2026',
   plan: '6 Month Premium',
   planAmount: 4500,
+  checkedInToday: true,
+  checkInTime: '7:30 AM',
+  monthlyAttendanceRate: 78,
+  consistencyScore: 85,
+};
+
+// ─── Coach Announcements ────────────────────────────────────
+
+export const MEMBER_APP_ANNOUNCEMENTS = [
+  {
+    id: 'ann-001',
+    title: 'Gym Closed on 26 Jan',
+    message: 'The gym will remain closed on Republic Day (26 Jan). Regular hours resume 27 Jan.',
+    date: '2026-06-12',
+    priority: 'high' as const,
+    by: 'Management',
+  },
+  {
+    id: 'ann-002',
+    title: 'New Equipment Arrived 🏋️',
+    message: 'We\'ve added a cable crossover machine and a Smith machine to the weight section!',
+    date: '2026-06-10',
+    priority: 'normal' as const,
+    by: 'Coach Suresh',
+  },
+];
+
+// ─── Body Measurements ──────────────────────────────────────
+
+export const MEMBER_APP_BODY_MEASUREMENTS = {
+  current: {
+    date: '2026-06-09',
+    chest: 40.5,
+    biceps: 14.2,
+    waist: 32.0,
+    thighs: 23.5,
+    shoulders: 46.0,
+    hips: 38.0,
+  },
+  previous: {
+    date: '2026-05-09',
+    chest: 39.8,
+    biceps: 13.8,
+    waist: 33.2,
+    thighs: 23.0,
+    shoulders: 45.5,
+    hips: 38.5,
+  },
+  unit: 'inches',
+};
+
+// ─── Personal Records ───────────────────────────────────────
+
+export const MEMBER_APP_PERSONAL_RECORDS = [
+  { id: 'pr-001', exercise: 'Deadlift', value: '120 kg', date: '2026-05-28', icon: '🏋️' },
+  { id: 'pr-002', exercise: 'Bench Press', value: '80 kg', date: '2026-06-02', icon: '💪' },
+  { id: 'pr-003', exercise: 'Squats', value: '100 kg', date: '2026-05-15', icon: '🦵' },
+  { id: 'pr-004', exercise: 'Longest Streak', value: '14 days', date: '2026-03-20', icon: '🔥' },
+  { id: 'pr-005', exercise: 'Monthly Visits', value: '22 days', date: '2026-02-28', icon: '📅' },
+];
+
+// ─── Achievement Badges ─────────────────────────────────────
+
+export type AchievementBadge = {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  earned: boolean;
+  earnedDate?: string;
+  progress?: number; // 0-100
+  requirement: string;
+};
+
+export const MEMBER_APP_ACHIEVEMENTS: AchievementBadge[] = [
+  { id: 'badge-001', name: 'First Step', description: 'Complete your first check-in', icon: '👣', earned: true, earnedDate: '2025-08-15', requirement: '1 check-in' },
+  { id: 'badge-002', name: 'Week Warrior', description: '7-day attendance streak', icon: '⚔️', earned: true, earnedDate: '2026-06-09', requirement: '7-day streak' },
+  { id: 'badge-003', name: 'Century Club', description: 'Complete 100 check-ins', icon: '💯', earned: true, earnedDate: '2026-04-01', requirement: '100 check-ins' },
+  { id: 'badge-004', name: 'Iron Will', description: '14-day attendance streak', icon: '🔥', earned: true, earnedDate: '2026-03-20', requirement: '14-day streak' },
+  { id: 'badge-005', name: 'Transformer', description: 'Lose 5 kg from starting weight', icon: '🦋', earned: true, earnedDate: '2026-02-15', requirement: '-5 kg' },
+  { id: 'badge-006', name: 'Unstoppable', description: '30-day attendance streak', icon: '⚡', earned: false, progress: 23, requirement: '30-day streak' },
+  { id: 'badge-007', name: 'Elite Member', description: 'Complete 200 check-ins', icon: '👑', earned: false, progress: 71, requirement: '200 check-ins' },
+  { id: 'badge-008', name: 'Body Sculptor', description: 'Lose 10 kg from starting weight', icon: '🎯', earned: false, progress: 80, requirement: '-10 kg' },
+];
+
+// ─── Weekly Summary ─────────────────────────────────────────
+
+export const MEMBER_APP_WEEKLY_SUMMARY = {
+  weekStart: '2026-06-08',
+  weekEnd: '2026-06-14',
+  daysAttended: 5,
+  totalDays: 7,
+  workoutsCompleted: 5,
+  totalWorkouts: 5,
+  caloriesBurned: 2450,
+  avgSessionDuration: '1h 15m',
+  highlightMessage: 'Great week! You hit all your workout targets. 🎯',
+};
+
+// ─── Emergency / Gym Contact ────────────────────────────────
+
+export const MEMBER_APP_EMERGENCY_CONTACT = {
+  name: 'Sunita Kumar',
+  relation: 'Mother',
+  phone: '+91 98765 43211',
+};
+
+export const MEMBER_APP_FEE_STATUS = {
+  lastPaymentDate: '28 Dec 2025',
+  lastPaymentAmount: 4500,
+  lastPaymentMethod: 'UPI',
+  nextDueDate: '30 Jun 2026',
+  nextDueAmount: 4500,
+  status: 'paid' as const,
 };
 
 // ─── Scheduler Mock Data ──────────────────────────────────────
